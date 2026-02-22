@@ -1,7 +1,15 @@
 ---
 title: "Advanced R Package Development"
 subtitle: "DFO - February 2026"
-format: revealjs
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
 execute:
   eval: false
   echo: true
@@ -36,12 +44,16 @@ Cameras. Remind everyone about the code of conduct briefly - it's about creating
 
 ::: columns
 ::: {.column width="50%"}
+<div style="width:300px; height:300px; background-color:#ff69b4; margin-bottom:1rem;"></div>
+
 **PINK**
 
 I'm stuck, please send help
 :::
 
 ::: {.column width="50%"}
+<div style="width:300px; height:300px; background-color:#4caf50; margin-bottom:1rem;"></div>
+
 **GREEN**
 
 I'm good, let's move on
@@ -52,13 +64,17 @@ I'm good, let's move on
 
 ::: columns
 ::: {.column width="50%"}
-**PINK = I'm stuck**
+<div style="width:300px; height:300px; background-color:#ff69b4; margin-bottom:1rem;"></div>
+
+**PINK = I'm stuck** [✋]{style="font-size:2em;"}       
 
 Use the Zoom Raise Hand reaction
 :::
 
 ::: {.column width="50%"}
-**GREEN = I'm good**
+<div style="width:300px; height:300px; background-color:#4caf50; margin-bottom:1rem;"></div>
+
+**GREEN = I'm good** [👍]{style="font-size:2em;"}       
 
 Use the Thumbs Up reaction
 :::
