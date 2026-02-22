@@ -32,8 +32,8 @@ A package is the fundamental unit of shareable R code. Even if you never share i
 
 ## Package structure
 
-```
-fishr/
+```default
+mypackage/
   R/           <- Your R functions
   man/         <- Documentation (auto-generated)
   tests/       <- Tests
