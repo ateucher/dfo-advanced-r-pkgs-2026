@@ -24,6 +24,18 @@ snapshot_review()
 snapshot_accept()
 ```
 
+::: {.callout-tip}
+## Snapshots need updating throughout development
+
+This will not be the last time you update snapshots. Each time you change
+output that a snapshot captures - a message format, an error message, a print
+method - the affected tests will fail until you accept the new output.
+
+This is the intended workflow: the failure is a prompt to *review* the change,
+not a sign something is wrong. By Day 3 of this workshop you will have gone
+through this cycle several times, and that is normal.
+:::
+
 ## Writing "Clean" Tests
 
 Tests should not leave behind any evidence that they were there. Use `withr` to keep things local.
@@ -114,7 +126,7 @@ to update the documentation for `biomass_index()` with the new argument.
 #'   CPUE is computed via `cpue()`.
 #' @param effort Optional numeric vector of effort. Required if `catch` is
 #'   provided.
-#' #' @param verbose Logical; print processing info? Default from
+#' @param verbose Logical; print processing info? Default from
 #'   `getOption("fishr.verbose", FALSE)`.
 #' @param ... Additional arguments passed to `cpue()` when computing from
 #'   catch and effort (e.g., `method`, `gear_factor`).
