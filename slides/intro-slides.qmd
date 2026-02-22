@@ -26,7 +26,7 @@ This is a three-day course for people who want to build R packages that are robu
 
 - Treat everyone with respect
 - Everyone should feel welcome
-- Full text: <https://advanced-r-package-development.netlify.app/CODE_OF_CONDUCT.html>
+- Full text: <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html>
 
 ::: {.notes}
 Cameras. Remind everyone about the code of conduct briefly - it's about creating a safe learning environment.
@@ -84,8 +84,8 @@ Paste link in chat. Open GitHub discussions, ask people to introduce themselves.
 
 ## Resources
 
-- **Workshop website:** <https://advanced-r-package-development.netlify.app>
-- **Setup instructions:** <https://advanced-r-package-development.netlify.app/setup.html>
+- **Workshop website:** <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/>
+- **Setup instructions:** <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html>
 - **Cheatsheet:** <https://rstudio.github.io/cheatsheets/html/package-development.html>
 
 ::: {.notes}
