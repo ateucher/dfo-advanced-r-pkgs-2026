@@ -25,6 +25,8 @@ website:
             href: slides/intro-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
+          - text: "Day 3, Session 2: Data in Packages"
+            href: slides/data-packages-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
             href: slides/releasing-slides.html
   repo-url: https://github.com/boshek/2026-feb-course-planning
