@@ -1,0 +1,177 @@
+---
+title: "Advanced R Package Development"
+subtitle: "DFO - February 2026"
+format: revealjs
+execute:
+  eval: false
+  echo: true
+---
+
+## Welcome!
+
+**Instructors:**
+
+- Andy Teucher
+  - [andyteucher.ca](https://andyteucher.ca)
+  - GitHub: [ateucher](https://github.com/ateucher)
+- Sam Albers
+  - [samalbers.science](https://samalbers.science)
+  - GitHub: [boshek](https://github.com/boshek)
+
+## Welcome!
+
+This is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.
+
+**Code of Conduct:**
+
+- Treat everyone with respect
+- Everyone should feel welcome
+- Full text: <https://advanced-r-package-development.netlify.app/CODE_OF_CONDUCT.html>
+
+::: {.notes}
+Cameras. Remind everyone about the code of conduct briefly - it's about creating a safe learning environment.
+:::
+
+## Sticky Notes
+
+::: columns
+::: {.column width="50%"}
+**PINK**
+
+I'm stuck, please send help
+:::
+
+::: {.column width="50%"}
+**GREEN**
+
+I'm good, let's move on
+:::
+:::
+
+## Sticky Notes (online)
+
+::: columns
+::: {.column width="50%"}
+**PINK = I'm stuck**
+
+Use the Zoom Raise Hand reaction
+:::
+
+::: {.column width="50%"}
+**GREEN = I'm good**
+
+Use the Thumbs Up reaction
+:::
+:::
+
+::: {.notes}
+We'll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room.
+:::
+
+## Discussions / Q & A
+
+- GitHub Discussions: <https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions>
+
+Open the welcome discussion and introduce yourself:
+
+- Office/department, city/town
+- Why you're here
+- Something you've built or are trying to build
+
+::: {.notes}
+Paste link in chat. Open GitHub discussions, ask people to introduce themselves. Share screen doing it.
+:::
+
+## Resources
+
+- **Workshop website:** <https://advanced-r-package-development.netlify.app>
+- **Setup instructions:** <https://advanced-r-package-development.netlify.app/setup.html>
+- **Cheatsheet:** <https://rstudio.github.io/cheatsheets/html/package-development.html>
+
+::: {.notes}
+Remind people about setup - which they should have done before today.
+:::
+
+## Check your setup
+
+Run these two commands and make sure they succeed before we begin:
+
+```{r}
+devtools::has_devel()
+```
+
+Look for "Your system is ready to build packages!"
+
+
+
+::: {.fragment}
+```{r}
+usethis::git_sitrep()
+```
+
+Look for `Personal access token for 'https://github.com': '<discovered>'`
+:::
+
+::: {.notes}
+Give people 2-3 minutes to run these. has_devel() should print "Your system is ready to build packages!". For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content.
+:::
+
+# Day 1
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 8:20 | Introduction |
+| 8:20 - 9:20 | Package Development Fundamentals |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:55 | Git/GitHub for Collaborative Development |
+| 10:55 - 11:10 | Break |
+| 11:10 - 12:30 | Testing with testthat - Part 1 |
+
+# Day 2
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 9:20 | Function Design Best Practices |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:55 | Testing with testthat - Part 2 |
+| 10:55 - 11:10 | Break |
+| 11:10 - 11:30 | Advanced Documentation |
+| 11:30 - 12:30 | Debugging Techniques |
+
+# Day 3
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 9:20 | Object-Oriented Programming |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:35 | Data Packages |
+| 10:35 - 10:55 | Releasing Your R Package |
+| 10:55 - 11:10 | Break |
+| 11:10 - 12:30 | BYOP + Open Topics |
+
+## BYOP + Open Topics
+
+**Vignettes** (20-25 min)
+
+- Writing long-form documentation with Quarto
+- When to write a vignette vs a help page
+
+::: {.fragment}
+**Open Q&A** (15-20 min)
+
+- Specific challenges you've encountered during the workshop
+- Applying workshop concepts to your own package
+:::
+
+::: {.fragment}
+**Bring Your Own Package** (35-45 min)
+
+- Dedicated time to work on your package
+- Instructors available for individual consultation
+:::
