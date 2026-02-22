@@ -69,9 +69,13 @@ filter_by_year()
 plot_abundance()
 
 # Avoid
-cpue() # What does this do?
+result() # What result?
 fish_data() # Is this a function or an object?
 ```
+
+::: {.fragment}
+Note: Sometimes you have exceptions. `cpue` us a well-established domain abbreviation. The next slide covers this.
+:::
 
 ## Objects as nouns
 
@@ -99,7 +103,7 @@ y <- sum(c(1, 2, 3))
 ```
 
 ::: {.fragment}
-The `air` formatter (already configured in this project) handles this automatically on save.
+The `air` formatter (hopefully already configured in this project) handles this automatically on save.
 :::
 
 ## Naming in fishr
@@ -110,7 +114,7 @@ Our functions follow these conventions:
 - `biomass_index()` - descriptive, easy to predict
 
 ::: {.fragment}
-Domain-standard abbreviations are the one acceptable exception to "be verbose".
+Domain-standard abbreviations are an example of an exception to be verbose.
 :::
 
 # Pure Functions vs Side Effects
@@ -174,7 +178,7 @@ The calculation itself is pure. The `message()` call is a side effect.
 
 ## Package-wide options
 
-R has a global key-value store packages can use for user-configurable defaults:
+R has a global key-value store that packages can use for user-configurable defaults:
 
 ```{r}
 # Set an option
