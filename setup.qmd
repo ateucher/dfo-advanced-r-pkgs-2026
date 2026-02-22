@@ -78,7 +78,6 @@ Instructions to install the Air command line tool can be found at: <https://posi
 In R, install the necessary packages by running:
 
 ```{r}
-#| eval: false
 install.packages(
   c(
     "devtools",
@@ -100,7 +99,6 @@ install.packages(
 You can verify your system is set up for package development by running:
 
 ```{r}
-#| eval: false
 devtools::has_devel()
 ```
 
@@ -147,7 +145,6 @@ We highly recommend the book [Happy Git with R](https://happygitwithr.com/) for 
 Configure your `user.name` and `user.email` for git in RStudio with:
 
 ```{r}
-#| eval: false
 usethis::use_git_config(
   user.name = "Jane Doe", # actual first and last name
   user.email = "jane@example.com" # email associated with GitHub account
@@ -161,7 +158,6 @@ The [Managing Git(Hub) Credentials](https://usethis.r-lib.org/articles/articles/
 Create a PAT with:
 
 ```{r}
-#| eval: false
 usethis::create_github_token()
 ```
 
@@ -180,7 +176,6 @@ macOS and Windows both have built-in credential managers that will securely stor
 You can now check your Git setup by asking for a "Git situation report" in R:
 
 ```{r}
-#| eval: false
 usethis::git_sitrep()
 ```
 

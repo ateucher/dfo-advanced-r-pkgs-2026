@@ -52,7 +52,6 @@ A function with **side effects** interacts with the outside environment (writes 
 Let's look at `cpue()` as it stands at the end of Day 1:
 
 ```{r}
-#| eval: true
 cpue <- function(catch, effort, gear_factor = 1, verbose = FALSE) {
   # Side effect: prints a message
   if (verbose) {
@@ -134,7 +133,6 @@ The second changes how *all* numbers display for the rest of the session. Unlike
 ### Our biomass_index function
 
 ```{r}
-#| eval: true
 biomass_index <- function(cpue, area_swept) {
   cpue * area_swept
 }
