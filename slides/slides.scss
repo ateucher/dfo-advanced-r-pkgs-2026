@@ -1,0 +1,219 @@
+/*-- scss:defaults --*/
+// fonts
+@import 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Gochi+Hand&display=swap';
+
+$font-family-sans-serif: "Atkinson Hyperlegible", sans-serif;
+
+$body-bg:#325c65ff;
+$body-color: #FFFFFF;
+$link-color: #C7B41D;
+$presentation-font-size-root: 40px;
+$git-orange: #ffa500;
+$highlight-term-color: #e2b4c3ff;
+$quote-color: adjust-color($color: $highlight-term-color, $lightness: 5%, $alpha: 1.0);
+
+// headings
+$headingTextTransform: none;
+$h1-font-size: 1.6em !default;
+$h2-font-size: 1.3em !default;
+$h3-font-size: 1.15em !default;
+
+/*-- scss:rules --*/
+
+.h-center {
+  margin: 0 auto;
+}
+.w-90 {
+  width: 90%;
+}
+
+
+/* Handwriting */
+.hand{
+  font-family: 'Gochi Hand', cursive;
+  font-size: 125%;
+}
+
+.color-gold {
+    color: #C7B41D;
+}
+
+.color-yellow {
+    color: #ffed27ff;
+}
+
+.small {
+  font-size: 0.75em;
+}
+
+.brshort {
+    line-height: 10px;
+}
+
+.reveal .slide .question {
+  margin: 1em;
+  padding-left: 1.0em;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  background: #2fc89fff;
+  text-align: center;
+}
+
+.reveal .slide .question p::before {
+  content: "🤔 ";
+}
+
+.reveal .slide .notebox {
+  margin: 1em;
+  padding-left: 1.0em;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  background: #f6d770ff;
+  border: 3px solid #fff;
+  color: #000000;
+  text-align: center;
+}
+
+.reveal .slide .poll {
+  border-left: 3px solid #FFD166;
+  padding-left: 0.5em;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  background: #FFEDC2;
+}
+
+.reveal .slide .appex {
+  border-left: 3px solid #003559;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.5em;
+  background: #EBF7FF;
+}
+
+
+.subtitle {
+  color: $link-color;
+  font-size: $h2-font-size;
+  font-family: $presentation-heading-font;
+}
+
+.author {
+  color: $link-color;
+  font-size: $h2-font-size;
+  font-family: $presentation-heading-font;
+}
+
+.footer {
+  color: $link-color;
+  font-family: $presentation-heading-font;
+}
+
+.reveal .slide-number {
+  color: $link-color;
+  font-family: $presentation-heading-font;
+}
+
+.reveal .panel-tabset [role=tab] {
+    font-size: 0.8em;
+}
+
+.reveal .footer {
+    color: $link-color;
+}
+
+.huge-primary {
+  font-family: $font-family-sans-serif;
+  font-size: 1500%;
+  font-weight: bold;
+  color: rgba(225, 237, 116, 1);
+}
+
+
+.center-x{
+  text-align: center;
+}
+
+.important {
+  color: $link-color;
+}
+
+.black-code {
+  color: #000000;
+  font-family: $font-family-monospace;
+  font-size: 2em;
+}
+
+.black-code-smaller {
+  color: #000000;
+  font-family: $font-family-monospace;
+  font-size: 1.5em;
+}
+
+.black-code-smallest {
+  color: #000000;
+  font-family: $font-family-monospace;
+  font-size: 1em;
+}
+
+.h-center {
+  margin: 0 auto;
+}
+
+
+.vertical-center {
+  margin: auto;
+  width: 50%;
+}
+
+/* file: style.css */
+#vcenter {
+  vertical-align: middle;
+}
+
+
+/* file: style.css */
+.v-center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90%;
+}
+
+.reveal .slides .cell-output-tall code {
+  max-height: 600px;
+}
+
+.reveal .slides .resources {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 5px 0 0 0;
+  border-top: $link-color 1px solid;
+}
+
+.reveal .slides .resources p {
+  font-size: 0.75em;
+  color: $link-color;
+  margin: 0;
+}
+
+span.highlight-term {
+  color: $highlight-term-color;
+  font-weight: bold;
+  font-style: italic;
+}
+
+span.git-orange {
+  color: $git-orange;
+}
+
+.reveal .slides .sourceCode code {
+  background-color: #3a3a3aff;
+}
+
+.reveal .slides blockquote {
+  font-style: italic;
+  color: $quote-color;
+  border-color: $quote-color;
+}

@@ -1,0 +1,359 @@
+---
+title: Testing with testthat - Part 2
+format: html
+---
+
+### Updating snapshots
+
+We have added better error messages with our input validations.
+Because when we recorded the snapshots the error message was different, now when we run the tests, these snapshot tests will fail. 
+We will need to update our snapshots.
+
+
+```{r}
+test()
+```
+
+We will get warning messages indicating that the snapshots have changed.
+
+### Review snapshot changes
+
+```{r}
+# After modifying output, review changes
+snapshot_review()
+snapshot_accept()
+```
+
+## Writing "Clean" Tests
+
+Tests should not leave behind any evidence that they were there. Use `withr` to keep things local.
+
+`withr` has functions with the `local_` prefix that keeps changes local to the current environment. 
+That environment can be a function, or it can be a test. 
+
+There are also `with_` functions that are good for executing a small snippet of code with a modified state.
+
+### Add withr to Suggests
+
+```{r}
+use_package("withr", type = "Suggests")
+```
+
+### Testing with package options
+
+We updated `cpue()` to use a package option for the function verbosity. 
+Remember our updated `R/cpue.R`:
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+
+  validate_numeric_inputs(catch = catch, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(catch), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(
+    method,
+    ratio = catch / effort,
+    log = log(catch / effort)
+  )
+
+  raw_cpue * gear_factor
+}
+```
+
+Now test with `withr::local_options()` to temporarily change options:
+
+In `tests/testthat/test-cpue.R`
+
+```{r}
+test_that("cpue uses verbosity when option set to TRUE", {
+  withr::local_options(fishr.verbose = TRUE) # will be reset when this test_that block finishes
+
+  expect_snapshot(cpue(100, 10))
+})
+
+test_that("cpue is not verbose when option set to FALSE", {
+  withr::local_options(fishr.verbose = FALSE) # will be reset when this test_that block finishes
+
+  expect_silent(cpue(100, 10))
+})
+
+test_that("cpue verbosity falls back to FALSE when not set", {
+  withr::with_options(
+    list(fishr.verbose = NULL), # will be reset as soon as this code block executes
+    expect_no_message(cpue(100, 10))
+  )
+})
+# Options automatically restored after each test
+```
+
+### Your turn
+
+Add the same `verbose` argument to `biomass_index()` and add tests. Make sure
+to update the documentation for `biomass_index()` with the new argument.
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' Calculates biomass index from CPUE and area swept. Can optionally
+#' compute CPUE from catch and effort data.
+#'
+#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are
+#'   provided, this is computed automatically.
+#' @param area_swept Numeric vector of area swept (e.g., km²)
+#' @param catch Optional numeric vector of catch. If provided with `effort`,
+#'   CPUE is computed via `cpue()`.
+#' @param effort Optional numeric vector of effort. Required if `catch` is
+#'   provided.
+#' #' @param verbose Logical; print processing info? Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+#' @param ... Additional arguments passed to `cpue()` when computing from
+#'   catch and effort (e.g., `method`, `gear_factor`).
+#'
+#' @return A numeric vector of biomass index values
+#' @export
+#'
+#' @examples
+#' # From pre-computed CPUE
+#' biomass_index(cpue = 10, area_swept = 5)
+#'
+#' # Compute CPUE on the fly
+#' biomass_index(area_swept = 5, catch = 100, effort = 10)
+#'
+#' # Pass method through to cpue()
+#' biomass_index(
+#'   area_swept = 5,
+#'   catch = c(100, 200),
+#'   effort = c(10, 20),
+#'   method = "log"
+#' )
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  verbose = getOption("fishr.verbose", default = FALSE),
+  ...
+) {
+  rlang::check_dots_used()
+
+  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {
+    cpue <- cpue(catch, effort, verbose = verbose, ...)
+  }
+
+  if (is.null(cpue)) {
+    stop("Must provide either 'cpue' or both 'catch' and 'effort'.")
+  }
+
+  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)
+
+  if (verbose) {
+    message("calculating biomass index for ", length(area_swept), " records")
+  }
+
+  cpue * area_swept
+}
+```
+
+```{r}
+use_test("biomass")
+```
+
+In `tests/testthat/test-biomass.R`
+
+```{r}
+test_that("biomass_index uses verbosity when set as an option", {
+  withr::local_options(fishr.verbose = TRUE)
+
+  expect_snapshot(biomass_index(cpue = 5, area_swept = 100))
+})
+
+test_that("biomass_index verbosity falls back to FALSE when not set", {
+  withr::local_options(fishr.verbose = NULL)
+
+  expect_no_message(biomass_index(cpue = 5, area_swept = 100))
+})
+# Options automatically restored after each test
+```
+
+
+### Other withr helpers
+
+`withr` provides many helpers for keeping tests isolated:
+
+- `local_tempdir()` / `with_tempdir()` - create temporary directories
+- `local_tempfile()` / `with_tempfile()` - create temporary files
+- `local_envvar()` / `with_envvar()` - temporarily set environment variables
+- `local_dir()` / `with_dir()` - temporarily change working directory
+- `defer()` - register custom cleanup code
+
+```{r}
+test_that("example with temporary file", {
+  temp_file <- withr::local_tempfile(lines = c("100,10", "200,20"))
+
+  # Test something with temp_file
+  lines <- readLines(temp_file)
+  expect_length(lines, 2)
+})
+# temp_file automatically deleted after test
+```
+
+### Quiz
+
+Can anyone think of somewhere we have altered the global state in our testing, 
+and how we might address it?
+
+::: {.callout-tip collapse="true"}
+
+## Answer
+
+In `tests/testthat/helper.R`: `set.seed()` sets the seed globally. We want to 
+create the data frame the same every time, so need the same random seed, but
+want to keep that change local.
+
+```{r}
+# tests/testthat/helper.R
+
+# Helper function to generate sample fishing data
+generate_fishing_data <- function(n = 10) {
+  withr::local_seed(67)
+  data.frame(
+    catch = runif(n, 10, 500),
+    effort = runif(n, 1, 20),
+    gear_factor = runif(n, 1, 5)
+  )
+}
+```
+
+:::
+
+
+## Test Coverage with covr
+
+Once you have a test suite, a natural question is: how much of my code is actually being tested? 
+The `covr` package answers this by tracking which lines of your package code are executed when your tests run.
+
+### Set up covr
+
+Add covr to `Suggests` in your DESCRIPTION
+
+```{r}
+use_package("covr", type = "Suggests")
+```
+
+### Checking coverage
+
+`package_coverage()` runs your tests and records which lines were hit:
+
+```{r}
+library(covr)
+
+cov <- package_coverage()
+cov
+```
+
+This prints a per-file coverage percentage. 
+To get a single overall number:
+
+```{r}
+percent_coverage(cov)
+```
+
+### Finding untested code
+
+The most actionable output from covr is the list of lines with zero coverage:
+
+```{r}
+zero_coverage(cov)
+```
+
+This returns a data frame showing exactly which lines have no test exercising them. 
+In RStudio, the results appear as markers you can click to jump to the uncovered code.
+
+### Interactive report
+
+For a visual overview, `report()` opens an HTML page where you can browse file-by-file coverage with highlighted source:
+
+```{r}
+report(cov)
+```
+
+### Interactive checking
+
+```{r}
+devtools::test_coverage_active_file()
+```
+
+Nice to set a keyboard shortcut for this: `Ctrl/Cmd + R`
+
+### Excluding lines from coverage
+
+Some lines are not worth testing - for example, a `print` method or an interactive-only code path. 
+You can exclude them with a special comment:
+
+```{r}
+if (interactive()) {
+  # nocov start
+  browse_results(x)
+} # nocov end
+```
+
+Or exclude a single line:
+
+```{r}
+stop("Column must be numeric") # nocov
+```
+
+### Coverage in CI (optional content)
+
+To also run coverage automatically in CI, add the GitHub Actions workflow:
+
+```{r}
+usethis::use_github_action("test-coverage")
+```
+
+By default the workflow uploads results to [Codecov](https://about.codecov.io/), which requires a (free) Codecov account linked to your GitHub repo. 
+Codecov provides a dashboard that tracks coverage over time and can comment on pull requests with coverage diffs.
+
+If you use Codecov, you will need to add a `CODECOV_TOKEN` as a repository secret in GitHub. 
+To get your token, sign in to [codecov.io](https://about.codecov.io/) with your GitHub account, navigate to your repository, and copy the upload token. 
+Then in your GitHub repo, go to **Settings > Secrets and variables > Actions** and add a new repository secret named `CODECOV_TOKEN` with that value. 
+The workflow generated by `use_github_action("test-coverage")` already references this secret, so once it is set uploads will work automatically.
+
+If you don't want to set up a Codecov account, you can edit the generated workflow file (`.github/workflows/test-coverage.yaml`) to just print coverage to the Actions log without uploading. 
+The default workflow has a "Test coverage" step that already calls `print(cov)`, followed by a `codecov/codecov-action` step that uploads. 
+Remove the upload step and the `covr::to_cobertura()` call so the "Test coverage" step looks like this:
+
+```yaml
+      - name: Test coverage
+        run: |
+          cov <- covr::package_coverage(
+            quiet = FALSE,
+            clean = FALSE,
+            install_path = file.path(
+              normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"),
+              "package"
+            )
+          )
+          print(cov)
+        shell: Rscript {0}
+```
+
+Coverage results will appear directly in the Actions log each time the workflow runs. 
+You still get visibility into coverage on every push and PR - you just don't get the Codecov dashboard or PR comments.
+
+### A note on coverage targets
+
+High coverage is useful as a guide for finding gaps, but chasing 100% coverage is rarely worthwhile. 
+Coverage tells you which lines were *executed*, not whether the tests actually verify correct behavior. 
+A test that runs code without meaningful assertions inflates coverage without adding value. 
+Focus on covering the important logic paths and edge cases rather than hitting a number.

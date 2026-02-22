@@ -1,1 +1,14 @@
 .Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.httr-oauth
+.DS_Store
+
+/.quarto/
+_site
+.quarto
+
+**/*.quarto_ipynb
+.claude/settings.local.json
+/.luarc.json

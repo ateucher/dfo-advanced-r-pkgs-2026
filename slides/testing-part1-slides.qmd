@@ -1,0 +1,459 @@
+---
+title: "Testing with testthat"
+subtitle: "Part 1 - Advanced R Package Development"
+format: revealjs
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Test infrastructure
+2. Writing tests
+3. Test helpers and fixtures
+4. Testing messages and warnings
+5. Snapshot testing introduction
+6. Running your tests
+
+# Test Infrastructure Setup
+
+## Start a branch
+
+```{r}
+pr_init("add-tests")
+```
+
+Good habit: each logical unit of work gets its own branch and PR.
+
+## Initialize testthat
+
+```{r}
+use_testthat()
+```
+
+::: {.fragment}
+This creates:
+
+- `tests/testthat/` - directory for test files
+- `tests/testthat.R` - script to run all tests
+- Adds `testthat` to `Suggests` in `DESCRIPTION`
+:::
+
+## Create a test file
+
+Tests for `R/{name}.R` go in `tests/testthat/test-{name}.R`
+
+```{r}
+use_test("cpue")
+```
+
+::: {.fragment}
+Creates `tests/testthat/test-cpue.R` linked to `R/cpue.R`
+:::
+
+::: {.notes}
+The naming convention is intentional - it makes it easy to navigate between source and tests.
+usethis will open the file automatically.
+:::
+
+# Writing Tests
+
+## Basic structure
+
+```{r}
+test_that("cpue calculates simple ratio correctly", {
+  expect_equal(cpue(catch = 100, effort = 10), 10)
+  expect_equal(cpue(catch = 50, effort = 2), 25)
+})
+```
+
+- One `test_that()` block = one behaviour
+- Description should read like a sentence
+- Multiple `expect_*()` calls per block are fine
+
+## Common expectations
+
+- `expect_equal()`: exact equality (with a tolerance for numeric)
+- `expect_identical()`: exact equality
+- `expect_lt()`, `expect_gt()`, etc.: comparisons
+- `expect_length()`: checks length of output
+- `expect_type()`: checks the type of the output
+- `expect_true()`, `expect_false()`: checks if condition is TRUE/FALSE
+- `expect_message()`: checks if code produces a message
+- more...
+
+See [testthat documentation](https://testthat.r-lib.org/reference/index.html)
+
+---
+
+```{r}
+test_that("cpue handles vectors of data", {
+  catches <- c(100, 200, 300)
+  efforts <- c(10, 10, 10)
+  expected_results <- c(10, 20, 30)
+
+  expect_equal(cpue(catches, efforts), expected_results)
+})
+```
+
+::: {.notes}
+Notice how we set up the test data clearly before making assertions. This makes it easy to understand what is being tested.
+:::
+
+## Use specific expectations
+
+::: columns
+::: {.column width="50%"}
+**Vague**
+
+```{r}
+expect_true(
+  is.numeric(cpue(100, 10))
+)
+```
+
+:::
+
+::: {.column width="50%"}
+**Specific**
+
+```{r}
+expect_type(
+  cpue(100, 10),
+  "double"
+)
+```
+
+:::
+
+:::
+
+::: {.fragment}
+Specific expectations give better failure messages - you see *what* failed, not just *that* it failed.
+:::
+
+## Testing optional (default) arguments
+
+```{r}
+test_that("gear_factor standardization scales correctly", {
+  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)
+
+  # Default gear_factor = 1 should have no effect
+  expect_equal(
+    cpue(catch = 100, effort = 10),
+    cpue(catch = 100, effort = 10, gear_factor = 1)
+  )
+})
+```
+
+## Testing edge cases
+
+```{r}
+test_that("cpue handles zero catch and missing data", {
+  expect_equal(cpue(catch = 0, effort = 10), 0)
+
+  expect_true(is.na(cpue(NA_real_, 10)))
+  expect_true(is.na(cpue(100, NA_real_)))
+})
+```
+
+::: {.fragment}
+Edge cases often reveal assumptions baked into your code.
+:::
+
+## Run your tests
+
+```{r}
+test()
+```
+
+::: {.fragment}
+Then make a commit:
+
+```{r}
+pr_push()
+```
+
+:::
+
+# Test Helpers and Fixtures
+
+## The problem
+
+Tests that share setup code can become repetitive.
+
+What if the setup logic is complex or used in many tests?
+
+::: {.fragment}
+Solution: **helper files** and **setup files**
+:::
+
+## Create a helper file
+
+```{r}
+use_testthat_helper()
+```
+
+::: {.fragment}
+Creates `tests/testthat/helper.R` - loaded before every test run.
+
+Does not contain test code itself, but defines functions that can be used in tests.
+
+```{r}
+# tests/testthat/helper.R
+
+generate_fishing_data <- function(n = 10) {
+  set.seed(67)
+  data.frame(
+    catch = runif(n, 10, 500),
+    effort = runif(n, 1, 20),
+    gear_factor = runif(n, 1, 5)
+  )
+}
+```
+
+:::
+
+::: {.notes}
+Helpers are functions - they run fresh each test. Use helpers for expensive-to-type but cheap-to-compute setup.
+:::
+
+## Using helpers in tests
+
+```{r}
+test_that("cpue works with generated data", {
+  data <- generate_fishing_data(n = 5)
+
+  result <- cpue(data$catch, data$effort)
+
+  expect_equal(
+    result,
+    c(34.053, 9.065, 19.239, 135.640, 6.372),
+    tolerance = 1e-3
+  )
+})
+```
+
+## Setup files
+
+`setup.R` runs **once** before all tests - good for expensive fixtures.
+
+```{r}
+# tests/testthat/setup.R
+
+reference_data <- data.frame(
+  catch = c(100, 200, 300),
+  effort = c(10, 10, 10),
+  expected_cpue = c(10, 20, 30)
+)
+```
+
+\
+
+::: {.fragment}
+
+```{r}
+test_that("cpue matches reference data", {
+  result <- cpue(reference_data$catch, reference_data$effort)
+  expect_equal(result, reference_data$expected_cpue)
+})
+```
+
+:::
+
+# Testing Messages and Warnings
+
+## Add a `verbose` parameter
+
+Update `R/cpue.R`:
+
+```{r}
+#' @param verbose Logical; if TRUE, prints processing info (default FALSE)
+cpue <- function(catch, effort, gear_factor = 1, verbose = FALSE) {
+  if (verbose) {
+    message("Processing ", length(catch), " records")
+  }
+  raw_cpue <- catch / effort
+  raw_cpue * gear_factor
+}
+```
+
+## Testing with `expect_message`
+
+```{r}
+test_that("cpue provides informative message when verbose", {
+  expect_message(
+    cpue(c(100, 200), c(10, 20), verbose = TRUE),
+    "Processing 2 records"
+  )
+})
+
+test_that("cpue is silent by default", {
+  expect_no_message(cpue(100, 10))
+})
+```
+
+::: {.notes}
+Always test both the positive and negative case - that the message appears when expected, and that it's absent when not.
+:::
+
+## Testing with `expect_warning`
+
+```{r}
+test_that("cpue warns when vector lengths don't match", {
+  expect_warning(
+    cpue(catch = c(100, 200, 300), effort = c(10, 20)),
+    "longer object length is not a multiple of shorter object length"
+  )
+
+  expect_no_warning(cpue(100, 10))
+})
+```
+
+# Snapshot Testing
+
+## Overview
+
+Snapshot testing captures output and compares against a saved reference.
+
+- Creates and saves the reference snapshot on first run
+- Subsequent runs compare output to the snapshot and fail if it changes
+- testthat provides tools to compare and accept/reject changes
+
+. . .
+
+### Best for:
+
+- Complex text output (print methods, formatted messages)
+- Errors and warnings - **prefer `expect_snapshot()` over `expect_error()`/`expect_warning()`** because it captures the full output for review
+- Plots (with the `vdiffr` package)
+
+## Basic snapshot test
+
+```{r}
+expect_snapshot(
+  my_function("input that produces complex output"),
+)
+```
+
+\
+
+```{r}
+test_that("cpue error message is informative", {
+  expect_snapshot(
+    cpue("not a number", 10),
+    error = TRUE
+  )
+})
+```
+
+::: {.fragment}
+First run creates `tests/testthat/_snaps/cpue.md` - review it!
+:::
+
+## First run
+
+```{r}
+test()
+```
+
+testthat writes the snapshot to `tests/testthat/_snaps/`:
+
+```
+# cpue error message is informative
+
+    Code
+      cpue("not a number", 10)
+    Error
+      non-numeric argument to binary operator
+```
+
+::: {.fragment}
+Commit the snapshot file - it becomes your reference.
+:::
+
+## When snapshots change
+
+After modifying output, tests fail. Review and accept:
+
+```{r}
+snapshot_review() # interactive diff viewer
+snapshot_accept() # accept all changes
+```
+
+::: {.fragment}
+We'll dive deeper into snapshot workflows in **Part 2**.
+:::
+
+# Running Your Tests
+
+## Three levels
+
+| What | How | Shortcut |
+|------|-----|---------|
+| Single test | `Ctrl+Enter` on `test_that()` block | - |
+| Active file | `devtools::test_active_file()` | `Ctrl/Cmd+T` |
+| Whole package | `devtools::test()` | `Shift+Ctrl/Cmd+T` |
+
+## Interactive testing matters
+
+Running individual `test_that()` blocks interactively only works if tests are self-contained.
+
+::: {.fragment}
+Keep setup *inside* `test_that()` blocks (or in helpers), not floating in the test file.
+:::
+
+## Full check
+
+```{r}
+test() # run tests only
+
+check() # full package check (includes tests)
+```
+
+::: {.notes}
+check() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission.
+:::
+
+# Your Turn
+
+## Exercise
+
+Add tests for `biomass_index()`. Aim for at least one snapshot test.
+
+```{r}
+# With R/biomass.R open, create the test file:
+use_test()
+# or
+use_test("biomass")
+```
+
+::: {.fragment}
+**Things to test:**
+
+- Correct calculation for simple inputs
+- Vector inputs
+- Error on invalid input (use `expect_snapshot(error = TRUE)`)
+:::
+
+## Our solutions
+
+```{r}
+test_that("biomass_index calculates correctly", {
+  expect_equal(biomass_index(cpue = 10, area_swept = 5), 50)
+  expect_equal(biomass_index(cpue = 20, area_swept = 2.5), 50)
+})
+
+test_that("biomass_index handles vectors", {
+  expect_equal(
+    biomass_index(c(10, 20, 30), c(5, 5, 5)),
+    c(50, 100, 150)
+  )
+})
+
+test_that("biomass_index throws error on invalid input", {
+  expect_snapshot(biomass_index("ten", 5), error = TRUE)
+  expect_snapshot(biomass_index(10, "five"), error = TRUE)
+})
+```

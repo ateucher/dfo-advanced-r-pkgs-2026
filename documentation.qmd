@@ -1,0 +1,221 @@
+---
+title: "Advanced Documentation"
+format: html
+---
+
+## The problem with duplicated documentation
+
+Our `biomass_index()` function is in good shape after our testing sessions. Here is where we left it:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param catch Numeric vector of catch (e.g., kg).
+#' @param effort Numeric vector of effort (e.g., hours).
+#' @param ... Additional arguments passed to [cpue()].
+#' @export
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  # ...
+}
+```
+
+And here is the documentation for `cpue()`:
+
+```{r}
+
+```
+
+There are two documentation problems here:
+
+1. `catch` and `effort` are already documented in `cpue()`. If the description of those parameters ever changes, we have two places to update.
+2. The `@param ...` says "Additional arguments passed to `cpue()`" but gives the user no information about *which* arguments are accepted or what they do.
+
+## @inheritParams
+
+`@inheritParams` copies parameter documentation from another function into the current one. You specify the source function, and roxygen2 copies the `@param` entries for any parameter whose name matches.
+
+Replace the hand-written `@param catch` and `@param effort` with:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @inheritParams cpue
+#' @param ... Additional arguments passed to `cpue()`.
+#' @export
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  # ...
+}
+```
+
+roxygen2 looks at the `@param` tags in `cpue()` and copies documentation for any parameter that:
+
+- appears in the current function's signature, **and**
+- is not already documented in the current function
+
+So `catch` and `effort` get pulled in from `cpue()`. 
+`gear_factor`, `method`, and `verbose` are skipped because they are not explicit parameters of `biomass_index()`.
+
+```{r}
+document()
+```
+
+Open the help page to confirm:
+
+```{r}
+?biomass_index
+```
+
+The `catch` and `effort` parameter descriptions now match `cpue()` exactly - and they will stay in sync automatically whenever `cpue()` docs change.
+
+::: {.callout-tip}
+`@inheritParams` can chain across functions. If function C inherits from B which inherits from A, roxygen2 resolves the full chain. It also works across packages: `@inheritParams pkg::function`.
+:::
+
+## @inheritDotParams
+
+`@param ...` is vague. The user has to follow the cross-reference to `cpue()` and work out which arguments apply. `@inheritDotParams` generates a proper description that names the forwarded arguments and links their documentation automatically.
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @inheritParams cpue
+#' @inheritDotParams cpue -catch -effort
+#' @export
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  # ...
+}
+```
+
+The `-catch -effort` syntax **excludes** those parameters from the generated `...` description, since they are already documented explicitly above. What remains - `gear_factor`, `method`, `verbose` - gets rendered as a formatted list linking back to `?cpue`.
+
+```{r}
+document()
+?biomass_index
+```
+
+The `...` entry now reads something like:
+
+> **...** Arguments passed to `cpue()`:
+> `gear_factor` Numeric adjustment for gear standardisation...
+> `method` One of "ratio" or "log"...
+> `verbose` Logical; if TRUE, prints processing information...
+
+Users can see exactly what they can pass through without leaving the help page.
+
+## Markdown and cross-references
+
+roxygen2 supports standard Markdown formatting in all text fields: `@description`, `@details`, `@param`, `@return`, `@seealso`, and others.
+
+### Inline formatting
+
+The basics work as expected:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' Calculates a biomass index by multiplying CPUE by area swept. Returns
+#' `NA` for any row where either input is `NA`.
+#'
+#' @param cpue Numeric vector of CPUE values (units: kg/hr).
+#' @param area_swept Numeric vector of area swept in **km²**.
+#' @return A numeric vector the same length as `cpue`.
+```
+
+- Backticks render as inline code: `cpue`, `NA`, `TRUE`
+- `**text**` renders as **bold**
+- `*text*` renders as *italic*
+
+### Lists
+
+Use standard Markdown lists in `@details` or `@description`:
+
+```{r}
+#' @details
+#' Two modes of use:
+#'
+#' - Provide `cpue` directly for a simple calculation.
+#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.
+#'
+#' Any additional arguments in `...` are forwarded to [cpue()].
+```
+
+Blank lines between the tag and the list content are required - without them roxygen2 treats the hyphens as literal text.
+
+### Linking to functions
+
+The most common form is the function name followed by `()` in square brackets:
+
+```{r}
+#' Calculates biomass index from CPUE and area swept.
+#' See [cpue()] for computing CPUE values from raw catch and effort.
+```
+
+The `()` suffix tells roxygen2 this is a function link.
+This generates a code-formatted link that takes the user directly to `?cpue` when they click it in the help document or a pkgdown site.
+
+### Linking across packages
+
+To link to a function in another package, use the `::` operator inside the brackets:
+
+```{r}
+#' @param data A data frame. See [dplyr::filter()] for subsetting rows.
+```
+
+This creates a link that opens `?dplyr::filter`. R CMD check may produce a NOTE - "Undeclared package 'dplyr' in Rd xrefs". 
+Adding the package to `Suggests` in your DESCRIPTION silences it; you do not need `Imports`.
+
+### Custom link text
+
+To display different text than the function name, use the `[text][target()]` form:
+
+```{r}
+#' Returns the same structure as [the CPUE function][cpue()].
+```
+
+This renders as "the CPUE function" with a link to `?cpue`. Use this sparingly - the function name itself is usually the most informative link text.
+
+### The @seealso tag
+
+```{r}
+#' @seealso [cpue()] to compute CPUE values from raw catch and effort.
+#' @seealso [validate_numeric_inputs()] for the shared input validation logic.
+```
+
+`@seealso` renders in its own section at the bottom of the help page. Use it for functions that are related but not directly referenced in the body of the docs.
+
+### Summary
+
+| Syntax | Result |
+|--------|--------|
+| `[cpue()]` | Link to `?cpue` in this package |
+| `[fishr::cpue()]` | Link to `?fishr::cpue` in another package |
+| `[some text][cpue()]` | "some text" linking to `?cpue` |
+
+Use links freely in `@description`, `@details`, `@param`, `@return`, and `@seealso`. A well-linked help page lets users navigate the package without leaving the help system.

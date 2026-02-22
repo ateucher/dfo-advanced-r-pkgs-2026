@@ -1,0 +1,843 @@
+---
+title: Object-Oriented Programming in R
+---
+
+## Introduction
+
+You already use object-oriented programming (OOP) patterns constantly in R, even if you have not thought about it explicitly.
+
+Let's look at the `plot()` and `summary()` functions.
+
+```{r}
+x_norm <- rnorm(5000)
+plot(x_norm)
+
+summary(mtcars)
+plot(mtcars)
+plot(mtcars$mpg, mtcars$hp)
+
+mtcars_model <- lm(mpg ~ wt, data = mtcars)
+summary(mtcars_model)
+plot(mtcars_model)
+```
+
+The same function - `summary()` - does something completely different depending on what you
+hand it. A numeric vector gets a five-number summary. A data frame gets column summaries. A linear model fit gets coefficients, standard errors,
+and p-values. The function name stays the same; the behaviour
+adapts to the data.
+
+This is one of the most powerful ideas in OOP: you write code that calls `print()` or `plot()` or
+`summary()`, and the object itself determines what happens.
+
+We are going to:
+
+1. Create a new S3 class `cpue_result` to wrap CPUE calculations with metadata
+2. Write `print`, `summary`, and `plot` methods for it
+3. Convert `cpue()` and `biomass_index()` into generics that work with both numeric vectors and data frames
+
+## OOP Systems in R
+
+R has several OOP systems. They differ in formality and where methods live.
+
+| System | Dispatch | Methods live on... | Formality | Common in |
+|--------|----------|-------------------|-----------|-----------|
+| **S3** | Single (first argument) | The generic function | Informal | Base R, tidyverse, most packages |
+| **S4** | Multiple arguments | The generic function | Formal (classes, validity) | Bioconductor, methods-heavy packages |
+| **S7** | Multiple arguments | The generic function | Formal (classes, properties, validation) | Some new packages (successor to S3 and S4) |
+| **R6** | Single | The object itself | Moderate (via R6 package) | Mutable state, encapsulation |
+
+For package development, S3 covers the vast majority of use cases.
+S4 is worth learning if you work in Bioconductor or need multiple dispatch.
+S7 is designed as the eventual successor to both S3 and S4 - it combines the simplicity of S3 with more of the rigor of S4 (formal class definitions, property validation, multiple dispatch). 
+If you are starting a new package and want more structure than S3 provides, S7 is worth considering, though S3 remains the dominant system in practice.
+
+We will focus on S3 today, with a brief look at R6 at the end.
+
+## S3 in Depth
+
+S3 is the most widely used OOP system in R. It is simple, flexible, and what base R itself uses.
+
+### How S3 works
+
+An S3 object is just a regular R object (list, vector, data frame, etc.) with a `class` attribute.
+When you call a generic function like `print(x)`, R looks at `class(x)` and dispatches to the
+appropriate method.
+
+```{r}
+class(x_norm)
+class(mtcars)
+class(mtcars_model)
+```
+
+### Seeing the dispatch chain
+
+```{r}
+# What methods exist for print?
+methods(generic.function = "print")
+
+# What methods exist for a class?
+methods(class = "data.frame")
+```
+
+### The dispatch mechanism
+
+When you call `summary(x)` where `x` has class `"foo"`:
+
+1. R looks for `summary.foo`
+2. If not found, looks for `summary.default`
+3. If neither exists, throws an error
+
+This is called **single dispatch** - the method is chosen based on the class of _the first argument only_.
+
+## Creating an S3 Class
+
+Our `cpue()` function returns a plain numeric vector:
+
+```{r}
+result <- cpue(c(100, 200, 300), c(10, 20, 15))
+class(result)
+```
+
+That class is just `"numeric"`. When we `print(result)`, R dispatches to `print.numeric` and
+shows raw numbers. What if we want CPUE output to identify itself - to carry context about the
+calculation and display it in a useful way?
+
+### The simplest way: `class() <-`
+
+The most direct way to create an S3 class is to set the `class` attribute on an existing object.
+Let's modify `cpue()` to tag its output. Add two lines at the end of the function body in
+`R/cpue.R`:
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+
+  validate_numeric_inputs(catch = catch, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(catch), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(
+    method,
+    ratio = catch / effort,
+    log = log(catch / effort)
+  )
+
+  result <- raw_cpue * gear_factor
+  class(result) <- "cpue_result"
+  result
+}
+```
+
+```{r}
+load_all()
+
+result <- cpue(c(100, 200, 300), c(10, 20, 15))
+result
+class(result)
+```
+
+Now R knows this is a `cpue_result`. We can write a `print` method for it. 
+
+## Writing Methods
+
+### print method
+
+The `print` method controls what users see when they type an object name at the console. 
+When you type `result` and hit Enter, R calls `print(result)` behind the scenes - 
+this is called **autoprinting**. R looks at the class of the object, finds `print.cpue_result`, and calls that. 
+Without a custom print method, R falls back to `print.default`, which is why our 
+tagged vector currently displays as raw numbers.
+
+```{r}
+print.cpue_result <- function(x, ...) {
+  cat("CPUE Results for", length(x), "records\n")
+  cat("Values:", round(x, 2), "\n")
+  invisible(x)
+}
+```
+
+Important details:
+
+- The function name must be `print.<classname>`
+- Always include `...` in the signature (required by the `print` generic)
+- Return `invisible(x)` so assignment still works: `y <- print(x)`
+- Use `cat()` rather than `print()` inside print methods to avoid recursion
+
+```{r}
+document()
+load_all()
+
+result
+```
+
+
+That is the entire mechanism behind S3 dispatch: set a class, write a `function.classname`
+method, and R connects the two automatically.
+
+Note that although `result` *looks* different when we print it, it is still a numeric vector under the hood:
+
+```{r}
+is.numeric(result)
+unclass(result)
+```
+
+### Adding metadata with attributes
+
+A bare numeric vector with a class label has no context. What gear factor was
+used? What method was used? R objects can carry arbitrary **attributes** - named
+metadata attached to the object. Let's update the function body again:
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+
+  validate_numeric_inputs(catch = catch, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(catch), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(
+    method,
+    ratio = catch / effort,
+    log = log(catch / effort)
+  )
+
+  result <- raw_cpue * gear_factor
+  attr(result, "gear_factor") <- gear_factor
+  attr(result, "n_records") <- length(catch)
+  attr(result, "method") <- method
+  class(result) <- "cpue_result"
+  result
+}
+```
+
+```{r}
+load_all()
+
+result <- cpue(c(100, 200, 300), c(10, 20, 15))
+attr(result, "gear_factor")
+attr(result, "n_records")
+attr(result, "method")
+```
+
+Now our print method can be more informative:
+
+```{r}
+#' @export
+print.cpue_result <- function(x, ...) {
+  cat("Survey Result\n")
+  cat("Records:", attr(x, "n_records"), "\n")
+  cat("Gear factor:", attr(x, "gear_factor"), "\n")
+  cat("Method:", attr(x, "method"), "\n")
+  cat("CPUE values:", round(x, 2), "\n")
+  invisible(x)
+}
+```
+
+As a class accumulates more fields, setting attributes one by one gets unwieldy. There
+is a better pattern.
+
+### Create a constructor function
+
+For anything beyond a very basic class, the standard practice is to create a **constructor function** that builds the object in one place.
+A common naming convention, recommended in [Advanced R](https://adv-r.hadley.nz/s3.html#s3-constructor), is `new_<classname>`.
+
+```{r}
+#' Create a cpue result object
+#'
+#' @param cpue_values Numeric vector of CPUE values.
+#' @param method Character string indicating the calculation method.
+#' @param gear_factor Numeric gear correction factor used.
+#' @param n_records Integer number of records processed.
+#'
+#' @return A `cpue_result` object.
+#' @noRd
+new_cpue_result <- function(cpue_values, method, gear_factor, n_records) {
+  structure(
+    cpue_values, # The data
+    method = method, # Attributes specifying metadata
+    gear_factor = gear_factor,
+    n_records = n_records,
+    class = "cpue_result" # class is a special attribute
+  )
+}
+```
+
+A few things changed:
+
+- `structure()` sets multiple attributes at once - including `class` - instead of separate
+  `attr()` and `class() <-` calls
+- All object creation is centralised
+
+```{r}
+#' Summarize a CPUE survey
+#'
+#' Calculates CPUE from catch and effort data and returns a structured
+#' `cpue_result` object with metadata about the calculation.
+#'
+#' @param catch Numeric vector of catch values.
+#' @param effort Numeric vector of effort values.
+#' @param gear_factor Numeric gear correction factor (default 1).
+#' @param method Calculation method: "ratio" or "log".
+#'
+#' @return A `cpue_result` object.
+#' @export
+#'
+#' @examples
+#' cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  # ...cpue body here
+
+  new_cpue_result(
+    cpue_values = result,
+    method = method,
+    gear_factor = gear_factor,
+    n_records = length(catch)
+  )
+}
+```
+
+```{r}
+load_all()
+
+result <- cpue(
+  catch = c(100, 200, 300, 150),
+  effort = c(10, 20, 15, 30)
+)
+
+result
+```
+
+### summary method
+
+`summary` should compute and return a useful statistical summary:
+
+```{r}
+#' @export
+summary.cpue_result <- function(object, ...) {
+  stats <- list(
+    method = attr(object, "method"),
+    n_records = attr(object, "n_records"),
+    gear_factor = attr(object, "gear_factor"),
+    mean_cpue = mean(object),
+    median_cpue = stats::median(object),
+    sd_cpue = stats::sd(object),
+    range_cpue = range(object)
+  )
+
+  structure(stats, class = "summary.cpue_result")
+}
+
+#' @export
+print.summary.cpue_result <- function(x, ...) {
+  cat("Survey Result Summary\n")
+  cat("---------------------\n")
+  cat("Method:      ", x$method, "\n")
+  cat("Records:     ", x$n_records, "\n")
+  cat("Gear factor: ", x$gear_factor, "\n")
+  cat("Mean CPUE:   ", round(x$mean_cpue, 2), "\n")
+  cat("Median CPUE: ", round(x$median_cpue, 2), "\n")
+  cat("SD CPUE:     ", round(x$sd_cpue, 2), "\n")
+  cat(
+    "CPUE Range:    ",
+    round(x$range_cpue[1], 2),
+    "-",
+    round(x$range_cpue[2], 2),
+    "\n"
+  )
+  invisible(x)
+}
+```
+
+Note that `summary` returns an object of class `summary.cpue_result`, which has its own print method.
+This is the standard pattern in base R (see `summary.lm`).
+
+```{r}
+document()
+load_all()
+
+summary(result)
+``` 
+
+### Your turn: Make a `plot()` method
+
+Plot methods must be named `plot.<classname>`, take `x` as the first argument, and include `...` in the signature.
+
+Note that you don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. 
+
+```{r}
+#' @export
+plot.cpue_result <- function(x, ...) {
+  plot(
+    seq_along(x),
+    x,
+    type = "b",
+    xlab = "Record",
+    ylab = "CPUE",
+    main = paste("CPUE -", attr(x, "method"), "method"),
+    ...
+  )
+}
+```
+
+The `...` passes through to `plot.default`, allowing users to customize (colours, line types, etc.)
+without us having to anticipate every option.
+
+```{r}
+document()
+load_all()
+
+plot(result)
+plot(result, col = "steelblue", pch = 19)
+```
+
+### Registering S3 methods
+
+For your methods to work when the package is installed (not just with `load_all()`), they need to
+appear in the NAMESPACE file. The `@export` tag on each method handles this via roxygen2.
+
+```{r}
+document()
+```
+
+Look at the NAMESPACE file. What do you see different about S3 methods compared to regular functions?
+
+```
+S3method(print,cpue_result)
+S3method(summary,cpue_result)
+S3method(plot,cpue_result)
+```
+
+### Testing the class
+
+We should update our tests to verify that `cpue()` returns the right class. testthat provides `expect_s3_class()` for exactly this:
+
+```{r}
+test_that("cpue() returns a cpue_result object", {
+  result <- cpue(c(100, 200), c(10, 20))
+  expect_s3_class(result, "cpue_result")
+})
+```
+
+We can also test that the metadata attributes are set correctly:
+
+```{r}
+test_that("cpue_result carries calculation metadata", {
+  result <- cpue(c(100, 200, 300), c(10, 20, 15), method = "log")
+  expect_equal(attr(result, "method"), "log")
+  expect_equal(attr(result, "gear_factor"), 1)
+  expect_equal(attr(result, "n_records"), 3)
+})
+```
+
+And snapshot tests are a natural fit for print methods, since they capture the exact console output:
+
+```{r}
+test_that("print.cpue_result displays expected output", {
+  result <- cpue(c(100, 200, 300), c(10, 20, 15))
+  expect_snapshot(print(result))
+})
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+## Creating your own generics and methods
+
+So far we have built new classes and created methods for existing generics. But one of the most practical uses
+of S3 is creating your own generics, so the same function name works
+on different types of input.
+
+Our `cpue()` function currently takes numeric vectors:
+
+```{r}
+cpue(catch = c(100, 200), effort = c(10, 20))
+```
+
+But users often have their data in a data frame. Instead of making them extract columns every
+time, we can make `cpue()` work directly on data frames too. The same function call adapts its
+behaviour depending on what the user passes in - just like `summary()` does in base R.
+
+### Step 1: Make cpue a generic
+
+We replace the function body with `UseMethod("cpue")`. The first argument becomes `x` by
+convention, since it could be either a numeric vector or a data frame:
+
+```{r}
+#' Calculate Catch Per Unit Effort (CPUE)
+#'
+#' Calculates CPUE from catch and effort data, with optional gear
+#' standardization. Supports ratio and log-transformed methods.
+#'
+#' @param x Input data: a numeric vector of catch values, or a data frame
+#'   containing catch and effort columns.
+#' @param ... Additional arguments passed to methods.
+#'
+#' @export
+cpue <- function(x, ...) {
+  UseMethod("cpue")
+}
+```
+
+### Step 2: Move the existing implementation into cpue.numeric
+
+The existing code becomes the numeric method. The first argument changes from `catch` to `x`
+to match the generic's signature, but the logic is identical:
+
+```{r}
+#' @rdname cpue
+#'
+#' @param effort Numeric vector of effort (e.g., hours)
+#' @param gear_factor Numeric scalar for gear standardization (default 1)
+#' @param method Character; one of `"ratio"` (default) or `"log"`.
+#' @param verbose Logical; print processing info? Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+#'
+#' @return A numeric vector of CPUE values
+#' @export
+#'
+#' @examples
+#' cpue(100, 10)
+#' cpue(c(100, 200), c(10, 20), method = "log")
+cpue.numeric <- function(
+  x,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  method <- match.arg(method)
+
+  validate_numeric_inputs(x = x, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(x), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(
+    method,
+    ratio = x / effort,
+    log = log(x / effort)
+  )
+
+  new_cpue_result(
+    cpue_values = raw_cpue * gear_factor,
+    method = method,
+    gear_factor = gear_factor,
+    n_records = length(x)
+  )
+}
+```
+
+All existing code that calls `cpue()` with positional arguments continues to work - R
+dispatches to `cpue.numeric` because the first argument is numeric.
+
+::: {.callout-warning}
+## Named argument change
+
+The first argument was renamed from `catch` to `x` to match the generic's signature. Any call using named arguments - `cpue(catch = 100, effort = 10)` - will now fail because `catch` is no longer a parameter. Update these to use positional arguments: `cpue(100, 10)`.
+:::
+
+### Step 3: Add a data frame method
+
+```{r}
+#' @rdname cpue
+#' @param catch_col Name of the catch column (default `"catch"`).
+#' @param effort_col Name of the effort column (default `"effort"`).
+#' @export
+cpue.data.frame <- function(
+  x,
+  catch_col = "catch",
+  effort_col = "effort",
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  if (!catch_col %in% names(x)) {
+    stop("Column '", catch_col, "' not found in data frame.", call. = FALSE)
+  }
+  if (!effort_col %in% names(x)) {
+    stop("Column '", effort_col, "' not found in data frame.", call. = FALSE)
+  }
+
+  # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.
+  # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.
+  cpue(
+    x = x[[catch_col]],
+    effort = x[[effort_col]],
+    gear_factor = gear_factor,
+    method = method,
+    verbose = verbose,
+    ...
+  )
+}
+```
+
+The data frame method extracts the right columns and calls `cpue()` again with numeric vectors,
+which dispatches to `cpue.numeric`. This layering - where one method calls the generic again
+with different input - is a common and effective pattern.
+
+### Step 4: Add a `.default` method
+
+It's good practice to add a default method that throws an informative error if 
+the user passes in an unsupported type. If the generic can't find a method for 
+the class of `x`, it will fall back to `cpue.default`:
+
+
+```{r}
+#' @rdname cpue
+#' @export
+cpue.default <- function(x, ...) {
+  stop("Unsupported input type for cpue(): ", class(x), call. = FALSE)
+}
+```
+
+### Update biomass_index documentation
+
+Converting `cpue` into a generic changed its signature from `cpue(catch, effort, ...)` to `cpue(x, ...)`. The `@inheritParams cpue` tag on `biomass_index` was inheriting `catch` and `effort` docs from the old function - those params no longer exist on the generic.
+
+Update `biomass_index` to inherit from `cpue.numeric` instead, since that is the method it actually calls. Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param catch Numeric vector of catch (e.g., kg).
+#' @inheritParams cpue.numeric
+#' @inheritDotParams cpue.numeric -effort
+#' @export
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  # ...
+}
+```
+
+```{r}
+document()
+load_all()
+
+# Still works with vectors
+cpue(c(100, 200), c(10, 20))
+
+# Now also works with data frames
+fishing_data <- data.frame(
+  catch = c(100, 200, 300),
+  effort = c(10, 20, 15)
+)
+
+cpue(fishing_data)
+
+# Custom column names
+trawl_data <- data.frame(
+  kg = c(50, 100, 150),
+  hours = c(5, 10, 8)
+)
+
+cpue(trawl_data, catch_col = "kg", effort_col = "hours")
+```
+
+### Updating and adding tests
+
+Two things have changed that may break existing tests:
+
+- **Named argument calls:** tests using `cpue(catch = ..., effort = ...)` will fail now that the argument is named `x`. Change these to positional calls.
+- **Return type:** `cpue()` now returns a `cpue_result` object, not a plain numeric. `expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in `as.numeric()` for numeric comparisons: `expect_equal(as.numeric(cpue(100, 10)), 10)`.
+
+Some existing snapshots will also be stale since the print format changed. Run `snapshot_accept()` after `check()` to accept the updated snapshots.
+
+Now add tests for the data frame method and the default error:
+
+```{r}
+test_that("cpue.data.frame dispatches correctly", {
+  fishing_data <- data.frame(
+    catch = c(100, 200, 300),
+    effort = c(10, 20, 15)
+  )
+  result <- cpue(fishing_data)
+  expect_s3_class(result, "cpue_result")
+  expect_equal(as.numeric(result), c(10, 10, 20))
+})
+
+test_that("cpue.data.frame works with custom column names", {
+  trawl_data <- data.frame(
+    kg = c(50, 100),
+    hours = c(5, 10)
+  )
+  result <- cpue(trawl_data, catch_col = "kg", effort_col = "hours")
+  expect_s3_class(result, "cpue_result")
+  expect_equal(as.numeric(result), c(10, 10))
+})
+
+test_that("cpue.data.frame errors on missing columns", {
+  df <- data.frame(x = 1, y = 2)
+  expect_snapshot(cpue(df), error = TRUE)
+})
+
+test_that("cpue.default gives informative error", {
+  expect_snapshot(cpue("not valid"), error = TRUE)
+})
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+<!--
+TODO: This is still very awkward with the way biomass_index() is structured
+where the first argument can be missing.
+
+## Your Turn: biomass_index.data.frame
+
+`biomass_index()` can accept either pre-computed CPUE values or raw catch/effort data (with `...` passing arguments through to `cpue()`). Convert it into a generic with a numeric method and a data frame method.
+
+Hint: follow the same three steps we used for `cpue()`:
+
+1. Replace the function body with `UseMethod("biomass_index")`
+2. Move the existing implementation into `biomass_index.numeric` - keep the optional `catch`/`effort`/`...` pass-through
+3. Write `biomass_index.data.frame` that extracts columns and delegates to the numeric method
+
+::: {.callout-tip collapse="true"}
+
+## Solution
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param x Input data: a numeric vector of CPUE values, or a data frame
+#'   containing CPUE and area swept columns.
+#' @param ... Additional arguments passed to methods.
+#'
+#' @export
+biomass_index <- function(x, ...) {
+  UseMethod("biomass_index")
+}
+
+#' @rdname biomass_index
+#' @param area_swept Numeric vector of area swept (e.g., km squared).
+#' @param catch Optional numeric vector of catch. If provided with `effort`,
+#'   CPUE is computed via [cpue()].
+#' @param effort Optional numeric vector of effort. Required if `catch` is
+#'   provided.
+#' @export
+biomass_index.numeric <- function(
+  x,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  rlang::check_dots_used()
+
+  if (is.null(x) && (!is.null(catch) && !is.null(effort))) {
+    x <- cpue(catch, effort, ...)
+  }
+
+  if (is.null(x)) {
+    stop("Must provide either 'x' (cpue) or both 'catch' and 'effort'.")
+  }
+
+  validate_numeric_inputs(x = x, area_swept = area_swept)
+
+  x * area_swept
+}
+
+#' @rdname biomass_index
+#' @param cpue_col Name of the CPUE column (default `"cpue"`).
+#' @param area_col Name of the area swept column (default `"area_swept"`).
+#' @export
+biomass_index.data.frame <- function(
+  x,
+  cpue_col = "cpue",
+  area_col = "area_swept",
+  ...
+) {
+  rlang::check_dots_used()
+
+  if (!cpue_col %in% names(x)) {
+    stop("Column '", cpue_col, "' not found in data frame.", call. = FALSE)
+  }
+  if (!area_col %in% names(x)) {
+    stop("Column '", area_col, "' not found in data frame.", call. = FALSE)
+  }
+
+  biomass_index(x[[cpue_col]], x[[area_col]])
+}
+```
+
+Test it:
+
+```{r}
+document()
+load_all()
+
+# Vector method
+biomass_index(c(10, 20), c(5, 8))
+
+# Data frame method
+survey_data <- data.frame(
+  cpue = c(10, 20, 30),
+  area_swept = c(5, 8, 6)
+)
+
+biomass_index(survey_data)
+```
+
+::: 
+-->
+
+## When to Use OOP in Packages
+
+S3 classes are worth reaching for when:
+
+- Your function returns complex results that benefit from custom `print`/`summary`/`plot` methods
+- You want other packages to be able to extend your work with new methods
+- You want to create a consistent interface when your users want to do the same
+  things with different types of input (e.g., numeric vectors, data frames, model fits)
+
+They are probably not needed when:
+
+- A simple named list or data frame communicates the result clearly
+- There is only one way to display or summarize the output
+- The function returns a scalar or vector with obvious meaning
+
+## Recap
+
+- R has multiple OOP systems (S3, S4, R6) - S3 is the most common and covers most use cases
+- S3 objects are regular R objects with a `class` attribute
+- The same function (`print`, `summary`, `plot`) does different things for different classes -
+  the object determines the behaviour, not the caller
+- Constructors (`new_*`) build valid objects
+- Write `print`, `summary`, and `plot` methods to make your classes pleasant to work with
+- Create custom generics with `UseMethod()` for domain-specific operations
+- Test classes with `expect_s3_class()` and snapshot tests for print output

@@ -1,0 +1,441 @@
+---
+title: "Data in Packages"
+---
+
+## Why include data in packages?
+
+R packages are a natural distribution mechanism for data. You have probably already used package data many times without thinking about it - `iris`, `mtcars`, and `airquality` are all datasets shipped with base R. Beyond bundling examples, packages can:
+
+- Ship **reference tables** that functions need internally (lookup tables, code mappings)
+- Bundle **example datasets** that make documentation and `@examples` self-contained
+- Act as **data packages** whose sole purpose is distributing data to users
+- Provide **API functions** that fetch live data when running code
+
+Today we will cover the first, second, and fourth of these in `fishr`.
+
+## Types of package data
+
+| Location | Created by | Exported? | Use when |
+|---|---|---|---|
+| `data/*.rda` | `use_data()` | Yes | Example data for documentation, datasets users will work with directly |
+| `R/sysdata.rda` | `use_data(..., internal = TRUE)` | No | Lookup tables, constants used by package functions |
+| `inst/extdata/` | Manual copy | No (accessed via `system.file()`) | Non-R formats (CSV, GeoJSON, shapefiles) |
+| API function | `httr2` | Yes | Live data that changes over time |
+
+## Static exported data
+
+### The workflow
+
+The standard workflow uses a `data-raw/` directory to keep reproducible scripts that generate your data objects. This script is the ground truth for how your data was created.
+
+```{r}
+usethis::use_data_raw("horsefly_sample")
+```
+
+This creates `data-raw/horsefly_sample.R` and adds `data-raw/` to `.Rbuildignore` (so it is excluded from the installed package).
+
+::: {.callout-tip}
+## A note on `data-raw/`
+`usethis::use_data_raw()` adds the `data-raw/` *directory* to `.Rbuildignore` so it is excluded from the installed package, but you should commit the scripts inside it. The R scripts that describe *how* you created the data are part of your reproducible record.
+:::
+
+In `data-raw/horsefly_sample.R`, build the dataset and save it:
+
+```{r}
+# data-raw/horsefly_sample.R
+# Run this script once to create data/horsefly_sample.rda.
+
+horsefly_sample <- data.frame(
+  set_number = c(1L, 2L, 3L, 4L, 5L),
+  catch = c(3L, 0L, 5L, 2L, 4L),
+  effort = c(1L, 1L, 1L, 1L, 1L),
+  stringsAsFactors = FALSE
+)
+
+usethis::use_data(horsefly_sample, overwrite = TRUE)
+```
+
+```{r}
+source("data-raw/horsefly_sample.R")
+```
+
+### Documenting exported data
+
+Exported datasets need documentation just like functions. Create `R/data.R`:
+
+```{r}
+use_r("data")
+```
+
+```{r}
+#' Rainbow Trout gill net survey data from Horsefly Lake
+#'
+#' Catch and effort aggregated to the net set level from a fictional
+#' gill net survey of Rainbow Trout (*Oncorhynchus mykiss*) at
+#' Horsefly Lake, British Columbia.
+#'
+#' @format A data frame with columns:
+#'
+#' - `set_number` Integer. Net set identifier.
+#' - `catch` Integer. Number of fish caught per set.
+#' - `effort` Integer. Number of net-nights per set.
+#' @source Fictional data for illustration purposes.
+#'
+#' @examples
+#' cpue(horsefly_sample)
+"horsefly_sample"
+```
+
+```{r}
+document()
+```
+
+```{r}
+load_all()
+```
+
+The dataset now appears in `data(package = "fishr")`. Open it directly by name and check its documentation with `?horsefly_sample`. Because it already has `catch` and `effort` columns, it passes directly to `cpue()`:
+
+```{r}
+horsefly_sample
+
+cpue(horsefly_sample)
+```
+
+```{r}
+check()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+
+## Fetching live data with httr2
+
+So far we have been dealing with **package data**: objects bundled into the package that users can load directly. Now we shift to **package functionality**: an exported function that fetches live data on demand. The distinction matters because `fetch_kluane_data()` is not a dataset. It is a function that happens to return data. It lives in `R/`, is documented with roxygen2, and is tested like any other function. The Kluane Lake Trout data is updated regularly, so a function that always returns the current snapshot is more useful than a static copy bundled at build time.
+
+### Add httr2 to your package
+
+```{r}
+usethis::use_package("httr2")
+```
+
+This adds `httr2` to the `Imports` field in `DESCRIPTION`. Any function that uses `httr2` needs this.
+
+### The Government of Canada Open Data API
+
+The Government of Canada publishes open data through a [CKAN](https://docs.ckan.org) data portal. CKAN exposes a simple REST API where you query a resource by ID.
+
+The Kluane Lake Trout dataset lives at:
+
+- **Dataset page:** [open.canada.ca/data/en/dataset/307fce02-71cf-4902-b485-57a70cfafe2b](https://open.canada.ca/data/en/dataset/307fce02-71cf-4902-b485-57a70cfafe2b)
+- **API endpoint:** `https://open.canada.ca/data/en/api/3/action/datastore_search`
+- **Kathleen Lake resource ID:** `af1e5730-34bd-4314-831c-1d940d99e1a7`
+
+The response is JSON with a `result.records` array where each element is one row.
+
+### Building `fetch_kluane_data()`
+
+Create `R/fetch-kluane.R`:
+
+```{r}
+#' Fetch Kluane Lake Trout survey data
+#'
+#' Retrieves gill net survey records from the Government of Canada open data
+#' portal via the CKAN datastore API. Returns individual fish records from
+#' standardised gill net surveys at lakes in Kluane National Park, Yukon.
+#'
+#' @param limit Integer. Maximum number of records to fetch (default 2000).
+#'
+#' @return A data frame with columns `lake`, `year`, `set_number`, `species`,
+#'   `fork_length_mm`, and `weight_g`.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' kluane <- fetch_kluane_data()
+#' head(kluane)
+#' }
+#' # \dontrun{} prevents this example from running during R CMD check
+#' # since it requires a network connection.
+fetch_kluane_data <- function(limit = 2000) {
+  req <- httr2::request(
+    "https://open.canada.ca/data/en/api/3/action/datastore_search"
+  )
+  req <- httr2::req_url_query(
+    req,
+    resource_id = "af1e5730-34bd-4314-831c-1d940d99e1a7",
+    limit = limit
+  )
+  resp <- httr2::req_perform(req)
+
+  # simplifyVector = TRUE converts the JSON array of objects to a data frame
+  # and coerces JSON null values to NA automatically.
+  records <- httr2::resp_body_json(resp, simplifyVector = TRUE)$result$records
+
+  # The first record is a bilingual EN/FR column header row, not data.
+  records <- records[-1, ]
+
+  data.frame(
+    lake = records$Lake,
+    year = as.integer(records$Year),
+    set_number = as.integer(records[["Set Number"]]),
+    species = records$Species,
+    fork_length_mm = as.numeric(records[["Fork Length (millimetres)"]]),
+    weight_g = as.numeric(records[["Weight (grams)"]]),
+    stringsAsFactors = FALSE
+  )
+}
+```
+
+Walk through the httr2 steps:
+
+- `request()` - create a request object pointing at the base URL
+- `req_url_query()` - append query parameters to the request (`?resource_id=...&limit=...`)
+- `req_perform()` - execute the HTTP GET and return a response object
+- `resp_body_json(..., simplifyVector = TRUE)` - parse the JSON body and coerce the array of records directly to a data frame
+
+### Trying it out
+
+```{r}
+load_all()
+
+kluane <- fetch_kluane_data()
+head(kluane)
+nrow(kluane)
+```
+
+### Connecting to cpue()
+
+Each row is one fish from one net set. To compute CPUE we count fish per set and supply an effort value. We assume effort is 1 per set here for illustrative purposes only - in practice, effort would be derived from the data (e.g., soak time in hours):
+
+```{r}
+fish <- kluane[kluane$species != "no fish", ]
+
+survey_df <- data.frame(
+  catch = as.integer(table(fish$set_number)),
+  effort = 1L
+)
+
+lt_cpue <- cpue(survey_df)
+summary(lt_cpue)
+```
+
+This works because `cpue()` is a generic with a `data.frame` method - passing a data frame with `catch` and `effort` columns dispatches to `cpue.data.frame()` automatically, as we built in the OOP session. Real-world data is now flowing through the same function without any changes to it.
+
+### Handling HTTP errors
+
+After performing the request, use `resp_check_status()` to raise an informative error on any 4xx or 5xx response. This makes the check explicit and visible in the function body:
+
+```{r}
+fetch_kluane_data <- function(limit = 2000) {
+  req <- httr2::request(
+    "https://open.canada.ca/data/en/api/3/action/datastore_search"
+  )
+  req <- httr2::req_url_query(
+    req,
+    resource_id = "af1e5730-34bd-4314-831c-1d940d99e1a7",
+    limit = limit
+  )
+  resp <- httr2::req_perform(req)
+  httr2::resp_check_status(resp)
+
+  records <- httr2::resp_body_json(resp, simplifyVector = TRUE)$result$records
+  records <- records[-1, ]
+
+  data.frame(
+    lake = records$Lake,
+    year = as.integer(records$Year),
+    set_number = as.integer(records[["Set Number"]]),
+    species = records$Species,
+    fork_length_mm = as.numeric(records[["Fork Length (millimetres)"]]),
+    weight_g = as.numeric(records[["Weight (grams)"]]),
+    stringsAsFactors = FALSE
+  )
+}
+```
+
+```{r}
+check()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+::: {.callout-note}
+## Testing functions that call HTTP APIs
+
+Testing functions that make real HTTP requests is an important topic we do not cover here. The key challenge is that tests should not depend on an external server being available. The [vcr](https://docs.ropensci.org/vcr/) and [httptest2](https://enpiar.com/httptest2/) packages both solve this by recording real HTTP interactions and replaying them during tests, keeping your test suite fast and self-contained.
+:::
+
+## Internal data
+
+Some data belongs to the package but should not be visible to users. Lookup tables, constants, and calibration coefficients are all good candidates for internal data. The key constraint: internal data powers package behaviour without appearing in the user's namespace.
+
+### Creating internal data
+
+Internal data lives in `R/sysdata.rda`, not in `data/`. It is created with `use_data()` using `internal = TRUE`:
+
+```{r}
+use_data_raw("gear-types")
+```
+
+```{r}
+# data-raw/gear_types.R
+gear_types <- data.frame(
+  gear_type = c(
+    "nordic_gillnet",
+    "sinking_longline",
+    "fyke_net",
+    "electrofishing"
+  ),
+  gear_factor = c(1.0, 0.72, 1.35, 0.45),
+  description = c(
+    "Nordic multi-mesh gillnet (standard reference gear)",
+    "Sinking baited longline",
+    "Passive fyke net trap",
+    "Electrofishing unit"
+  ),
+  stringsAsFactors = FALSE
+)
+
+usethis::use_data(gear_types, internal = TRUE, overwrite = TRUE)
+```
+
+```{r}
+source("data-raw/gear_types.R")
+```
+
+`use_data(..., internal = TRUE)` writes all objects passed to it into a single `R/sysdata.rda` file. Every function in the package can access `gear_types` directly, but it does not appear in `ls()` for users and is not exported.
+
+### Using internal data in a function
+
+This is where internal data becomes genuinely useful. Instead of asking users to supply a numeric `gear_factor` (a "magic number" only fisheries scientists would know), we let them name the gear and look up the factor automatically.
+
+Update `cpue.numeric()` and `cpue.data.frame()` in `R/cpue.R`, replacing `gear_factor` with `gear_type` in both:
+
+```{r}
+#' @rdname cpue
+#' @param gear_type Character. Gear type used for sampling. Must be one of the
+#'   types in the internal `gear_types` table. Defaults to `"nordic_gillnet"`,
+#'   the standard reference gear (factor = 1.0).
+#' @export
+cpue.numeric <- function(
+  x,
+  effort,
+  gear_type = "nordic_gillnet",
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  if (!gear_type %in% gear_types$gear_type) {
+    stop(
+      "`gear_type` must be one of: ",
+      paste(gear_types$gear_type, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  gear_factor <- gear_types$gear_factor[gear_types$gear_type == gear_type]
+
+  method <- match.arg(method)
+  validate_numeric_inputs(x = x, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(x), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(method, ratio = x / effort, log = log(x / effort))
+
+  new_cpue_result(
+    cpue_values = raw_cpue * gear_factor,
+    method = method,
+    gear_factor = gear_factor,
+    n_records = length(x)
+  )
+}
+
+#' @rdname cpue
+#' @param catch_col Character. Name of the catch column (default `"catch"`).
+#' @param effort_col Character. Name of the effort column (default `"effort"`).
+#' @export
+cpue.data.frame <- function(
+  x,
+  catch_col = "catch",
+  effort_col = "effort",
+  gear_type = "nordic_gillnet",
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  if (!catch_col %in% names(x)) {
+    stop("Column '", catch_col, "' not found in data frame.", call. = FALSE)
+  }
+  if (!effort_col %in% names(x)) {
+    stop("Column '", effort_col, "' not found in data frame.", call. = FALSE)
+  }
+
+  cpue(
+    x = x[[catch_col]],
+    effort = x[[effort_col]],
+    gear_type = gear_type,
+    method = method,
+    verbose = verbose,
+    ...
+  )
+}
+```
+
+The error message is generated dynamically from the internal table. If you add a gear type to `data-raw/gear_types.R` and re-run the script, it appears in the error automatically - no manual string editing required.
+
+### Trying it out
+
+```{r}
+load_all()
+
+cpue(100, 10) # default: nordic_gillnet -> 10
+cpue(100, 10, gear_type = "fyke_net") # factor 1.35 -> 13.5
+cpue(100, 10, gear_type = "trapnet") # error: lists valid types
+```
+
+```{r}
+check()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+## Your turn
+
+**Goal:** Extend the gear type table with a new gear, verify the validation error updates automatically, and use the new gear in a CPUE calculation.
+
+1. Open `data-raw/gear_types.R` and add a new row for `"trap_net"` with a gear factor of `1.1` and a description of your choice.
+
+2. Re-run the script and reload the package:
+
+```{r}
+source("data-raw/gear_types.R")
+load_all()
+```
+
+3. Confirm that the new gear type works and that the error message for unknown types now lists `"trap_net"`:
+
+```{r}
+cpue(100, 10, gear_type = "trap_net") # should return 110
+cpue(100, 10, gear_type = "unknown") # error should now list trap_net
+```
+
+The error message was never hard-coded - it was always computed from the table. Adding a row was the only change needed.
+
+4. Changing `cpue()` to use `gear_type` instead of `gear_factor` broke the existing tests for gear standardization. Run the tests and identify which ones are failing, then update `tests/testthat/test-cpue.R` to fix them and add a test for the new validation error:
+
+```{r}
+check()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
