@@ -1,0 +1,90 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "slides/*.qmd"
+    - "!claude.md"
+    - "!CLAUDE.md"
+
+website:
+  title: "📦 Advanced R Package Development"
+  site-url: https://advanced-r-package-development.netlify.app
+  navbar:
+    background: secondary
+    right:
+      - icon: github
+        href: https://github.com/boshek/2026-feb-course-planning
+        aria-label: GitHub
+    left:
+      - href: index.qmd
+        text: Home
+      - sidebar:modules
+      - text: "Slides"
+        menu:
+          - text: "Day 1, Session 3: Testing Part 1"
+            href: slides/testing-part1-slides.html
+          - text: "Day 3, Session 2: Releasing Your R Package"
+            href: slides/releasing-slides.html
+  repo-url: https://github.com/boshek/2026-feb-course-planning
+  repo-actions: [edit, issue]
+  sidebar:
+    search: true
+    id: modules
+    title: "Modules"
+    style: docked
+    background: light
+    contents:
+      - text: "Course Schedule"
+        href: course-schedule.qmd
+      - text: "System Setup"
+        href: setup.qmd
+      - section: "Day 1: Foundations"
+        contents:
+          - text: "Package Development Fundamentals"
+            href: package-fundamentals.qmd
+          - text: "Git/GitHub for Collaborative Development"
+            href: git-github.qmd
+          - text: "Testing with testthat - Part 1"
+            href: testing-part1.qmd
+      - section: "Day 2: Advanced Testing and Debugging"
+        contents:
+          - text: "Function Design Best Practices"
+            href: function-design-best-practices.qmd
+          - text: "Testing with testthat - Part 2"
+            href: testing-part2.qmd
+          - text: "Advanced Documentation"
+            href: documentation.qmd
+          - text: "Debugging Techniques"
+            href: debugging-techniques.qmd
+      - section: "Day 3: Advanced Topics and Application"
+        contents:
+          - text: "Object-Oriented Programming"
+            href: object-oriented-programming.qmd
+          - text: "Data in Packages"
+            href: data-packages.qmd
+          - text: "Releasing Your R Package"
+            href: releasing-your-r-package
+
+bibliography: references.bib
+
+execute:
+  eval: false
+
+format:
+  html:
+    theme:
+      light:
+        - flatly
+        - style-light.scss
+      dark:
+        - darkly
+        - style-dark.scss
+    toc: true
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides/slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"

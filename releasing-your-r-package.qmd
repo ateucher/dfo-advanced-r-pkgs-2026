@@ -1,0 +1,6 @@
+---
+title: "Releasing Your R Package"
+format: html
+---
+
+See [slides](slides/releasing-slides.qmd).

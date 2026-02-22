@@ -1,0 +1,403 @@
+---
+title: Testing with testthat - Part 1
+format: html
+---
+
+## Test Infrastructure Setup
+
+First, let's start a fresh branch for our tests:
+
+```{r}
+pr_init("add-tests")
+```
+
+### Initialize testthat
+
+```{r}
+use_testthat()
+```
+
+This creates:
+
+- `tests/testthat/` directory for test files
+- `tests/testthat.R` to run tests
+- Adds testthat to `Suggests` in DESCRIPTION
+
+### Create a test file
+
+All new code should have an accompanying test.
+
+Tests for `R/{name}.R` go in `tests/testthat/test-{name}.R`. 
+
+```{r}
+use_test("cpue")
+```
+
+This creates `tests/testthat/test-cpue.R` matching your `R/cpue.R` file.
+
+## Writing Tests
+
+### Basic test structure
+
+```{r}
+test_that("cpue calculates simple ratio correctly", {
+  expect_equal(cpue(catch = 100, effort = 10), 10)
+  expect_equal(cpue(catch = 50, effort = 2), 25)
+})
+```
+
+```{r}
+test_that("cpue handles vectors of data", {
+  catches <- c(100, 200, 300)
+  efforts <- c(10, 10, 10)
+  expected_results <- c(10, 20, 30)
+
+  expect_equal(cpue(catches, efforts), expected_results)
+})
+```
+
+When possible, use a specific expectation which will give an informative failure message, instead of `expect_true()` or `expect_false()`.
+For example, instead of:
+
+```{r}
+expect_true(is.numeric(cpue(100, 10)))
+```
+
+Use:
+
+```{r}
+expect_type(cpue(100, 10), "double")
+```
+
+### Testing optional arguments
+
+```{r}
+test_that("gear_factor standardization scales correctly", {
+  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)
+  expect_equal(
+    cpue(catch = 100, effort = 10),
+    cpue(catch = 100, effort = 10, gear_factor = 1)
+  )
+})
+```
+
+### Testing edge cases
+
+```{r}
+test_that("cpue handles zero catch and missing data", {
+  expect_equal(cpue(catch = 0, effort = 10), 0)
+
+  expect_true(is.na(cpue(NA_real_, 10)))
+  expect_true(is.na(cpue(100, NA_real_)))
+})
+```
+
+
+### Run your tests
+
+```{r}
+test()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
+
+```{r}
+pr_push()
+```
+
+
+## Test Helpers and Fixtures
+
+### Create a test helper file
+
+```{r}
+use_test_helper()
+```
+
+Test helpers are loaded before tests run. Create `tests/testthat/helper.R`:
+
+```{r}
+# tests/testthat/helper.R
+
+# Helper function to generate sample fishing data
+generate_fishing_data <- function(n = 10) {
+  set.seed(67)
+  data.frame(
+    catch = runif(n, 10, 500),
+    effort = runif(n, 1, 20),
+    gear_factor = runif(n, 1, 5)
+  )
+}
+```
+
+### Using helpers in tests
+
+```{r}
+test_that("cpue works with generated data", {
+  data <- generate_fishing_data(n = 5)
+
+  result <- cpue(data$catch, data$effort)
+
+  expect_equal(
+    result,
+    c(34.053, 9.065, 19.239, 135.640, 6.372),
+    ignore_attr = TRUE,
+    tolerance = 1e-3
+  )
+})
+```
+
+### Create a setup file
+
+Setup runs once before all tests. Create `tests/testthat/setup.R`:
+
+```{r}
+# tests/testthat/setup.R
+
+# Set up test fixtures that are expensive to create
+# (only created once, shared across all tests)
+
+# Reference dataset for testing
+reference_data <- data.frame(
+  catch = c(100, 200, 300),
+  effort = c(10, 10, 10),
+  expected_cpue = c(10, 20, 30)
+)
+```
+
+### Using setup objects in tests
+
+Objects created in `setup.R` are available to all tests:
+
+```{r}
+test_that("cpue matches reference data", {
+  result <- cpue(reference_data$catch, reference_data$effort)
+
+  expect_equal(result, reference_data$expected_cpue)
+})
+```
+
+## Testing Different Function Types
+
+### Testing return types and structure
+
+```{r}
+test_that("cpue returns numeric vector", {
+  result <- cpue(c(100, 200), c(10, 20))
+
+  expect_type(result, "double")
+  expect_length(result, 2)
+})
+```
+
+### Testing with expect_message
+
+Let's add a `verbose` parameter to cpue so we can test messages.
+Don't forget to update the function documentation with the new `verbose` argument.
+
+Update `R/cpue.R` -- add the parameter and update the roxygen documentation:
+
+```{r}
+#' Calculate Catch Per Unit Effort (CPUE)
+#'
+#' Calculates CPUE from catch and effort data, with optional gear standardization.
+#'
+#' @param catch Numeric vector of catch (e.g., kg)
+#' @param effort Numeric vector of effort (e.g., hours)
+#' @param gear_factor Numeric adjustment for gear standardization (default is 1)
+#' @param verbose Logical indicating whether to print processing messages (default is FALSE)
+#'
+#' @return A numeric vector of CPUE values
+#' @export
+#'
+#' @examples
+#' cpue(100, 10)
+#' cpue(100, 10, gear_factor = 0.5)
+cpue <- function(catch, effort, gear_factor = 1, verbose = FALSE) {
+  if (verbose) {
+    message("Processing ", length(catch), " records")
+  }
+
+  raw_cpue <- catch / effort
+
+  raw_cpue * gear_factor
+}
+```
+
+Now test the message:
+
+```{r}
+test_that("cpue provides informative message when verbose", {
+  expect_message(
+    cpue(c(100, 200), c(10, 20), verbose = TRUE),
+    "Processing 2 records"
+  )
+})
+
+test_that("cpue is silent by default", {
+  expect_no_message(cpue(100, 10))
+})
+```
+
+### Testing with expect_warning
+
+```{r}
+test_that("cpue warns when vector lengths don't match", {
+  expect_warning(
+    cpue(catch = c(100, 200, 300), effort = c(10, 20)),
+    "longer object length is not a multiple of shorter object length"
+  )
+
+  expect_no_warning(cpue(100, 10))
+})
+```
+
+## Snapshot Testing Introduction
+
+Snapshot testing captures output and compares against a saved reference.
+
+### When to use snapshots
+
+- Complex text output (print methods, messages)
+- Errors and warnings
+  - When testing errors and warnings, don't us `expect_error()` or `expect_warning()`. 
+    Instead, use `expect_snapshot(error = TRUE)` for errors and `expect_snapshot()` 
+    for warnings because these allow the user to review the full text of the output.
+- Plots (with vdiffr package)
+
+### Basic snapshot test
+
+```{r}
+test_that("cpue error message is informative", {
+  expect_snapshot(
+    cpue("not a number", 10),
+    error = TRUE
+  )
+})
+```
+
+### First run creates the snapshot
+
+When you first run this test, testthat creates a snapshot file in `tests/testthat/_snaps/`, 
+and you will get a warning that a new snapshot was added.
+
+```{r}
+test()
+```
+
+### Reviewing snapshot changes
+
+```{r}
+# After modifying output, review changes
+snapshot_review()
+```
+
+### Snapshot testing for warnings
+
+Let's update our warning test to use snapshots so we can review the full warning
+and save ourselves from having to copy and paste the warning text into our test code.
+
+```{r}
+test_that("cpue produces no warnings with valid input", {
+  expect_snapshot(
+    cpue(catch = c(100, 200, 300), effort = c(10, 20))
+  )
+
+  expect_no_warning(cpue(100, 10))
+})
+```
+
+### Your turn
+
+Update your message test to use snapshots instead of `expect_message()`
+
+```{r}
+test_that("cpue provides informative message when verbose", {
+  expect_snapshot(
+    cpue(c(100, 200), c(10, 20), verbose = TRUE)
+  )
+  expect_no_message(cpue(100, 10))
+})
+```
+
+***We'll dive deeper into snapshot testing in Part 2***
+
+## Run All Tests and Check
+
+```{r}
+test()
+
+check()
+```
+
+## Your Turn
+
+Add some tests for `biomass_index()`. Try to make at least one snapshot test.
+
+With `R/biomass.R` open, run:
+
+```{r}
+use_test()
+```
+
+Or
+
+```{r}
+use_test("biomass")
+```
+
+### Our solutions
+
+Yours may look different. Let's discuss!
+
+```{r}
+test_that("biomass_index calculates correctly", {
+  expect_equal(biomass_index(cpue = 10, area_swept = 5), 50)
+  expect_equal(biomass_index(cpue = 20, area_swept = 2.5), 50)
+})
+
+test_that("biomass_index handles vectors", {
+  cpue_vals <- c(10, 20, 30)
+  area_vals <- c(5, 5, 5)
+
+  expect_equal(biomass_index(cpue_vals, area_vals), c(50, 100, 150))
+})
+
+test_that("biomass_index throws error on invalid input", {
+  expect_snapshot(biomass_index("ten", 5), error = TRUE)
+  expect_snapshot(biomass_index(10, "five"), error = TRUE)
+})
+```
+
+## Navigating tests - interactive testing, testing single files, testing the whole package
+
+You will often want to:
+
+1. Run a single test interactively
+2. Test a file
+3. Test the whole package
+
+### Run a test interactively
+
+Run with `Ctrl+Enter` as you would any other code.
+
+This is one place it's important that your tests are self-contained.
+If there is a lot of infrastructure set up outside your `test_that()` blocks it is difficult to do interactive testing.
+
+### Test a file
+
+```{r}
+devtools::test_active_file()
+```
+
+Map a keyboard shortcut to this: `Ctrl/Cmd+T`
+
+### Test the whole package
+
+```{r}
+devtools::test()
+```
+
+Map a keyboard shortcut to this: `Shift+Ctrl/Cmd+T`

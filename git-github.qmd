@@ -1,0 +1,154 @@
+---
+title: Git/GitHub for Collaborative Development
+format: html
+---
+
+## Git Workflow Review
+
+***back to slides - git workflow overview***
+
+### Check your git status
+
+```{r}
+git_sitrep()
+```
+
+Make sure we have pushed all of our changes up to this point.
+
+```{bash}
+git push origin main
+```
+
+## Continuous Integration
+
+### Add GitHub Actions for R CMD check
+
+```{r}
+use_github_action("check-standard")
+```
+
+This creates `.github/workflows/R-CMD-check.yaml` that runs `R CMD check` on multiple platforms whenever you push.
+
+It also adds a "R CMD check" status badge to your README. Look at your README.Rmd badges section, then rebuild, and `check()` locally.
+
+```{r}
+build_readme()
+
+check()
+```
+
+::: {.callout-tip}
+## Make a commit
+Commit your changes, and push.
+:::
+
+### View your check results
+
+After pushing, go to your repo's "Actions" tab to see the workflow run.
+
+## Setting Up Air
+
+[Air](https://posit-dev.github.io/air/) is a fast R formatter that automatically formats your code every time you save a `.R` file. 
+It helps you keep your mind focused on the code, and most importantly eases collaboration because it forces a consistent style among you and your collaborators.
+
+### Install Air in your project
+
+```{r}
+use_air(vscode = FALSE)
+```
+
+In RStudio, change these settings:
+
+![](img/rstudio-options-air-formatter.png)
+
+![](img/rstudio-options-format-on-save.png)
+
+[Install the Air command line utility](https://posit-dev.github.io/air/cli.html). 
+Otherwise, the first time Air is run (i.e., the first time you save a file), 
+it will be downloaded and installed automatically.
+
+## Pull Request Workflows
+
+***back to slides - PR workflow overview***
+
+### Start a new feature branch
+
+```{r}
+pr_init("add-biomass-function")
+```
+
+This creates and checks out a new branch.
+
+### Write a new function
+
+```{r}
+use_r("biomass")
+```
+
+Add a simple biomass calculation function:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' Calculates biomass index from CPUE and area swept.
+#'
+#' @param cpue Numeric vector of CPUE values
+#' @param area_swept Numeric vector of area swept (e.g., km²)
+#'
+#' @return A numeric vector of biomass index values
+#' @export
+#'
+#' @examples
+#' salmon_cpue <- cpue(catch = 2, effort = 2)
+#' biomass_index(cpue = salmon_cpue, area_swept = 5)
+biomass_index <- function(cpue, area_swept) {
+  cpue * area_swept
+}
+```
+
+### Document and check
+
+```{r}
+document()
+load_all()
+
+biomass_index(10, 5)
+
+check()
+```
+
+### Push your branch and create a PR
+
+```{r}
+pr_push()
+```
+
+This pushes your branch and opens a browser to create the PR.
+
+### Working with PRs
+
+```{r}
+# Pause work on current PR (switch back to main)
+pr_pause()
+
+# Resume work on a PR
+pr_resume("add-biomass-function")
+
+# After PR is merged, clean up
+pr_finish()
+```
+
+### Fetch and review someone else's PR
+
+```{r}
+pr_fetch(123) # PR number
+```
+
+
+### Run a final check
+
+```{r}
+check()
+```
+
+<!-- TODO: Decide if we want to add Air CI -->

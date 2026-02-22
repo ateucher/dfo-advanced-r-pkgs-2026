@@ -1,0 +1,129 @@
+---
+title: "Course Schedule"
+format: html
+---
+
+# Advanced R Package Development Workshop
+## February 2026
+
+**Duration:** 3 consecutive half-days
+**Time:** 8:00 AM - 12:30 PM daily
+**Format:** Three 80-minute sessions per day with 15-minute breaks
+
+---
+
+## Day 1: Foundations and Core Skills
+**Theme:** Review fundamentals and establish good practices
+
+### 08:00 - 08:20 | Introduction (20 min) (Sam)
+- Schedule review
+- Course format
+
+### 08:20 - 09:20 | Review of Package Development Fundamentals (60 min) (Sam)
+- Package structure and state
+- Package creation workflow and metadata
+- Write our first function
+- Quick review of documentation basics
+
+### 09:20 - 09:35 | Break (15 min)
+
+### 09:35 - 10:55 | Review of Package Development Fundamentals + Git/GitHub for Collaborative Development (80 min) (Andy)
+- Git workflow review + continuous integration
+- GitHub setup
+- Additional package review
+- Setting up air in RStudio
+- Pull Request workflows for collaboration
+    - Using `pr_*` helpers 
+
+### 10:55 - 11:10 | Break (15 min)
+
+### 11:10 - 12:30 | Testing with testthat - Part 1 (80 min) (Andy)
+- Test review, setup test infrastructure
+- Fixture generators and test helpers.R, setup.R
+- Testing different function types
+- Snapshot testing introduction
+
+---
+
+## Day 2: Advanced Testing and Debugging
+**Theme:** Building robust, reliable packages
+
+### 08:00 - 09:20 | Function Design Best Practices (80 min) (Sam)
+- Function naming conventions
+- Default arguments and the ellipsis (...)
+- Pure functions vs side-effects
+- Function composition and helper functions
+- Function length and complexity principles
+- Write more functions
+
+### 09:20 - 09:35 | Break (15 min)
+
+### 09:35 - 10:55 | Testing with testthat - Part 2 (80 min) (Andy)
+- Snapshot testing
+- Writing "clean" tests that also clean up after themselves (keeping things local)
+- Testing with external dependencies/data 
+- Test coverage (with covr)
+
+### 10:55 - 11:10 | Break (15 min)
+
+### 11:10 - 11:30 | Advanced documentation (20 min) (Andy)
+- roxygen2 review
+- Special roxygen tags to avoid duplication
+- Markdown formatting and cross-referencing
+
+### 11:30 - 12:30 | Debugging Techniques (60 min) (Sam)
+- Debugging strategies in R
+- Using browser(), debug(), and debugonce()
+- Debugging in different environments
+- Common debugging scenarios in packages
+
+---
+
+## Day 3: Advanced Topics and Application
+**Theme:** OOP, data packages, and real-world application
+
+### 08:00 - 09:20 | Object-Oriented Programming in R (80 min) (Andy)
+- Overview of OOP systems in general and in R (S3, S4, R6)
+- More details on S3
+- When to use OOP in packages
+- Creating classes and methods
+    - `plot`
+    - `summary`
+    - `print`
+    - make your own generics
+- Documenting S3 methods
+
+### 09:20 - 09:35 | Break (15 min)
+
+### 09:35 - 10:35 | Data Packages (60 min) (Sam)
+- Types of package data: exported, internal, and API functions
+- Static exported data and documentation
+- Fetching live data with httr2
+- Using internal data to drive function behaviour
+
+### 10:35 - 10:55 | Releasing Your R Package (20 minutes) (Andy)
+
+- Licensing your package
+- Package versioning strategies
+- Releasing your package (CRAN, GitHub, internal repos)
+
+### 10:55 - 11:10 | Break (15 min)
+
+### 11:10 - 12:30 | BYOP (Bring Your Own Package) + Open Topics (80 min)
+- Vignettes (20-25 min)
+- Reviews any topics covered in relation to their own packages
+- Open Q&A on specific challenges encountered during workshop (15-20 min)
+- Dedicated time for participants to work on their own packages with instructor support (35-45 min)
+- Instructors available for individual consultation
+
+---
+
+## Workshop Notes
+
+**Total Teaching Time:** 9 sessions × 80 minutes = 12 hours
+
+**Learning Approach:**
+- Each session includes practical exercises, not just lecture
+- Topics build progressively from fundamentals to advanced concepts
+- Final day allows for integration and application of learned concepts
+- Schedule allows flexibility based on pace and participant interests
