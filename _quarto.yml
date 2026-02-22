@@ -80,11 +80,3 @@ format:
         - darkly
         - style-dark.scss
     toc: true
-  revealjs:
-    height: 900
-    width: 1600
-    theme: [moon, slides/slides.scss]
-    highlight-style: a11y
-    slide-number: true
-    chalkboard: true
-    footer: "[{{< fa house >}}](../index.html)"
