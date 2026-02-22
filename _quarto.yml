@@ -21,6 +21,8 @@ website:
       - sidebar:modules
       - text: "Slides"
         menu:
+          - text: "Day 1, Session 1: Package Development Fundamentals"
+            href: slides/package-fundamentals-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
