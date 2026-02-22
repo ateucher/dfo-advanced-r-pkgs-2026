@@ -23,6 +23,8 @@ website:
         menu:
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
+          - text: "Day 2, Session 1: Function Design Best Practices"
+            href: slides/function-design-best-practices-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
             href: slides/releasing-slides.html
   repo-url: https://github.com/boshek/2026-feb-course-planning

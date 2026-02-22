@@ -1,0 +1,607 @@
+---
+title: "Function Design Best Practices"
+subtitle: "Advanced R Package Development"
+format: revealjs
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Why function design matters
+2. Naming conventions
+3. Pure functions vs side effects
+4. Default arguments and `match.arg`
+5. The ellipsis (`...`)
+6. Managing dependencies
+7. DRY: Don't Repeat Yourself
+8. Function composition
+
+# Why Function Design Matters
+
+## What makes good code?
+
+- Readable: easy to understand what it does
+- Correct: does what you intend
+- Maintainable: easy to change
+
+::: {.fragment}
+From the [Tidyverse design guide](https://design.tidyverse.org/):
+
+- Programming is a task performed by humans
+- Reduce cognitive load with consistent design
+- Make your functions and systems composable
+- Think about others who are not like us
+:::
+
+::: {.notes}
+Today we refactor our fishr functions with these principles in mind. The goal is not perfection - it's making functions easier to use correctly and harder to use incorrectly.
+:::
+
+# Naming Conventions
+
+## General guidelines
+
+- Use verbs to ascribe an action
+- Use consistent style (`snake_case`)
+- Consider short prefixes to unify package functions
+- Don't be afraid to be verbose
+- Avoid conflict with existing functions
+
+## snake_case for everything
+
+```{r}
+# Good
+calculate_area <- function(length, width) {}
+lib_summary <- function() {}
+
+# Avoid
+calculateArea <- function(Length, Width) {}
+```
+
+## Functions as verbs
+
+```{r}
+# Good - functions do things
+calculate_cpue()
+filter_by_year()
+plot_abundance()
+
+# Avoid
+cpue() # What does this do?
+fish_data() # Is this a function or an object?
+```
+
+## Objects as nouns
+
+```{r}
+# Good - objects are things
+survey_data <- read_csv("survey.csv")
+model_fit <- lm(y ~ x, data = df)
+
+# Avoid
+doReadingCSV <- read_csv("survey.csv")
+```
+
+## Code style
+
+Consistent style makes code easier to read.
+
+```{r}
+# Inconsistent
+x = 1 + 2
+y = sum(c(1, 2, 3))
+
+# Consistent
+x <- 1 + 2
+y <- sum(c(1, 2, 3))
+```
+
+::: {.fragment}
+The `air` formatter (already configured in this project) handles this automatically on save.
+:::
+
+## Naming in fishr
+
+Our functions follow these conventions:
+
+- `cpue()` - short, but a domain-standard abbreviation well understood by fisheries scientists
+- `biomass_index()` - descriptive, easy to predict
+
+::: {.fragment}
+Domain-standard abbreviations are the one acceptable exception to "be verbose".
+:::
+
+# Pure Functions vs Side Effects
+
+## Two kinds of functions
+
+**Pure function:**
+
+1. Always returns the same output for the same inputs
+2. Has no side effects
+
+```{r}
+# Pure
+add <- function(x, y) {
+  x + y
+}
+
+# Not pure - depends on global state
+multiplier <- 2
+scale <- function(x) {
+  x * multiplier
+}
+```
+
+## Functions with side effects
+
+```{r}
+# Side effect: modifies global state
+counter <- 0
+increment <- function() {
+  counter <<- counter + 1
+}
+
+# Side effects: reads from disk, prints output
+load_data <- function(path) {
+  cat("Loading", path, "\n")
+  read.csv(path)
+}
+```
+
+::: {.fragment}
+Side effects are sometimes necessary, but prefer pure functions when possible. Easier to test and reason about.
+:::
+
+## cpue annotated
+
+```{r}
+cpue <- function(catch, effort, gear_factor = 1, verbose = FALSE) {
+  # Side effect: prints a message to the console
+  if (verbose) {
+    message("Processing ", length(catch), " records")
+  }
+
+  # Pure calculation
+  raw_cpue <- catch / effort
+  raw_cpue * gear_factor
+}
+```
+
+The calculation itself is pure. The `message()` call is a side effect.
+
+## Package-wide options
+
+R has a global key-value store packages can use for user-configurable defaults:
+
+```{r}
+# Set an option
+options(fishr.verbose = TRUE)
+
+# Get an option (with a fallback default)
+getOption("fishr.verbose", default = FALSE)
+```
+
+::: {.fragment}
+By convention, package options use the package name as a prefix to avoid conflicts: `fishr.verbose`, not just `verbose`.
+:::
+
+## getOption() in the function signature
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  verbose = getOption("fishr.verbose", default = FALSE)
+) {
+  if (verbose) {
+    message("Processing ", length(catch), " records")
+  }
+
+  raw_cpue <- catch / effort
+  raw_cpue * gear_factor
+}
+```
+
+::: {.fragment}
+Users can set `options(fishr.verbose = TRUE)` once and all fishr functions pick it up. They can still override per call: `cpue(100, 10, verbose = TRUE)`.
+:::
+
+## Side effects to avoid
+
+```{r}
+# Don't do this - writes a file without asking
+bad_cpue <- function(catch, effort) {
+  result <- catch / effort
+  write.csv(data.frame(cpue = result), "cpue_log.csv")
+  result
+}
+
+# Don't do this - changes how all numbers display globally
+bad_summary <- function(x) {
+  options(digits = 2)
+  summary(x)
+}
+```
+
+::: {.fragment}
+Return values and let the caller decide what to do with them.
+:::
+
+# Default Arguments and match.arg
+
+## Three types of arguments
+
+```{r}
+my_function <- function(
+  required_arg, # Required: no default
+  optional_arg = TRUE, # Optional: has a default
+  ... # Dots: passed to other functions
+) {}
+```
+
+## Adding a method argument to cpue
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+
+  if (verbose) {
+    message("Processing ", length(catch), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(
+    method,
+    ratio = catch / effort,
+    log = log(catch / effort)
+  )
+
+  raw_cpue * gear_factor
+}
+```
+
+## How match.arg works
+
+`match.arg()` takes the first element of the default vector when the user doesn't supply a value, and gives a clear error for invalid input:
+
+```{r}
+load_all()
+
+cpue(100, 10) # Uses default ("ratio")
+cpue(100, 10, method = "log") # Explicit
+cpue(100, 10, method = "median") # Error: invalid value
+```
+
+::: {.fragment}
+The vector in the default `c("ratio", "log")` is both the documentation and the validation list.
+:::
+
+## Document and check
+
+```{r}
+document()
+check()
+```
+
+::: {.fragment}
+Adding `method` to the verbose message changes its format - any snapshot test for the verbose output will fail with a mismatch. Accept the updated snapshot:
+
+```{r}
+testthat::snapshot_accept()
+```
+
+:::
+
+# The Ellipsis (...)
+
+## Passing arguments through with ...
+
+The ellipsis lets a function accept extra arguments and pass them to another function:
+
+```{r}
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {
+    cpue <- cpue(catch, effort, ...)
+  }
+
+  if (is.null(cpue)) {
+    stop("Must provide either 'cpue' or both 'catch' and 'effort'.")
+  }
+
+  cpue * area_swept
+}
+```
+
+## Demo
+
+```{r}
+load_all()
+
+# Pre-computed CPUE
+biomass_index(cpue = 10, area_swept = 5)
+
+# Compute on the fly
+biomass_index(area_swept = 5, catch = 100, effort = 10)
+
+# Pass method through to cpue() via ...
+biomass_index(
+  area_swept = 5,
+  catch = c(100, 200),
+  effort = c(10, 20),
+  method = "log"
+)
+```
+
+::: {.notes}
+Note: we write area_swept = 5 even though it's the second argument. Because we're skipping cpue, positional matching would put 5 into cpue instead. When you skip optional arguments, name them.
+:::
+
+## Why cpue = NULL?
+
+`cpue = NULL` signals "not provided" clearly:
+
+- `is.null()` is a reliable check for "argument not given"
+- If we used `cpue = 0`, there's no way to tell whether the user passed zero intentionally or just didn't provide a value
+
+## Pitfalls of ...
+
+- Arguments passed through `...` must be named - positional matching doesn't work through the ellipsis
+- Misspelled arguments are silently absorbed: `cpue(100, 10, mthod = "log")` won't error
+- Errors from inner functions can be hard to trace
+
+::: {.fragment}
+Solution: `rlang::check_dots_used()` catches unused dots before they cause confusion.
+:::
+
+# Managing Dependencies
+
+## Declaring a dependency
+
+```{r}
+use_package("rlang")
+```
+
+::: {.fragment}
+Adds `rlang` to `Imports` in `DESCRIPTION`. Call functions using `::`:
+
+```{r}
+format_catch <- function(catch) {
+  if (!is.numeric(catch)) {
+    rlang::abort("`catch` must be a numeric vector.")
+  }
+  round(catch, 2)
+}
+```
+
+`::` is explicit, avoids namespace conflicts, and makes clear which package each function comes from.
+:::
+
+## Importing frequently-used functions
+
+For functions called throughout a package, `::` on every call is verbose:
+
+```{r}
+use_import_from("rlang", "abort")
+```
+
+::: {.fragment}
+Inserts `@importFrom rlang abort` into your package roxygen block and updates `NAMESPACE` after `document()`.
+
+`abort()` is then available across your package without the `rlang::` prefix.
+:::
+
+## Catching unused dots
+
+```{r}
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  ...
+) {
+  rlang::check_dots_used()
+
+  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {
+    cpue <- cpue(catch, effort, ...)
+  }
+
+  if (is.null(cpue)) {
+    stop("Must provide either 'cpue' or both 'catch' and 'effort'.")
+  }
+
+  cpue * area_swept
+}
+```
+
+# DRY: Don't Repeat Yourself
+
+## The problem with repetition
+
+```{r}
+# Repetitive
+sum_of_squares_2 <- 1^2 + 2^2
+sum_of_squares_3 <- 1^2 + 2^2 + 3^2
+sum_of_squares_4 <- 1^2 + 2^2 + 3^2 + 4^2
+```
+
+::: {.fragment}
+Problems:
+
+- Change the formula and you must update every line
+- Easy to introduce inconsistencies
+- Hard to read and maintain
+:::
+
+## Refactor to use functions
+
+```{r}
+# DRY version
+square <- function(x) x^2
+
+sum_of_squares <- function(n) {
+  sum(square(seq_len(n)))
+}
+
+sum_of_squares(2)
+sum_of_squares(3)
+sum_of_squares(4)
+```
+
+Small, focused functions that do one thing well. Easier to test, read, and reuse.
+
+## Identifying repetition
+
+Look for:
+
+- Copy-pasted code with small variations
+- The same expression computed multiple times
+- Long functions that do many separate things
+
+::: {.fragment}
+If a function exceeds ~20-30 lines, consider whether it is doing too many things.
+:::
+
+## Why validate inputs?
+
+```{r}
+cpue("one hundred", 10)
+#> Error in catch/effort : non-numeric argument to binary operator
+```
+
+::: {.fragment}
+Unhelpful - doesn't say which argument is the problem or what was expected.
+
+Instead of copy-pasting the same check into every function, create a shared helper.
+:::
+
+## A validation helper
+
+```{r}
+# R/utils.R
+
+#' @noRd
+validate_numeric_inputs <- function(...) {
+  args <- list(...)
+  arg_names <- names(args)
+
+  for (i in seq_along(args)) {
+    if (!is.numeric(args[[i]])) {
+      stop(
+        "'",
+        arg_names[i],
+        "' must be numeric, got ",
+        class(args[[i]])[1],
+        ".",
+        call. = FALSE
+      )
+    }
+  }
+
+  invisible(NULL)
+}
+```
+
+`@noRd` tells roxygen2 not to generate a `.Rd` file - internal helpers don't need public docs.
+
+## Add validation to cpue
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+  validate_numeric_inputs(catch = catch, effort = effort)
+
+  if (verbose) {
+    message("Processing ", length(catch), " records using ", method, " method")
+  }
+
+  raw_cpue <- switch(method, ratio = catch / effort, log = log(catch / effort))
+  raw_cpue * gear_factor
+}
+```
+
+## Verify the helper works
+
+```{r}
+load_all()
+
+cpue(100, 10) # Good input
+cpue("high", 10) # 'catch' must be numeric, got character.
+biomass_index(cpue = "ten", area_swept = 5) # 'cpue' must be numeric...
+```
+
+## Where to put helpers
+
+- **Same file as the exported function** - when the helper is specific to one function. Keeps related logic together.
+- **`R/utils.R`** - when the helper is used across multiple functions in the package.
+
+::: {.fragment}
+Good rule of thumb: start with the helper in the same file. Move it to `utils.R` only when a second function needs it.
+:::
+
+# Function Composition
+
+## Composed workflow
+
+```{r}
+load_all()
+
+# Step by step
+my_cpue <- cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))
+biomass_index(cpue = my_cpue, area_swept = 50)
+
+# Or in one call, thanks to ... pass-through
+biomass_index(area_swept = 50, catch = c(100, 200, 300), effort = c(10, 20, 30))
+
+# With options passed through
+biomass_index(
+  area_swept = 50,
+  catch = c(100, 200, 300),
+  effort = c(10, 20, 30),
+  method = "log"
+)
+```
+
+## Composability is the payoff
+
+- **Naming** - clear names make composed code readable
+- **Pure calculations** - predictable functions are safe to chain
+- **`match.arg`** - consistent interfaces reduce mistakes
+- **`...`** - pass-through enables flexible composition
+- **Helpers** - shared validation keeps behaviour consistent
+
+# Your Turn
+
+## Exercise
+
+Add `verbose` support to `biomass_index()` using the same options pattern as `cpue()`:
+
+1. Add `verbose = getOption("fishr.verbose", FALSE)` as an argument
+2. When `verbose = TRUE`, print a message reporting how many records are being processed
+3. Run `document()` and `check()`
+4. Update any snapshot tests that now fail
+
+::: {.fragment}
+**Bonus:** write a test that confirms the message appears when `verbose = TRUE` and is silent by default.
+:::
