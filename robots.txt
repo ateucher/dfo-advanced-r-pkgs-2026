@@ -1,1 +1,1 @@
-Sitemap: https://ateucher.github.io/dfo-advanced-r-pkgs-2026/sitemap.xml
+Sitemap: http://andyteucher.ca/dfo-advanced-r-pkgs-2026/sitemap.xml
