@@ -157,20 +157,13 @@ Give people 2-3 minutes to run these. has_devel() should print "Your system is r
 
 ## BYOP + Open Topics
 
-**Vignettes** (20-25 min)
-
-- Writing long-form documentation with Quarto
-- When to write a vignette vs a help page
-
-::: {.fragment}
-**Open Q&A** (15-20 min)
+**Open Q&A**
 
 - Specific challenges you've encountered during the workshop
 - Applying workshop concepts to your own package
-:::
 
 ::: {.fragment}
-**Bring Your Own Package** (35-45 min)
+**Bring Your Own Package**
 
 - Dedicated time to work on your package
 - Instructors available for individual consultation
