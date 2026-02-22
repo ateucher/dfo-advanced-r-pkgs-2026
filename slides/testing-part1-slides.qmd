@@ -1,7 +1,15 @@
 ---
 title: "Testing with testthat"
 subtitle: "Part 1 - Advanced R Package Development"
-format: revealjs
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
 execute:
   eval: false
   echo: true

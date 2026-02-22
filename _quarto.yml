@@ -8,7 +8,7 @@ project:
 
 website:
   title: "📦 Advanced R Package Development"
-  site-url: https://advanced-r-package-development.netlify.app
+  site-url: http://andyteucher.ca/dfo-advanced-r-pkgs-2026/
   navbar:
     background: secondary
     right:
@@ -82,11 +82,3 @@ format:
         - darkly
         - style-dark.scss
     toc: true
-  revealjs:
-    height: 900
-    width: 1600
-    theme: [moon, slides/slides.scss]
-    highlight-style: a11y
-    slide-number: true
-    chalkboard: true
-    footer: "[{{< fa house >}}](../index.html)"
