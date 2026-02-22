@@ -110,7 +110,6 @@ format: html
 ### 10:55 - 11:10 | Break (15 min)
 
 ### 11:10 - 12:30 | BYOP (Bring Your Own Package) + Open Topics (80 min)
-- Vignettes (20-25 min)
 - Reviews any topics covered in relation to their own packages
 - Open Q&A on specific challenges encountered during workshop (15-20 min)
 - Dedicated time for participants to work on their own packages with instructor support (35-45 min)
