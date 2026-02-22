@@ -1,9 +1,6 @@
 ---
 title: "System Setup 🤖"
-format:
-  html: default
-  pdf:
-    geometry: margin=1in
+format: html
 ---
 
 You will require the following software installed and configured for the workshop.
