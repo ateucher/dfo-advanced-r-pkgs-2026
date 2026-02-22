@@ -1,1 +1,1 @@
-Sitemap: https://advanced-r-package-development.netlify.app/sitemap.xml
+Sitemap: https://ateucher.github.io/dfo-advanced-r-pkgs-2026/sitemap.xml
