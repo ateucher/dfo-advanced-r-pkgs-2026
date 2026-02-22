@@ -168,3 +168,7 @@ Give people 2-3 minutes to run these. has_devel() should print "Your system is r
 - Dedicated time to work on your package
 - Instructors available for individual consultation
 :::
+
+## Let's go!
+
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzcyZW11M3h2NDkxczh4a3pwbjhpOW1lMjQ0dnE2NTg5Z2toY2FodyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BpGWitbFZflfSUYuZ9/giphy.gif){fig-align="center"}
