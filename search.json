@@ -1,0 +1,1156 @@
+[
+  {
+    "objectID": "testing-part2.html",
+    "href": "testing-part2.html",
+    "title": "Testing with testthat - Part 2",
+    "section": "",
+    "text": "We have added better error messages with our input validations. Because when we recorded the snapshots the error message was different, now when we run the tests, these snapshot tests will fail. We will need to update our snapshots.\n\ntest()\n\nWe will get warning messages indicating that the snapshots have changed.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Testing with testthat - Part 2"
+    ]
+  },
+  {
+    "objectID": "testing-part2.html#writing-clean-tests",
+    "href": "testing-part2.html#writing-clean-tests",
+    "title": "Testing with testthat - Part 2",
+    "section": "Writing “Clean” Tests",
+    "text": "Writing “Clean” Tests\nTests should not leave behind any evidence that they were there. Use withr to keep things local.\nwithr has functions with the local_ prefix that keeps changes local to the current environment. That environment can be a function, or it can be a test.\nThere are also with_ functions that are good for executing a small snippet of code with a modified state.\n\nAdd withr to Suggests\n\nuse_package(\"withr\", type = \"Suggests\")\n\n\n\nTesting with package options\nWe updated cpue() to use a package option for the function verbosity. Remember our updated R/cpue.R:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  raw_cpue * gear_factor\n}\n\nNow test with withr::local_options() to temporarily change options:\nIn tests/testthat/test-cpue.R\n\ntest_that(\"cpue uses verbosity when option set to TRUE\", {\n  withr::local_options(fishr.verbose = TRUE) # will be reset when this test_that block finishes\n\n  expect_snapshot(cpue(100, 10))\n})\n\ntest_that(\"cpue is not verbose when option set to FALSE\", {\n  withr::local_options(fishr.verbose = FALSE) # will be reset when this test_that block finishes\n\n  expect_silent(cpue(100, 10))\n})\n\ntest_that(\"cpue verbosity falls back to FALSE when not set\", {\n  withr::with_options(\n    list(fishr.verbose = NULL), # will be reset as soon as this code block executes\n    expect_no_message(cpue(100, 10))\n  )\n})\n# Options automatically restored after each test\n\n\n\nYour turn\nAdd the same verbose argument to biomass_index() and add tests. Make sure to update the documentation for biomass_index() with the new argument.\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept. Can optionally\n#' compute CPUE from catch and effort data.\n#'\n#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are\n#'   provided, this is computed automatically.\n#' @param area_swept Numeric vector of area swept (e.g., km²)\n#' @param catch Optional numeric vector of catch. If provided with `effort`,\n#'   CPUE is computed via `cpue()`.\n#' @param effort Optional numeric vector of effort. Required if `catch` is\n#'   provided.\n#' #' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#' @param ... Additional arguments passed to `cpue()` when computing from\n#'   catch and effort (e.g., `method`, `gear_factor`).\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n#' # From pre-computed CPUE\n#' biomass_index(cpue = 10, area_swept = 5)\n#'\n#' # Compute CPUE on the fly\n#' biomass_index(area_swept = 5, catch = 100, effort = 10)\n#'\n#' # Pass method through to cpue()\n#' biomass_index(\n#'   area_swept = 5,\n#'   catch = c(100, 200),\n#'   effort = c(10, 20),\n#'   method = \"log\"\n#' )\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  verbose = getOption(\"fishr.verbose\", default = FALSE),\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, verbose = verbose, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\n  if (verbose) {\n    message(\"calculating biomass index for \", length(area_swept), \" records\")\n  }\n\n  cpue * area_swept\n}\n\n\nuse_test(\"biomass\")\n\nIn tests/testthat/test-biomass.R\n\ntest_that(\"biomass_index uses verbosity when set as an option\", {\n  withr::local_options(fishr.verbose = TRUE)\n\n  expect_snapshot(biomass_index(cpue = 5, area_swept = 100))\n})\n\ntest_that(\"biomass_index verbosity falls back to FALSE when not set\", {\n  withr::local_options(fishr.verbose = NULL)\n\n  expect_no_message(biomass_index(cpue = 5, area_swept = 100))\n})\n# Options automatically restored after each test\n\n\n\nOther withr helpers\nwithr provides many helpers for keeping tests isolated:\n\nlocal_tempdir() / with_tempdir() - create temporary directories\nlocal_tempfile() / with_tempfile() - create temporary files\nlocal_envvar() / with_envvar() - temporarily set environment variables\nlocal_dir() / with_dir() - temporarily change working directory\ndefer() - register custom cleanup code\n\n\ntest_that(\"example with temporary file\", {\n  temp_file &lt;- withr::local_tempfile(lines = c(\"100,10\", \"200,20\"))\n\n  # Test something with temp_file\n  lines &lt;- readLines(temp_file)\n  expect_length(lines, 2)\n})\n# temp_file automatically deleted after test\n\n\n\nQuiz\nCan anyone think of somewhere we have altered the global state in our testing, and how we might address it?\n\n\n\n\n\n\nTipAnswer\n\n\n\n\n\nIn tests/testthat/helper.R: set.seed() sets the seed globally. We want to create the data frame the same every time, so need the same random seed, but want to keep that change local.\n\n# tests/testthat/helper.R\n\n# Helper function to generate sample fishing data\ngenerate_fishing_data &lt;- function(n = 10) {\n  withr::local_seed(67)\n  data.frame(\n    catch = runif(n, 10, 500),\n    effort = runif(n, 1, 20),\n    gear_factor = runif(n, 1, 5)\n  )\n}",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Testing with testthat - Part 2"
+    ]
+  },
+  {
+    "objectID": "testing-part2.html#test-coverage-with-covr",
+    "href": "testing-part2.html#test-coverage-with-covr",
+    "title": "Testing with testthat - Part 2",
+    "section": "Test Coverage with covr",
+    "text": "Test Coverage with covr\nOnce you have a test suite, a natural question is: how much of my code is actually being tested? The covr package answers this by tracking which lines of your package code are executed when your tests run.\n\nSet up covr\nAdd covr to Suggests in your DESCRIPTION\n\nuse_package(\"covr\", type = \"Suggests\")\n\n\n\nChecking coverage\npackage_coverage() runs your tests and records which lines were hit:\n\nlibrary(covr)\n\ncov &lt;- package_coverage()\ncov\n\nThis prints a per-file coverage percentage. To get a single overall number:\n\npercent_coverage(cov)\n\n\n\nFinding untested code\nThe most actionable output from covr is the list of lines with zero coverage:\n\nzero_coverage(cov)\n\nThis returns a data frame showing exactly which lines have no test exercising them. In RStudio, the results appear as markers you can click to jump to the uncovered code.\n\n\nInteractive report\nFor a visual overview, report() opens an HTML page where you can browse file-by-file coverage with highlighted source:\n\nreport(cov)\n\n\n\nInteractive checking\n\ndevtools::test_coverage_active_file()\n\nNice to set a keyboard shortcut for this: Ctrl/Cmd + R\n\n\nExcluding lines from coverage\nSome lines are not worth testing - for example, a print method or an interactive-only code path. You can exclude them with a special comment:\n\nif (interactive()) {\n  # nocov start\n  browse_results(x)\n} # nocov end\n\nOr exclude a single line:\n\nstop(\"Column must be numeric\") # nocov\n\n\n\nCoverage in CI (optional content)\nTo also run coverage automatically in CI, add the GitHub Actions workflow:\n\nusethis::use_github_action(\"test-coverage\")\n\nBy default the workflow uploads results to Codecov, which requires a (free) Codecov account linked to your GitHub repo. Codecov provides a dashboard that tracks coverage over time and can comment on pull requests with coverage diffs.\nIf you use Codecov, you will need to add a CODECOV_TOKEN as a repository secret in GitHub. To get your token, sign in to codecov.io with your GitHub account, navigate to your repository, and copy the upload token. Then in your GitHub repo, go to Settings &gt; Secrets and variables &gt; Actions and add a new repository secret named CODECOV_TOKEN with that value. The workflow generated by use_github_action(\"test-coverage\") already references this secret, so once it is set uploads will work automatically.\nIf you don’t want to set up a Codecov account, you can edit the generated workflow file (.github/workflows/test-coverage.yaml) to just print coverage to the Actions log without uploading. The default workflow has a “Test coverage” step that already calls print(cov), followed by a codecov/codecov-action step that uploads. Remove the upload step and the covr::to_cobertura() call so the “Test coverage” step looks like this:\n      - name: Test coverage\n        run: |\n          cov &lt;- covr::package_coverage(\n            quiet = FALSE,\n            clean = FALSE,\n            install_path = file.path(\n              normalizePath(Sys.getenv(\"RUNNER_TEMP\"), winslash = \"/\"),\n              \"package\"\n            )\n          )\n          print(cov)\n        shell: Rscript {0}\nCoverage results will appear directly in the Actions log each time the workflow runs. You still get visibility into coverage on every push and PR - you just don’t get the Codecov dashboard or PR comments.\n\n\nA note on coverage targets\nHigh coverage is useful as a guide for finding gaps, but chasing 100% coverage is rarely worthwhile. Coverage tells you which lines were executed, not whether the tests actually verify correct behavior. A test that runs code without meaningful assertions inflates coverage without adding value. Focus on covering the important logic paths and edge cases rather than hitting a number.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Testing with testthat - Part 2"
+    ]
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#outline",
+    "href": "slides/testing-part1-slides.html#outline",
+    "title": "Testing with testthat",
+    "section": "Outline",
+    "text": "Outline\n\nTest infrastructure\nWriting tests\nTest helpers and fixtures\nTesting messages and warnings\nSnapshot testing introduction\nRunning your tests"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#start-a-branch",
+    "href": "slides/testing-part1-slides.html#start-a-branch",
+    "title": "Testing with testthat",
+    "section": "Start a branch",
+    "text": "Start a branch\n\npr_init(\"add-tests\")\n\nGood habit: each logical unit of work gets its own branch and PR."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#initialize-testthat",
+    "href": "slides/testing-part1-slides.html#initialize-testthat",
+    "title": "Testing with testthat",
+    "section": "Initialize testthat",
+    "text": "Initialize testthat\n\nuse_testthat()\n\n\nThis creates:\n\ntests/testthat/ - directory for test files\ntests/testthat.R - script to run all tests\nAdds testthat to Suggests in DESCRIPTION"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#create-a-test-file",
+    "href": "slides/testing-part1-slides.html#create-a-test-file",
+    "title": "Testing with testthat",
+    "section": "Create a test file",
+    "text": "Create a test file\nTests for R/{name}.R go in tests/testthat/test-{name}.R\n\nuse_test(\"cpue\")\n\n\nCreates tests/testthat/test-cpue.R linked to R/cpue.R\n\n\nThe naming convention is intentional - it makes it easy to navigate between source and tests. usethis will open the file automatically."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#basic-structure",
+    "href": "slides/testing-part1-slides.html#basic-structure",
+    "title": "Testing with testthat",
+    "section": "Basic structure",
+    "text": "Basic structure\n\ntest_that(\"cpue calculates simple ratio correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10), 10)\n  expect_equal(cpue(catch = 50, effort = 2), 25)\n})\n\n\nOne test_that() block = one behaviour\nDescription should read like a sentence\nMultiple expect_*() calls per block are fine"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#common-expectations",
+    "href": "slides/testing-part1-slides.html#common-expectations",
+    "title": "Testing with testthat",
+    "section": "Common expectations",
+    "text": "Common expectations\n\nexpect_equal(): exact equality (with a tolerance for numeric)\nexpect_identical(): exact equality\nexpect_lt(), expect_gt(), etc.: comparisons\nexpect_length(): checks length of output\nexpect_type(): checks the type of the output\nexpect_true(), expect_false(): checks if condition is TRUE/FALSE\nexpect_message(): checks if code produces a message\nmore…\n\nSee testthat documentation"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#use-specific-expectations",
+    "href": "slides/testing-part1-slides.html#use-specific-expectations",
+    "title": "Testing with testthat",
+    "section": "Use specific expectations",
+    "text": "Use specific expectations\n\n\nVague\n\nexpect_true(\n  is.numeric(cpue(100, 10))\n)\n\n\nSpecific\n\nexpect_type(\n  cpue(100, 10),\n  \"double\"\n)\n\n\n\nSpecific expectations give better failure messages - you see what failed, not just that it failed."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#testing-optional-default-arguments",
+    "href": "slides/testing-part1-slides.html#testing-optional-default-arguments",
+    "title": "Testing with testthat",
+    "section": "Testing optional (default) arguments",
+    "text": "Testing optional (default) arguments\n\ntest_that(\"gear_factor standardization scales correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)\n\n  # Default gear_factor = 1 should have no effect\n  expect_equal(\n    cpue(catch = 100, effort = 10),\n    cpue(catch = 100, effort = 10, gear_factor = 1)\n  )\n})"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#testing-edge-cases",
+    "href": "slides/testing-part1-slides.html#testing-edge-cases",
+    "title": "Testing with testthat",
+    "section": "Testing edge cases",
+    "text": "Testing edge cases\n\ntest_that(\"cpue handles zero catch and missing data\", {\n  expect_equal(cpue(catch = 0, effort = 10), 0)\n\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\nEdge cases often reveal assumptions baked into your code."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#run-your-tests",
+    "href": "slides/testing-part1-slides.html#run-your-tests",
+    "title": "Testing with testthat",
+    "section": "Run your tests",
+    "text": "Run your tests\n\ntest()\n\n\nThen make a commit:\n\npr_push()"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#the-problem",
+    "href": "slides/testing-part1-slides.html#the-problem",
+    "title": "Testing with testthat",
+    "section": "The problem",
+    "text": "The problem\nTests that share setup code can become repetitive.\nWhat if the setup logic is complex or used in many tests?\n\nSolution: helper files and setup files"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#create-a-helper-file",
+    "href": "slides/testing-part1-slides.html#create-a-helper-file",
+    "title": "Testing with testthat",
+    "section": "Create a helper file",
+    "text": "Create a helper file\n\nuse_testthat_helper()\n\n\nCreates tests/testthat/helper.R - loaded before every test run.\nDoes not contain test code itself, but defines functions that can be used in tests.\n\n# tests/testthat/helper.R\n\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(\n    catch = runif(n, 10, 500),\n    effort = runif(n, 1, 20),\n    gear_factor = runif(n, 1, 5)\n  )\n}\n\n\n\nHelpers are functions - they run fresh each test. Use helpers for expensive-to-type but cheap-to-compute setup."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#using-helpers-in-tests",
+    "href": "slides/testing-part1-slides.html#using-helpers-in-tests",
+    "title": "Testing with testthat",
+    "section": "Using helpers in tests",
+    "text": "Using helpers in tests\n\ntest_that(\"cpue works with generated data\", {\n  data &lt;- generate_fishing_data(n = 5)\n\n  result &lt;- cpue(data$catch, data$effort)\n\n  expect_equal(\n    result,\n    c(34.053, 9.065, 19.239, 135.640, 6.372),\n    tolerance = 1e-3\n  )\n})"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#setup-files",
+    "href": "slides/testing-part1-slides.html#setup-files",
+    "title": "Testing with testthat",
+    "section": "Setup files",
+    "text": "Setup files\nsetup.R runs once before all tests - good for expensive fixtures.\n\n# tests/testthat/setup.R\n\nreference_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 10, 10),\n  expected_cpue = c(10, 20, 30)\n)\n\n\n\n\n\ntest_that(\"cpue matches reference data\", {\n  result &lt;- cpue(reference_data$catch, reference_data$effort)\n  expect_equal(result, reference_data$expected_cpue)\n})"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#add-a-verbose-parameter",
+    "href": "slides/testing-part1-slides.html#add-a-verbose-parameter",
+    "title": "Testing with testthat",
+    "section": "Add a verbose parameter",
+    "text": "Add a verbose parameter\nUpdate R/cpue.R:\n\n#' @param verbose Logical; if TRUE, prints processing info (default FALSE)\ncpue &lt;- function(catch, effort, gear_factor = 1, verbose = FALSE) {\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n  raw_cpue &lt;- catch / effort\n  raw_cpue * gear_factor\n}"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#testing-with-expect_message",
+    "href": "slides/testing-part1-slides.html#testing-with-expect_message",
+    "title": "Testing with testthat",
+    "section": "Testing with expect_message",
+    "text": "Testing with expect_message\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_message(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE),\n    \"Processing 2 records\"\n  )\n})\n\ntest_that(\"cpue is silent by default\", {\n  expect_no_message(cpue(100, 10))\n})\n\n\nAlways test both the positive and negative case - that the message appears when expected, and that it’s absent when not."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#testing-with-expect_warning",
+    "href": "slides/testing-part1-slides.html#testing-with-expect_warning",
+    "title": "Testing with testthat",
+    "section": "Testing with expect_warning",
+    "text": "Testing with expect_warning\n\ntest_that(\"cpue warns when vector lengths don't match\", {\n  expect_warning(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20)),\n    \"longer object length is not a multiple of shorter object length\"\n  )\n\n  expect_no_warning(cpue(100, 10))\n})"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#overview",
+    "href": "slides/testing-part1-slides.html#overview",
+    "title": "Testing with testthat",
+    "section": "Overview",
+    "text": "Overview\nSnapshot testing captures output and compares against a saved reference.\n\nCreates and saves the reference snapshot on first run\nSubsequent runs compare output to the snapshot and fail if it changes\ntestthat provides tools to compare and accept/reject changes\n\n\nBest for:\n\nComplex text output (print methods, formatted messages)\nErrors and warnings - prefer expect_snapshot() over expect_error()/expect_warning() because it captures the full output for review\nPlots (with the vdiffr package)"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#basic-snapshot-test",
+    "href": "slides/testing-part1-slides.html#basic-snapshot-test",
+    "title": "Testing with testthat",
+    "section": "Basic snapshot test",
+    "text": "Basic snapshot test\n\nexpect_snapshot(\n  my_function(\"input that produces complex output\"),\n)\n\n\n\n\ntest_that(\"cpue error message is informative\", {\n  expect_snapshot(\n    cpue(\"not a number\", 10),\n    error = TRUE\n  )\n})\n\n\nFirst run creates tests/testthat/_snaps/cpue.md - review it!"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#first-run",
+    "href": "slides/testing-part1-slides.html#first-run",
+    "title": "Testing with testthat",
+    "section": "First run",
+    "text": "First run\n\ntest()\n\ntestthat writes the snapshot to tests/testthat/_snaps/:\n# cpue error message is informative\n\n    Code\n      cpue(\"not a number\", 10)\n    Error\n      non-numeric argument to binary operator\n\nCommit the snapshot file - it becomes your reference."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#when-snapshots-change",
+    "href": "slides/testing-part1-slides.html#when-snapshots-change",
+    "title": "Testing with testthat",
+    "section": "When snapshots change",
+    "text": "When snapshots change\nAfter modifying output, tests fail. Review and accept:\n\nsnapshot_review() # interactive diff viewer\nsnapshot_accept() # accept all changes\n\n\nWe’ll dive deeper into snapshot workflows in Part 2."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#three-levels",
+    "href": "slides/testing-part1-slides.html#three-levels",
+    "title": "Testing with testthat",
+    "section": "Three levels",
+    "text": "Three levels\n\n\n\nWhat\nHow\nShortcut\n\n\n\n\nSingle test\nCtrl+Enter on test_that() block\n-\n\n\nActive file\ndevtools::test_active_file()\nCtrl/Cmd+T\n\n\nWhole package\ndevtools::test()\nShift+Ctrl/Cmd+T"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#interactive-testing-matters",
+    "href": "slides/testing-part1-slides.html#interactive-testing-matters",
+    "title": "Testing with testthat",
+    "section": "Interactive testing matters",
+    "text": "Interactive testing matters\nRunning individual test_that() blocks interactively only works if tests are self-contained.\n\nKeep setup inside test_that() blocks (or in helpers), not floating in the test file."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#full-check",
+    "href": "slides/testing-part1-slides.html#full-check",
+    "title": "Testing with testthat",
+    "section": "Full check",
+    "text": "Full check\n\ntest() # run tests only\n\ncheck() # full package check (includes tests)\n\n\ncheck() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#exercise",
+    "href": "slides/testing-part1-slides.html#exercise",
+    "title": "Testing with testthat",
+    "section": "Exercise",
+    "text": "Exercise\nAdd tests for biomass_index(). Aim for at least one snapshot test.\n\n# With R/biomass.R open, create the test file:\nuse_test()\n# or\nuse_test(\"biomass\")\n\n\nThings to test:\n\nCorrect calculation for simple inputs\nVector inputs\nError on invalid input (use expect_snapshot(error = TRUE))"
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#our-solutions",
+    "href": "slides/testing-part1-slides.html#our-solutions",
+    "title": "Testing with testthat",
+    "section": "Our solutions",
+    "text": "Our solutions\n\ntest_that(\"biomass_index calculates correctly\", {\n  expect_equal(biomass_index(cpue = 10, area_swept = 5), 50)\n  expect_equal(biomass_index(cpue = 20, area_swept = 2.5), 50)\n})\n\ntest_that(\"biomass_index handles vectors\", {\n  expect_equal(\n    biomass_index(c(10, 20, 30), c(5, 5, 5)),\n    c(50, 100, 150)\n  )\n})\n\ntest_that(\"biomass_index throws error on invalid input\", {\n  expect_snapshot(biomass_index(\"ten\", 5), error = TRUE)\n  expect_snapshot(biomass_index(10, \"five\"), error = TRUE)\n})"
+  },
+  {
+    "objectID": "setup.html",
+    "href": "setup.html",
+    "title": "System Setup 🤖",
+    "section": "",
+    "text": "You will require the following software installed and configured for the workshop. Please have this set up and ready to go before we start.",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#computing-requirements",
+    "href": "setup.html#computing-requirements",
+    "title": "System Setup 🤖",
+    "section": "Computing requirements",
+    "text": "Computing requirements\nYou will need:\n\nA computer (preferably with administrative privileges), and a secondary monitor if possible\nR and RStudio\nR package development toolchain\nAir\nSeveral R packages\nGit\nGitHub account\nGitHub linked to R",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#install-r-and-rstudio",
+    "href": "setup.html#install-r-and-rstudio",
+    "title": "System Setup 🤖",
+    "section": "Install R and RStudio",
+    "text": "Install R and RStudio\nYou will need:\n\nR version &gt;= 4.4.0 (4.5 strongly recommended)\nRStudio &gt;= 2025.09 (2026.01 recommended)\n\n\nInstall R\nDownload and install R for your operating system from https://cloud.r-project.org/.\n\n\nInstall R Studio\nDownload and install RStudio Desktop from https://posit.co/download/rstudio-desktop/. This page should automatically offer you the version suitable for your operating system, but you can scroll down to find versions for all operating systems.",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#install-r-package-development-tools",
+    "href": "setup.html#install-r-package-development-tools",
+    "title": "System Setup 🤖",
+    "section": "Install R package development tools",
+    "text": "Install R package development tools\n\nFor Windows\nDownload and run the latest Rtools installer, Rtools.exe, from https://cran.r-project.org/bin/windows/Rtools/. Make sure the version of Rtools matches your version of R (e.g. Rtools44 for R 4.4, Rtools45 for R 4.5).\n\nKeep the default settings for the installation location and components to install\ncheck the box to add rtools to the system PATH.\n\n\n\nFor Mac\nInstall XCode. The easiest way is to open a Terminal window (Applications &gt; Utilities &gt; Terminal.app; or use the Terminal pane in RStudio) and type the following:\nxcode-select --install\nYou will be prompted to confirm the install, and possibly enter your computer password. Do so to complete the installation.\nAlternatively you can:\n\nDownload and install XCode from the Mac AppStore: http://itunes.apple.com/us/app/xcode/id497799835?mt=12\nWithin XCode go to Preferences : Downloads and install the Command Line Tools\n\n\n\nFor Linux\nIf you installed r-base-dev when installing R, you should have all you need to build packages from source. If not, go back to https://cloud.r-project.org/ and follow the instructions for your distribution (Ubuntu and Debian are likely the most common, and install it with sudo apt-get install r-base-dev).",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#air",
+    "href": "setup.html#air",
+    "title": "System Setup 🤖",
+    "section": "Install Air",
+    "text": "Install Air\nAir is a code formatter that will automatically format your code to a common style. This is a very useful tool for collaborative package development. Instructions to install the Air command line tool can be found at: https://posit-dev.github.io/air/cli.html.",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#packages",
+    "href": "setup.html#packages",
+    "title": "System Setup 🤖",
+    "section": "Install packages",
+    "text": "Install packages\nIn R, install the necessary packages by running:\n\ninstall.packages(\n  c(\n    \"devtools\",\n    \"usethis\",\n    \"roxygen2\",\n    \"testthat\",\n    \"withr\",\n    \"covr\",\n    \"rmarkdown\",\n    \"knitr\",\n    \"pkgdown\",\n    \"purrr\",\n    \"gitcreds\",\n    \"rlang\"\n  )\n)\n\nYou can verify your system is set up for package development by running:\n\ndevtools::has_devel()",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#git",
+    "href": "setup.html#git",
+    "title": "System Setup 🤖",
+    "section": "Git",
+    "text": "Git\nWe will be demonstrating the use of Git and GitHub for tracking changes during package development, and sharing and collaborating on our package.\n\nWindows\nCheck if Git is installed by running which git in the Terminal pane in RStudio.\nIf which git didn’t find Git installed:\n\nDownload and install Git from https://git-scm.com/downloads\nKeep all the default settings. If asked about “Adjusting your PATH environment”, make sure to select “Git from the command line and also from 3rd-party software”.\nOpen RStudio. In the menus go to Tools &gt; Global Options &gt; Git/SVN.\nCheck RStudio has found git under “Git executable:”\n\nYou may need to click Browse and find the git executable.\nIt may be in C:/Users/[username]/AppData/Local/Programs/Git/\n\n\n\n\nMac\nCheck if Git is installed by running which git in the Terminal. You should see something like /usr/bin/git, /usr/local/bin/, or /opt/homebrew/bin/git.\nIf you are asked to install the Xcode command line tools, say yes.\nIf which git didn’t find Git installed, and if you weren’t prompted to install it, run the following in the Terminal: xcode-select --install\n\n\n\n\n\n\nTip\n\n\n\nIf you do lots of scientific computing and especially if you use command-line programs in the Terminal, we recommend using Homebrew. See brew.sh for installation instructions. To install Git using Homebrew, run the following in the Terminal: brew install git",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#github",
+    "href": "setup.html#github",
+    "title": "System Setup 🤖",
+    "section": "GitHub",
+    "text": "GitHub\nRegister a GitHub account at github.com.\nWe highly recommend the book Happy Git with R for advice on setting up and using Git with R (Bryan and Hester, n.d.).",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "setup.html#check-link-between-r-and-github",
+    "href": "setup.html#check-link-between-r-and-github",
+    "title": "System Setup 🤖",
+    "section": "Check link between R and GitHub",
+    "text": "Check link between R and GitHub\nConfigure your user.name and user.email for git in RStudio with:\n\nusethis::use_git_config(\n  user.name = \"Jane Doe\", # actual first and last name\n  user.email = \"jane@example.com\" # email associated with GitHub account\n)\n\nCommunicating with GitHub requires authentication with your GitHub account. This is achieved by creating and securely storing a Personal Access Token (PAT). The Managing Git(Hub) Credentials vignette in the usethis (Wickham et al. 2023) package has details on using PATs, but for now the following should suffice.\nCreate a PAT with:\n\nusethis::create_github_token()\n\n\nGive the token a descriptive name, accept the default scopes, and click “Generate Token”.\nCopy the newly generated PAT to your clipboard.\nRun gitcreds::gitcreds_set() in R and paste in your PAT when prompted.\nAfter you close the PAT webpage, you won’t be able to see your PAT again! You can store it somewhere secure, such as in a password manager.\n\n\n\n\n\n\n\nNoteCaveat about storing PATs on Linux:\n\n\n\n\n\nmacOS and Windows both have built-in credential managers that will securely store your PAT, however the same does not exist in Linux. Happy Git with R has a section on options for storing your PAT on Linux.\n\n\n\nYou can now check your Git setup by asking for a “Git situation report” in R:\n\nusethis::git_sitrep()\n\n\n── Git global (user)\n• Name: 'Andy Teucher'\n• Email: 'andy.teucher@gmail.com'\n• Global (user-level) gitignore file: '/Users/andy/.gitignore'\n• Vaccinated: TRUE\nℹ Defaulting to 'https' Git protocol\n• Default Git protocol: 'https'\n• Default initial branch name: 'main'\n\n── GitHub user\n• Default GitHub host: 'https://github.com'\n• Personal access token for 'https://github.com': '&lt;discovered&gt;'\n• GitHub user: 'ateucher'\n• Token scopes: 'gist, repo, user, workflow'\n• Email(s): 'andy.teucher@gmail.com (primary)'\nℹ No active usethis project\n\nThe output shows information about the link between RStudio and GitHub. Not all of it is relevant now, but it is essential to check whether your name and email are correct and the PAT is showing as “discovered”:\n\nPersonal access token for 'https://github.com': '&lt;discovered&gt;'\n\n\nReferences\n\n\nBryan, Jenny, and Jim Hester. n.d. “Happy Git and GitHub for the useR.” https://happygitwithr.com/.\n\n\nWickham, Hadley, Jennifer Bryan, Malcolm Barrett, and Andy Teucher. 2023. Usethis: Automate Package and Project Setup. https://CRAN.R-project.org/package=usethis.",
+    "crumbs": [
+      "System Setup"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html",
+    "href": "package-fundamentals.html",
+    "title": "Package Creation and Metadata",
+    "section": "",
+    "text": "Check required packages\n\nall(\n  c(\"devtools\", \"roxygen2\", \"testthat\", \"knitr\", \"pkgdown\", \"usethis\") %in%\n    installed.packages()\n)",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html#get-ready",
+    "href": "package-fundamentals.html#get-ready",
+    "title": "Package Creation and Metadata",
+    "section": "",
+    "text": "Check required packages\n\nall(\n  c(\"devtools\", \"roxygen2\", \"testthat\", \"knitr\", \"pkgdown\", \"usethis\") %in%\n    installed.packages()\n)",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html#lay-the-foundations",
+    "href": "package-fundamentals.html#lay-the-foundations",
+    "title": "Package Creation and Metadata",
+    "section": "Lay the foundations",
+    "text": "Lay the foundations\n\nLoad devtools and create your package infrastructure\n\nlibrary(devtools)\ncreate_package(\"~/Desktop/fishr\")\n\nThis will open a new RStudio project called fishr with the basic package infrastructure.\n\n\nUse devtools and usethis\nWe can load devtools and usethis automatically via our .Rprofile file so that they are always loaded during development.\nNote that this is not adding devtools nor usethis as a package dependency, it makes it available to help us during development.\n\nuse_devtools()\n\nNote that devtools makes all of usethis available in your R session, so this is equivalent to also having library(usethis).\nPaste the contents of your clipboard of both commands in .Rprofile, and restart R.\n\n\nConfirm git is configured correctly (and update if necessary)\nThis should have been done in your setup, but it’s not a bad idea to double check.\n\ngit_sitrep()\ndev_sitrep()\n\nIf git_sitrep warns missing a username and email, run the following command to configure git:\n\nuse_git_config(\n  user.name = \"Your Name\",\n  user.email = \"Your Email\"\n)\n\nIf dev_sitrep suggests any package updates, please go ahead and do that.\n\n\nInitialize this package as a git repo\n\nuse_git()\n\nThis sets up your project as a git repository, and with your permission makes the first commit.\n\n\nConnect your repository to GitHub\n\nuse_github()\n\nThis creates a GitHub repo and sets it as your remote.\n\n\nPush your committed code\nAt this step you may be required to authenticate with GitHub.\n\ngit push origin main",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html#write-your-first-function",
+    "href": "package-fundamentals.html#write-your-first-function",
+    "title": "Package Creation and Metadata",
+    "section": "Write your first function",
+    "text": "Write your first function\n\nOpen a new file in R/ to hold your code\n\nuse_r(\"cpue\")\n\n\n\nWrite your function definition in this file\ncpue calculates catch per unit effort by dividing total catch by fishing effort. The function optionally applies a gear-specific correction factor to standardize CPUE across different fishing gear types. The function returns the adjusted CPUE value.\n\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\n\n\nLoad your package with load_all()\n\nload_all()\n\nAnd test out our new function:\n\ncpue(10, 5)\n\n[1] 2\n\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\nNow that we have a basic working function, commit your changes.\n\n\n\n\nCheck your package\n\ncheck()\n\n\n\nSet a license\n\nuse_mit_license()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nDESCRIPTION file:\nPackage: fishr\nTitle: Calculate standard catch metrics for fisheries\nVersion: 0.0.0.9000\nAuthors@R:\n    person(\"Jane\", \"Doe\",\n           email = \"jane.doe@something.com\",\n           role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"XXXX-XXXX-XXXX-XXXX\"))\nDescription: Provides functions for calculating and analyzing fisheries\n    catch data, such as Catch Per Unit Effort (CPUE), a fundamental metric in\n    fisheries science.\nLicense: MIT + file LICENSE\nEncoding: UTF-8\nRoxygen: list(markdown = TRUE)\nRoxygenNote: 7.3.2\n\n\nCheck again\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html#documentation-basics",
+    "href": "package-fundamentals.html#documentation-basics",
+    "title": "Package Creation and Metadata",
+    "section": "Documentation Basics",
+    "text": "Documentation Basics\n\nAdd a roxygen block just above your function definition\nInsert template with Ctrl + Alt + Shift + R or Cmd + Option + Shift + R\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear standardization.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric adjustment for gear standardization (default is 1)\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(100, 10, gear_factor = 0.5)\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  ...\n}\n\n\nBuild function documentation (man/cpue.Rd) from roxygen\n\ndocument()\n\nYou can preview it with ?function_name\n\nload_all()\n\n?cpue\n\n\n\nNAMESPACE file\n# Generated by roxygen2: do not edit by hand\n\nexport(cpue)\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nCheck package to ensure documentation conforms to standards\n\ncheck()\n\n\n\nCreate package-level documentation\n\nuse_package_doc()\n\ndocument()\n\nSee rendered documentation at man/fishr-package.Rd\nPreview and check again\n\nload_all()\n\n?fishr\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nREADME\n\nuse_readme_rmd()\n\n---\noutput: github_document\n---\n\n&lt;!-- README.md is generated from README.Rmd. Please edit that file --&gt;\n\n\n\n# fishr\n\n&lt;!-- badges: start --&gt;\n\n&lt;!-- badges: end --&gt;\n\nThe goal of fishr is to provide functions for calculating Catch Per Unit Effort (CPUE),\na fundamental metric in fisheries science.\n\n## Installation\n\nYou can install the development version of fishr from [GitHub](https://github.com/) with:\n\n```r\n# install.packages(\"devtools\")\ndevtools::install_github(\"yourname/fishr\")\n```\n\n## Example usage\n\n```{r example}\nlibrary(fishr)\ncpue(catch = 100, effort = 10)\n\n# With gear standardization\ncpue(catch = 100, effort = 10, gear_factor = 0.5)\n```\n\nbuild_readme()\n\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nSet a default DESCRIPTION\nThis avoids having to manually edit DESCRIPTION every time you create a package\n\nedit_r_profile()\n\nAdd this to your .Rprofile file:\n\n# Set usethis options:\noptions(\n  usethis.description = list(\n    \"Authors@R\" = utils::person(\n      \"Jane\",\n      \"Doe\",\n      email = \"jane.doe@example.com\",\n      role = c(\"aut\", \"cre\"),\n      comment = c(ORCID = \"0000-1111-2222-3333\")\n    )\n  )\n)\n\noptions(\n  warnPartialMatchArgs = TRUE,\n  warnPartialMatchDollar = TRUE,\n  warnPartialMatchAttr = TRUE\n)\n\nRestart R for changes to take effect.",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "package-fundamentals.html#common-pain-points",
+    "href": "package-fundamentals.html#common-pain-points",
+    "title": "Package Creation and Metadata",
+    "section": "Common Pain Points",
+    "text": "Common Pain Points\nSome typical pain points when developing packages:\n\nWhen to use load_all() vs install()?\n\nload_all(): During active development (fast, doesn’t install). Working inside your package project.\ninstall(): When you want to test as a “real” package, outside your package project.\n\nManaging dependencies\n\nWhich functions need @importFrom?\nWhen to use package::function() vs importing?\nDependencies in NAMESPACE vs DESCRIPTION\n\nDocumentation drift\n\nKeeping roxygen comments in sync with code\nUpdating examples when function signatures change\n\nUnderstanding check() errors and warnings\n\nWhat’s critical vs nice-to-have?\nCommon CRAN check issues\n\nPackage state confusion\n\nWhy isn’t my change showing up?\nDo I need to restart R?",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Package Development Fundamentals"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Advanced R Package Development",
+    "section": "",
+    "text": "🗓️ February 2026 24-26 ⏱️ 08:00 - 12:30 daily 🌎 Online"
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "Advanced R Package Development",
+    "section": "Overview",
+    "text": "Overview\nThis advanced workshop builds on the fundamentals of R package development, diving deeper into topics that will help you create robust, well-tested, and maintainable packages. Whether you’ve built one or two basic packages and want to level up your skills, or you’re looking to refine your development practices, this workshop will provide you with advanced techniques and best practices used by experienced package developers.\nYou will learn advanced function design principles, sophisticated debugging techniques, and comprehensive testing strategies with testthat. We’ll explore object-oriented programming in R (S3, S4, and R6), best practices for including data in packages, and strategies for versioning and releasing your packages. The workshop also covers collaborative development workflows using Git and GitHub, including pull request workflows.\nThis will be an online, interactive workshop delivered virtually over three consecutive half-days. We will be using RStudio as our primary IDE, though we’ll demonstrate Positron equivalents where relevant.\nThis workshop is for you if you…\n\nHave built 1-2 basic R packages and want to advance your skills\nWant to learn best practices for function design and package architecture\nAre looking to improve your testing and debugging workflows\nWant to understand object-oriented programming in R\nNeed to collaborate with others on package development\nAre ready to take your R package development to the next level"
+  },
+  {
+    "objectID": "index.html#prework",
+    "href": "index.html#prework",
+    "title": "Advanced R Package Development",
+    "section": "Prework",
+    "text": "Prework\nPlease ensure you have completed the steps in System Setup"
+  },
+  {
+    "objectID": "index.html#schedule",
+    "href": "index.html#schedule",
+    "title": "Advanced R Package Development",
+    "section": "Schedule",
+    "text": "Schedule\nSee the Course Schedule for the full program."
+  },
+  {
+    "objectID": "index.html#instructors",
+    "href": "index.html#instructors",
+    "title": "Advanced R Package Development",
+    "section": "Instructors",
+    "text": "Instructors\nAndy Teucher is a freelance data scientist and package developer with a passion for teaching others how to use data science tools to make their work more efficient and reproducible. His background is in conservation biology, with an MSc in Ecology from the University of Calgary. He has spent much of his career as a data scientist in government, where he made it his mission to promote and teach open, reproducible data science practices. He has written many R packages for internal use in his teams as well as for a broader audience, with several hosted on CRAN. Andy especially enjoys developing packages to make it easier to work with spatial data in R. Andy is a certified Software Carpentry and Data Carpentry instructor, and has led many workshops teaching programming skills to scientists and data professionals.\nSam Albers is a data scientist with 15 years experience writing code for scientific research. Sam wrote his first line of code to process data collected on salmon spawning in the Horsefly River watershed. Gradually, he ended up spending more time writing code than studying salmon and moved into a full time data scientist role in government. During that time, Sam developed several packages to facilitate reproducible research and gained a solid foundation in what it takes to build a good R package.\n\n This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License."
+  },
+  {
+    "objectID": "function-design-best-practices.html",
+    "href": "function-design-best-practices.html",
+    "title": "Function Design Best Practices",
+    "section": "",
+    "text": "Good function design reduces cognitive load for you and your users. The Tidyverse design guide offers a few core principles:\n\nProgramming is a task performed by humans\nReduce cognitive load with consistent design\nMake your functions and systems composable\nThink about others who are not like us\n\nToday we will refactor our fishr functions with these principles in mind.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#why-function-design-matters",
+    "href": "function-design-best-practices.html#why-function-design-matters",
+    "title": "Function Design Best Practices",
+    "section": "",
+    "text": "Good function design reduces cognitive load for you and your users. The Tidyverse design guide offers a few core principles:\n\nProgramming is a task performed by humans\nReduce cognitive load with consistent design\nMake your functions and systems composable\nThink about others who are not like us\n\nToday we will refactor our fishr functions with these principles in mind.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#naming-conventions",
+    "href": "function-design-best-practices.html#naming-conventions",
+    "title": "Function Design Best Practices",
+    "section": "Naming Conventions",
+    "text": "Naming Conventions\nSome general guidelines:\n\nUse verbs to ascribe an action\nUse consistent style (e.g., snake_case)\nConsider short prefixes to unify package functions\nDon’t be afraid to be verbose\nAvoid conflict with existing functions\n\n\n# bad\ngse(date = \"1977-05-25\")\n\n# good\nget_salmon_escapement(date = \"1977-05-25\")\n\n\nNaming in fishr\nOur functions follow these conventions:\n\ncpue() – short but domain-standard abbreviation\nbiomass_index() – descriptive, easy to predict",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#pure-functions-vs-side-effects",
+    "href": "function-design-best-practices.html#pure-functions-vs-side-effects",
+    "title": "Function Design Best Practices",
+    "section": "Pure Functions vs Side Effects",
+    "text": "Pure Functions vs Side Effects\nA pure function produces the same output for the same input and has no impact on anything outside itself. Pure functions are easier to test and reason about.\nA function with side effects interacts with the outside environment (writes files, prints messages, modifies global state).\n\nAnnotating our cpue function\nLet’s look at cpue() as it stands at the end of Day 1:\n\ncpue &lt;- function(catch, effort, gear_factor = 1, verbose = FALSE) {\n  # Side effect: prints a message\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n\n  # Pure calculation\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\nThe calculation itself (catch / effort * gear_factor) is pure. The message() call is a side effect – it interacts with the outside environment.\n\n\nPackage-wide options\nSometimes it is helpful to turn off these side effects. R has a global key-value store called options() that packages can use for user-configurable defaults. You interact with it using two functions:\n\n# Set an option\noptions(fishr.verbose = TRUE)\n\n# Get an option (with a fallback default)\ngetOption(\"fishr.verbose\", default = FALSE)\n\nBy convention, package options use the package name as a prefix (fishr.verbose, not just verbose) to avoid confusion with other packages.\nWe can use getOption() directly in the function signature. This makes the option visible to the user (they’ll see it in ?cpue) and keeps the function body cleaner:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  verbose = getOption(\"fishr.verbose\", default = FALSE)\n) {\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\nNow users can set options(fishr.verbose = TRUE) once and any fishr function that uses this option will pick it up, no need to pass verbose = TRUE every time. But users can still override it per-call:\ncpue(1, 5, verbose = TRUE)\n\n\nBad side-effect examples\nAvoid functions that silently affect the user’s environment:\n\n# DON'T do this -- writes a file without asking\nbad_cpue &lt;- function(catch, effort) {\n  result &lt;- catch / effort\n  write.csv(data.frame(cpue = result), \"cpue_log.csv\")\n  result\n}\n\n# DON'T do this -- changes global options\nbad_summary &lt;- function(x) {\n  options(digits = 2)\n  summary(x)\n}\n\nThe first function leaves behind a file the user likely didn’t ask for, and is doing two things at once - writing a file and returning the result. Functions that are called for their side-effects are ok (eg. write.csv(), plot(), etc) but should only be called for their side effect. They should usually return their input value. Sometimes they return a path (eg. if writing a file), or NULL.\nThe second changes how all numbers display for the rest of the session. Unlike our fishr.verbose option, which lets users opt in to behaviour, this forces a change on them. Return values instead and let the caller decide what to do with them.\n\n\nOur biomass_index function\n\nbiomass_index &lt;- function(cpue, area_swept) {\n  cpue * area_swept\n}\n\nThis is a pure function – no side effects at all. And it reliably returns the same output for the same set of inputs.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#default-arguments-and-match.arg",
+    "href": "function-design-best-practices.html#default-arguments-and-match.arg",
+    "title": "Function Design Best Practices",
+    "section": "Default Arguments and match.arg",
+    "text": "Default Arguments and match.arg\n\nAdding a method parameter to cpue\nRight now cpue() always calculates a simple ratio. Let’s add a method argument so users can choose between ratio CPUE and log-transformed CPUE.\nUpdate R/cpue.R:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(c(100, 200), c(10, 20), method = \"log\")\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  raw_cpue * gear_factor\n}\n\nThe switch() function selects which expression to evaluate based on the value of method. It’s a clean alternative to a chain of if/else if statements when dispatching on a single value.\n\n\nHow match.arg works\nmatch.arg() takes the first element of the default vector when the user doesn’t supply a value, and gives clear error messages for invalid input:\n\nload_all()\n\n# Uses default (\"ratio\")\ncpue(100, 10)\n\n# Explicit\ncpue(100, 10, method = \"log\")\n\n# Invalid input gives a helpful error\ncpue(100, 10, method = \"median\")\n\n\n\nDocument and check\n\ndocument()\n\ncheck()\n\n\n\n\n\n\n\nWarningSnapshot update needed\n\n\n\nAdding method to the verbose message changed its format - from \"Processing 2 records\" to \"Processing 2 records using ratio method\". If you have a snapshot test for the verbose output, check() will fail with a snapshot mismatch. Accept the updated snapshot before continuing:\n\ntestthat::snapshot_accept()\n\n\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#the-ellipsis",
+    "href": "function-design-best-practices.html#the-ellipsis",
+    "title": "Function Design Best Practices",
+    "section": "The Ellipsis (…)",
+    "text": "The Ellipsis (…)\n\nPassing arguments through with …\nThe ellipsis ... lets a function accept extra arguments and pass them to another function. This is useful when one function wraps another.\nLet’s refactor biomass_index() so it can optionally compute CPUE on the fly by accepting catch and effort instead of a pre-computed cpue value.\nUpdate R/biomass.R:\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept. Can optionally\n#' compute CPUE from catch and effort data.\n#'\n#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are\n#'   provided, this is computed automatically.\n#' @param area_swept Numeric vector of area swept (e.g., km²)\n#' @param catch Optional numeric vector of catch. If provided with `effort`,\n#'   CPUE is computed via `cpue()`.\n#' @param effort Optional numeric vector of effort. Required if `catch` is\n#'   provided.\n#' @param ... Additional arguments passed to `cpue()` when computing from\n#'   catch and effort (e.g., `method`, `gear_factor`).\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n#' # From pre-computed CPUE\n#' biomass_index(cpue = 10, area_swept = 5)\n#'\n#' # Compute CPUE on the fly\n#' biomass_index(area_swept = 5, catch = 100, effort = 10)\n#'\n#' # Pass method through to cpue()\n#' biomass_index(\n#'   area_swept = 5,\n#'   catch = c(100, 200),\n#'   effort = c(10, 20),\n#'   method = \"log\"\n#' )\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  cpue * area_swept\n}\n\n\n\nDemo\n\nload_all()\n\n# Pre-computed CPUE\nbiomass_index(cpue = 10, area_swept = 5)\n\n# Compute on the fly\nbiomass_index(area_swept = 5, catch = 100, effort = 10)\n\n# Pass method through to cpue()\nbiomass_index(\n  area_swept = 5,\n  catch = c(100, 200),\n  effort = c(10, 20),\n  method = \"log\"\n)\n\nNotice that in the second call, we wrote area_swept = 5 even though it’s the second argument. Because we’re skipping cpue, positional matching would put 5 into cpue instead. When you skip optional arguments or call them out of order, you need to name them.\nThis is also why optional arguments default to NULL rather than a meaningful value. cpue = NULL signals “not provided” clearly, and is.null() is a reliable way to check. If we had used cpue = 0 as the default, there would be no way to tell whether the user passed zero intentionally or just didn’t provide a value.\n\n\nPitfalls of …\nThe ellipsis is powerful but has risks:\n\nArguments passed through ... must be named – positional matching doesn’t work through the ellipsis, so biomass_index(area_swept = 5, catch = 100, effort = 10, \"log\") won’t do what you expect. Always use method = \"log\".\nMisspelled arguments are silently absorbed – cpue(100, 10, mthod = \"log\") won’t error, it just ignores mthod\nConfusing error origins – errors from inner functions can be hard to trace\nUse rlang::check_dots_used() at the top of your function to catch unused dots (covered below)\n\n\n\nDocument and check\n\ndocument()\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#managing-dependencies",
+    "href": "function-design-best-practices.html#managing-dependencies",
+    "title": "Function Design Best Practices",
+    "section": "Managing Dependencies",
+    "text": "Managing Dependencies\nEvery function your package calls from another package must be declared as a dependency. Undeclared dependencies may work on your machine because the package happens to be installed, declaring them ensures they are available for users of your package. R CMD check will catch them.\n\nDeclaring a dependency\nUse usethis::use_package() to add a package to the Imports field of DESCRIPTION:\n\nuse_package(\"rlang\")\n\nBefore this call, DESCRIPTION has no Imports field. After:\nImports:\n    rlang\nNow call functions from the package using :: notation:\n\nformat_catch &lt;- function(catch) {\n  if (!is.numeric(catch)) {\n    rlang::abort(\"`catch` must be a numeric vector.\")\n  }\n  round(catch, 2)\n}\n\nThe :: operator is the preferred approach for package development: it is explicit, avoids namespace conflicts, and makes clear which package each function comes from.\n\n\nImporting frequently-used functions\nFor functions you call throughout a package, repeating rlang:: on every call is verbose. usethis::use_import_from() adds the function to your NAMESPACE and lets you call it directly:\n\nuse_import_from(\"rlang\", \"abort\")\n\nThis inserts a @importFrom tag into a roxygen block (usually R/&lt;package&gt;-package.R):\n#' @importFrom rlang abort\nAfter running document(), abort() is available across your package without the rlang:: prefix. The NAMESPACE file is updated automatically - never edit it by hand.\n\n\nCatching unused dots\nNow that rlang is declared, use rlang::check_dots_used() to catch misspelled arguments before they are silently absorbed:\n\n# Example: catching unused dots\nf &lt;- function(x, ...) {\n  rlang::check_dots_used()\n  mean(x, ...)\n}\n\nf(1:10) # works\nf(1:10, na.rm = TRUE) # works\nf(1:10, narm = TRUE) # errors: unused dots\n\nApply this to biomass_index():\n\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  cpue * area_swept\n}\n\n\n\nDocument and check\n\ndocument()\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#dry-dont-repeat-yourself",
+    "href": "function-design-best-practices.html#dry-dont-repeat-yourself",
+    "title": "Function Design Best Practices",
+    "section": "DRY: Don’t Repeat Yourself",
+    "text": "DRY: Don’t Repeat Yourself\n\nWhy validate inputs?\nOur functions currently accept any input – what happens if someone passes a character?\n\ncpue(\"one hundred\", 10)\n\nWe get an unhelpful error (or worse, silent nonsense). Let’s add validation. But rather than copy-paste the same check into every function, we’ll create a reusable helper.\n\n\nCreate a helper file\n\nuse_r(\"utils\")\n\n\n\nWrite a validation helper\nAdd to R/utils.R:\n\n#' Validate that inputs are numeric\n#'\n#' Checks each named argument and stops with an informative error\n#' if any are not numeric.\n#'\n#' @param ... Named numeric inputs to validate.\n#'\n#' @return Invisible `NULL`. Called for its side effect of\n#'   stopping with an error if validation fails.\n#'\n#' @noRd\nvalidate_numeric_inputs &lt;- function(...) {\n  args &lt;- list(...)\n  arg_names &lt;- names(args)\n\n  for (i in seq_along(args)) {\n    if (!is.numeric(args[[i]])) {\n      stop(\n        \"'\",\n        arg_names[i],\n        \"' must be numeric, got \",\n        class(args[[i]])[1],\n        \".\",\n        call. = FALSE\n      )\n    }\n  }\n\n  invisible(NULL)\n}\n\nThe @noRd tag tells roxygen2 not to generate a .Rd file – this is an internal helper, not part of the public API.\n\n\nAdd validation to cpue\nUpdate R/cpue.R:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  raw_cpue * gear_factor\n}\n\n\n\nAdd validation to biomass_index\nUpdate R/biomass.R:\n\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\n  cpue * area_swept\n}\n\n\n\nVerify the helper works\n\nload_all()\n\n# Good input\ncpue(100, 10)\n\n# Bad input -- now shows which argument is the problem\ncpue(\"high\", 10)\n\nbiomass_index(cpue = \"ten\", area_swept = 5)\n\n\n\nWhere to put helper functions\nWhen you extract a helper, you have two choices:\n\nSame file as the exported function – when the helper is specific to that one function. For example, if cpue() needed a helper function to clean up effort values, put it below cpue() in R/cpue.R. This keeps related logic together and makes it easy to find later.\nA shared file like R/utils.R – when the helper is used by multiple functions across the package. validate_numeric_inputs() is a good example: both cpue() and biomass_index() use it, so it belongs in its own file.\n\nA good rule of thumb: start with the helper in the same file. Move it to utils.R only when a second function needs it.\n\n\nA note on function length\nThere’s no hard rule, but if a function exceeds ~20-30 lines, consider whether it’s doing too many things. Smaller functions are easier to test, read, and reuse.\n\n\nDocument and check\n\ndocument()\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "function-design-best-practices.html#function-composition",
+    "href": "function-design-best-practices.html#function-composition",
+    "title": "Function Design Best Practices",
+    "section": "Function Composition",
+    "text": "Function Composition\nGood function design pays off when functions compose well together. Each function does one thing and can be combined with others.\n\nComposed workflow\n\nload_all()\n\n# Step by step\nmy_cpue &lt;- cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))\nbiomass_index(cpue = my_cpue, area_swept = 50)\n\n# Or in one call, thanks to ... pass-through\nbiomass_index(area_swept = 50, catch = c(100, 200, 300), effort = c(10, 20, 30))\n\n# With options passed through\nbiomass_index(\n  area_swept = 50,\n  catch = c(100, 200, 300),\n  effort = c(10, 20, 30),\n  method = \"log\"\n)\n\n\n\nRecap\nComposability is the payoff of good function design:\n\nNaming – clear names make composed code readable\nPure calculations – predictable functions are safe to chain\nmatch.arg – consistent interfaces reduce mistakes\n… – pass-through enables flexible composition\nHelpers – shared validation keeps behaviour consistent\n\n\n\nFinal check\n\ncheck()",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Function Design Best Practices"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html",
+    "href": "debugging-techniques.html",
+    "title": "Debugging Techniques",
+    "section": "",
+    "text": "When something goes wrong, R prints an error message. The first step is always to read it carefully.\n\nload_all()\n\nbiomass_index(cpue = \"ten\", area_swept = 5)\n\nThe error tells us what went wrong, but not where in the call chain it happened. traceback() shows the sequence of function calls that led to the error:\n\ntraceback()\n\nRead the traceback bottom to top. The bottom is where your code started, the top is where the error occurred.\n\n\nWhen functions call other functions, the traceback gets more interesting:\n\nbiomass_index(area_swept = 5, catch = \"bad\", effort = 10)\n\n\ntraceback()\n\n3: validate_numeric_inputs(catch = catch, effort = effort) at cpue.R#5\n2: cpue(catch, effort, ...) at biomass.R#6\n1: biomass_index(area_swept = 5, catch = \"bad\", effort = 10)\nYou called biomass_index() (frame 1), which called cpue() (frame 2), which called validate_numeric_inputs() (frame 3), where the error was raised. The traceback reads bottom-to-top: your entry point is at the bottom, the error location is at the top.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#reading-error-messages-and-traceback",
+    "href": "debugging-techniques.html#reading-error-messages-and-traceback",
+    "title": "Debugging Techniques",
+    "section": "",
+    "text": "When something goes wrong, R prints an error message. The first step is always to read it carefully.\n\nload_all()\n\nbiomass_index(cpue = \"ten\", area_swept = 5)\n\nThe error tells us what went wrong, but not where in the call chain it happened. traceback() shows the sequence of function calls that led to the error:\n\ntraceback()\n\nRead the traceback bottom to top. The bottom is where your code started, the top is where the error occurred.\n\n\nWhen functions call other functions, the traceback gets more interesting:\n\nbiomass_index(area_swept = 5, catch = \"bad\", effort = 10)\n\n\ntraceback()\n\n3: validate_numeric_inputs(catch = catch, effort = effort) at cpue.R#5\n2: cpue(catch, effort, ...) at biomass.R#6\n1: biomass_index(area_swept = 5, catch = \"bad\", effort = 10)\nYou called biomass_index() (frame 1), which called cpue() (frame 2), which called validate_numeric_inputs() (frame 3), where the error was raised. The traceback reads bottom-to-top: your entry point is at the bottom, the error location is at the top.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#print-debugging",
+    "href": "debugging-techniques.html#print-debugging",
+    "title": "Debugging Techniques",
+    "section": "Print Debugging",
+    "text": "Print Debugging\nThe quick-and-dirty approach everyone uses from time to time: add print statements to see what’s happening at any given point into yur code.\nSay biomass_index() is returning a surprising result and you want to see what cpue looks like before the final calculation:\n\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\n  print(paste(\"cpue value:\", cpue)) # &lt;-- temporary debugging output\n\n  cpue * area_swept\n}\n\n\nload_all()\n\nbiomass_index(area_swept = 5, catch = 100, effort = 10)\n\nNow you can see the intermediate value. Once you’ve found the problem, delete the print() statement.\nThis is sometimes all you need: quick checks of variable values, confirming which branch of an if statement runs. When you need more (complex logic where you’d need many print statements, or when you need to inspect the full environment) reach for browser().",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#browser-interactive-debugging",
+    "href": "debugging-techniques.html#browser-interactive-debugging",
+    "title": "Debugging Techniques",
+    "section": "browser(): Interactive Debugging",
+    "text": "browser(): Interactive Debugging\nbrowser() pauses execution and drops you into an interactive debugger where you can inspect and modify variables.\n\nBasic usage\nAdd browser() to the function you want to inspect:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  browser() # &lt;-- execution pauses here\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  raw_cpue * gear_factor\n}\n\n\nload_all()\n\ncpue(c(100, 200, 300), c(10, 20, 30))\n\n\n\nBrowser commands\nOnce inside the browser, you have a mini command language:\n\n\n\n\n\n\n\nCommand\nAction\n\n\n\n\nn\nNext: execute the current line and step to the next\n\n\ns\nStep into: if the current line calls a function, enter that function\n\n\nc\nContinue: resume execution until the next browser() or the end\n\n\nQ\nQuit: stop execution immediately\n\n\nwhere\nShow the call stack (like traceback() but while paused)\n\n\n\nYou can also run any R expression: ls() to list all variables in the current environment, str(raw_cpue) to inspect structure.\nYou can also use the equivalent button that appear in RStudio when you enter debugging mode:\n\n\n\nConditional browser\nYou don’t always want to pause. Sometimes you only want to stop when something is wrong:\n\ncpue &lt;- function(catch, effort, gear_factor = 1, ...) {\n  if (any(effort == 0)) browser() # only pause when there's a problem\n\n  # ... rest of function\n}\n\nThis lets you run the function many times and only stop when the suspicious condition is met.\n\n\n\n\n\n\nWarningRemove browser() before committing\n\n\n\nbrowser() calls should never be committed to your package. R CMD check (via check()) will warn you about leftover browser() calls, but it’s good to build the habit of removing them immediately after debugging.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#rstudio-breakpoints-and-debugdebugonce",
+    "href": "debugging-techniques.html#rstudio-breakpoints-and-debugdebugonce",
+    "title": "Debugging Techniques",
+    "section": "RStudio Breakpoints and debug()/debugonce()",
+    "text": "RStudio Breakpoints and debug()/debugonce()\n\nVisual breakpoints in RStudio\nInstead of editing code to add browser(), you can click in the editor gutter (the grey margin to the left of line numbers) to set a breakpoint (red dot). This has the same effect as browser() but doesn’t modify your source file.\nAfter setting a breakpoint, run load_all() to activate it.\n\n\ndebug() and debugonce()\nFor functions you can’t easily edit (from other packages, or when you don’t want to modify source):\n\n# Enter browser on EVERY call to cpue\ndebug(cpue)\ncpue(100, 10) # pauses\ncpue(200, 20) # pauses again\n\n# Turn it off\nundebug(cpue)\n\n\n# Enter browser on the NEXT call only\ndebugonce(cpue)\ncpue(100, 10) # pauses\ncpue(200, 20) # runs normally, auto-cleared\n\nWhen to use each:\n\nBreakpoints: your own package code during development\ndebugonce(): quick one-off inspection of any function\ndebug(): when you need to step through a function repeatedly (remember to undebug())\n\n\n\noptions(error = recover)\nFor post-mortem debugging. Inspect the state after an error has occurred:\n\noptions(error = recover)\n\nbiomass_index(cpue = \"ten\", area_swept = 5)\n\nR will print the call stack as a numbered list and prompt you to pick a frame:\nEnter a frame number, or 0 to exit\n\n1: biomass_index(cpue = \"ten\", area_swept = 5)\n2: validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\nSelection:\nType a frame number to browse into it. Once inside, you can run ls(), inspect variables, etc. Type 0 to exit.\nThis is especially useful when you don’t know where the error is coming from and want to explore the full call stack interactively.\n\n# Reset to default behaviour when done\noptions(error = NULL)",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#debugging-failing-tests",
+    "href": "debugging-techniques.html#debugging-failing-tests",
+    "title": "Debugging Techniques",
+    "section": "Debugging Failing Tests",
+    "text": "Debugging Failing Tests\n\nbrowser() inside test_that()\nYou can add browser() inside a test to inspect what’s happening:\n\ntest_that(\"cpue calculates correctly\", {\n  browser()\n  result &lt;- cpue(catch = 100, effort = 10)\n  expect_equal(result, 10)\n})\n\nRun this interactively with Ctrl+Enter (not with test()). The test runner captures output differently, so interactive execution gives you the full browser experience.\n\n\nNarrow down with test_active_file()\nWhen a test fails, don’t run the full suite repeatedly. Focus on the failing file:\n\ndevtools::test_active_file()\n\n\n\n“Passes alone, fails with test()”\nA classic problem: a test passes when you run it by itself but fails when running the full suite with test().\nThis is almost always leftover state: a previous test changed something (an option, a global variable, a file) and didn’t clean up. This is exactly why we use withr for clean tests (from testing Part 2).\nDebugging strategy:\n\nFind which test before yours is causing the problem (binary search: run half the suite)\nLook for side effects: options(), Sys.setenv(), file creation, set.seed()\nFix with withr::local_* in the offending test\n\n\n\nDebugging snapshot mismatches\nWhen a snapshot test fails, don’t guess what changed:\n\nsnapshot_review()\n\nThis opens a side-by-side diff showing the old snapshot and the new output. You can then decide whether the change is intentional (accept) or a bug (fix).",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#rlanglast_trace",
+    "href": "debugging-techniques.html#rlanglast_trace",
+    "title": "Debugging Techniques",
+    "section": "rlang::last_trace()",
+    "text": "rlang::last_trace()\nWhen working with tidyverse or rlang-based packages, rlang::last_trace() gives a cleaner backtrace than traceback().\n\nComparison\nAfter an error from rlang/tidyverse code:\n\n# Standard R traceback: flat list, can be noisy\ntraceback()\n\n# rlang: tree-structured, hides internal frames\nrlang::last_trace()\n\nrlang::last_trace() organizes the call stack as a tree and collapses internal package machinery, making it easier to see the path through your code.\n\n\nInspecting the error object\n\nrlang::last_error()\n\nThis returns the error object itself, which you can inspect for the message, the call, and (in rlang errors) a backtrace attached to the error.\nThis is a “nice to know”, not essential for everyday debugging, but helpful when you’re working with tidyverse internals or rlang-style errors.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#debugging-strategy-summary",
+    "href": "debugging-techniques.html#debugging-strategy-summary",
+    "title": "Debugging Techniques",
+    "section": "Debugging Strategy Summary",
+    "text": "Debugging Strategy Summary\nA practical order of operations:\n\nRead the error message: often sufficient on its own\ntraceback(): find where in the call chain the error occurred\nPrint debugging: quick variable inspection for simple problems\nbrowser(): interactive inspection for complex logic\ndebugonce() / debug(): step through functions from other packages\noptions(error = recover): post-mortem exploration of the full call stack",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "debugging-techniques.html#your-turn",
+    "href": "debugging-techniques.html#your-turn",
+    "title": "Debugging Techniques",
+    "section": "Your Turn",
+    "text": "Your Turn\nThere’s a bug in this standardize_effort() function. It’s supposed to convert effort from hours to days (dividing by 24), then calculate CPUE. Use the debugging tools you just learned to find and fix it.\nAdd this to R/utils.R:\n\nstandardize_effort &lt;- function(catch, effort_hours) {\n  validate_numeric_inputs(catch = catch, effort_hours = effort_hours)\n\n  effort_days &lt;- effort_hours * 24\n\n  cpue(catch = catch, effort = effort_days)\n}\n\n\nload_all()\n\n# Should give CPUE per day (higher than per hour)\n# Effort is 48 hours = 2 days, so CPUE should be 100/2 = 50\nstandardize_effort(catch = 100, effort_hours = 48)\n\nThe result should be 50 but it returns something much smaller. Find the bug.\n\n\n\n\n\n\nTipSolution\n\n\n\n\n\nThe bug is on the conversion line. It multiplies by 24 instead of dividing:\n\n# Bug\neffort_days &lt;- effort_hours * 24\n\n# Fix\neffort_days &lt;- effort_hours / 24\n\nYou could find this by:\n\nAdding browser() before the cpue() call and checking the value of effort_days\nAdding message(\"effort_days: \", effort_days) to see the intermediate value\nStepping through with debugonce(standardize_effort) and inspecting each line",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Debugging Techniques"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html",
+    "href": "course-schedule.html",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Duration: 3 consecutive half-days Time: 8:00 AM - 12:30 PM daily Format: Three 80-minute sessions per day with 15-minute breaks\n\n\n\n\nTheme: Review fundamentals and establish good practices\n\n\n\nSchedule review\nCourse format\n\n\n\n\n\nPackage structure and state\nPackage creation workflow and metadata\nWrite our first function\nQuick review of documentation basics\n\n\n\n\n\n\n\n\nGit workflow review + continuous integration\nGitHub setup\nAdditional package review\nSetting up air in RStudio\nPull Request workflows for collaboration\n\nUsing pr_* helpers\n\n\n\n\n\n\n\n\n\nTest review, setup test infrastructure\nFixture generators and test helpers.R, setup.R\nTesting different function types\nSnapshot testing introduction\n\n\n\n\n\n\nTheme: Building robust, reliable packages\n\n\n\nFunction naming conventions\nDefault arguments and the ellipsis (…)\nPure functions vs side-effects\nFunction composition and helper functions\nFunction length and complexity principles\nWrite more functions\n\n\n\n\n\n\n\n\nSnapshot testing\nWriting “clean” tests that also clean up after themselves (keeping things local)\nTesting with external dependencies/data\nTest coverage (with covr)\n\n\n\n\n\n\n\n\nroxygen2 review\nSpecial roxygen tags to avoid duplication\nMarkdown formatting and cross-referencing\n\n\n\n\n\nDebugging strategies in R\nUsing browser(), debug(), and debugonce()\nDebugging in different environments\nCommon debugging scenarios in packages\n\n\n\n\n\n\nTheme: OOP, data packages, and real-world application\n\n\n\nOverview of OOP systems in general and in R (S3, S4, R6)\nMore details on S3\nWhen to use OOP in packages\nCreating classes and methods\n\nplot\nsummary\nprint\nmake your own generics\n\nDocumenting S3 methods\n\n\n\n\n\n\n\n\nTypes of package data: exported, internal, and API functions\nStatic exported data and documentation\nFetching live data with httr2\nUsing internal data to drive function behaviour\n\n\n\n\n\nLicensing your package\nPackage versioning strategies\nReleasing your package (CRAN, GitHub, internal repos)\n\n\n\n\n\n\n\n\nVignettes (20-25 min)\nReviews any topics covered in relation to their own packages\nOpen Q&A on specific challenges encountered during workshop (15-20 min)\nDedicated time for participants to work on their own packages with instructor support (35-45 min)\nInstructors available for individual consultation\n\n\n\n\n\n\nTotal Teaching Time: 9 sessions × 80 minutes = 12 hours\nLearning Approach: - Each session includes practical exercises, not just lecture - Topics build progressively from fundamentals to advanced concepts - Final day allows for integration and application of learned concepts - Schedule allows flexibility based on pace and participant interests",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html#february-2026",
+    "href": "course-schedule.html#february-2026",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Duration: 3 consecutive half-days Time: 8:00 AM - 12:30 PM daily Format: Three 80-minute sessions per day with 15-minute breaks",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html#day-1-foundations-and-core-skills",
+    "href": "course-schedule.html#day-1-foundations-and-core-skills",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Theme: Review fundamentals and establish good practices\n\n\n\nSchedule review\nCourse format\n\n\n\n\n\nPackage structure and state\nPackage creation workflow and metadata\nWrite our first function\nQuick review of documentation basics\n\n\n\n\n\n\n\n\nGit workflow review + continuous integration\nGitHub setup\nAdditional package review\nSetting up air in RStudio\nPull Request workflows for collaboration\n\nUsing pr_* helpers\n\n\n\n\n\n\n\n\n\nTest review, setup test infrastructure\nFixture generators and test helpers.R, setup.R\nTesting different function types\nSnapshot testing introduction",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html#day-2-advanced-testing-and-debugging",
+    "href": "course-schedule.html#day-2-advanced-testing-and-debugging",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Theme: Building robust, reliable packages\n\n\n\nFunction naming conventions\nDefault arguments and the ellipsis (…)\nPure functions vs side-effects\nFunction composition and helper functions\nFunction length and complexity principles\nWrite more functions\n\n\n\n\n\n\n\n\nSnapshot testing\nWriting “clean” tests that also clean up after themselves (keeping things local)\nTesting with external dependencies/data\nTest coverage (with covr)\n\n\n\n\n\n\n\n\nroxygen2 review\nSpecial roxygen tags to avoid duplication\nMarkdown formatting and cross-referencing\n\n\n\n\n\nDebugging strategies in R\nUsing browser(), debug(), and debugonce()\nDebugging in different environments\nCommon debugging scenarios in packages",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html#day-3-advanced-topics-and-application",
+    "href": "course-schedule.html#day-3-advanced-topics-and-application",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Theme: OOP, data packages, and real-world application\n\n\n\nOverview of OOP systems in general and in R (S3, S4, R6)\nMore details on S3\nWhen to use OOP in packages\nCreating classes and methods\n\nplot\nsummary\nprint\nmake your own generics\n\nDocumenting S3 methods\n\n\n\n\n\n\n\n\nTypes of package data: exported, internal, and API functions\nStatic exported data and documentation\nFetching live data with httr2\nUsing internal data to drive function behaviour\n\n\n\n\n\nLicensing your package\nPackage versioning strategies\nReleasing your package (CRAN, GitHub, internal repos)\n\n\n\n\n\n\n\n\nVignettes (20-25 min)\nReviews any topics covered in relation to their own packages\nOpen Q&A on specific challenges encountered during workshop (15-20 min)\nDedicated time for participants to work on their own packages with instructor support (35-45 min)\nInstructors available for individual consultation",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "course-schedule.html#workshop-notes",
+    "href": "course-schedule.html#workshop-notes",
+    "title": "Course Schedule",
+    "section": "",
+    "text": "Total Teaching Time: 9 sessions × 80 minutes = 12 hours\nLearning Approach: - Each session includes practical exercises, not just lecture - Topics build progressively from fundamentals to advanced concepts - Final day allows for integration and application of learned concepts - Schedule allows flexibility based on pace and participant interests",
+    "crumbs": [
+      "Course Schedule"
+    ]
+  },
+  {
+    "objectID": "data-packages.html",
+    "href": "data-packages.html",
+    "title": "Data in Packages",
+    "section": "",
+    "text": "R packages are a natural distribution mechanism for data. You have probably already used package data many times without thinking about it - iris, mtcars, and airquality are all datasets shipped with base R. Beyond bundling examples, packages can:\n\nShip reference tables that functions need internally (lookup tables, code mappings)\nBundle example datasets that make documentation and @examples self-contained\nAct as data packages whose sole purpose is distributing data to users\nProvide API functions that fetch live data when running code\n\nToday we will cover the first, second, and fourth of these in fishr.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#why-include-data-in-packages",
+    "href": "data-packages.html#why-include-data-in-packages",
+    "title": "Data in Packages",
+    "section": "",
+    "text": "R packages are a natural distribution mechanism for data. You have probably already used package data many times without thinking about it - iris, mtcars, and airquality are all datasets shipped with base R. Beyond bundling examples, packages can:\n\nShip reference tables that functions need internally (lookup tables, code mappings)\nBundle example datasets that make documentation and @examples self-contained\nAct as data packages whose sole purpose is distributing data to users\nProvide API functions that fetch live data when running code\n\nToday we will cover the first, second, and fourth of these in fishr.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#types-of-package-data",
+    "href": "data-packages.html#types-of-package-data",
+    "title": "Data in Packages",
+    "section": "Types of package data",
+    "text": "Types of package data\n\n\n\n\n\n\n\n\n\nLocation\nCreated by\nExported?\nUse when\n\n\n\n\ndata/*.rda\nuse_data()\nYes\nExample data for documentation, datasets users will work with directly\n\n\nR/sysdata.rda\nuse_data(..., internal = TRUE)\nNo\nLookup tables, constants used by package functions\n\n\ninst/extdata/\nManual copy\nNo (accessed via system.file())\nNon-R formats (CSV, GeoJSON, shapefiles)\n\n\nAPI function\nhttr2\nYes\nLive data that changes over time",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#static-exported-data",
+    "href": "data-packages.html#static-exported-data",
+    "title": "Data in Packages",
+    "section": "Static exported data",
+    "text": "Static exported data\n\nThe workflow\nThe standard workflow uses a data-raw/ directory to keep reproducible scripts that generate your data objects. This script is the ground truth for how your data was created.\n\nusethis::use_data_raw(\"horsefly_sample\")\n\nThis creates data-raw/horsefly_sample.R and adds data-raw/ to .Rbuildignore (so it is excluded from the installed package).\n\n\n\n\n\n\nTipA note on data-raw/\n\n\n\nusethis::use_data_raw() adds the data-raw/ directory to .Rbuildignore so it is excluded from the installed package, but you should commit the scripts inside it. The R scripts that describe how you created the data are part of your reproducible record.\n\n\nIn data-raw/horsefly_sample.R, build the dataset and save it:\n\n# data-raw/horsefly_sample.R\n# Run this script once to create data/horsefly_sample.rda.\n\nhorsefly_sample &lt;- data.frame(\n  set_number = c(1L, 2L, 3L, 4L, 5L),\n  catch = c(3L, 0L, 5L, 2L, 4L),\n  effort = c(1L, 1L, 1L, 1L, 1L),\n  stringsAsFactors = FALSE\n)\n\nusethis::use_data(horsefly_sample, overwrite = TRUE)\n\n\nsource(\"data-raw/horsefly_sample.R\")\n\n\n\nDocumenting exported data\nExported datasets need documentation just like functions. Create R/data.R:\n\nuse_r(\"data\")\n\n\n#' Rainbow Trout gill net survey data from Horsefly Lake\n#'\n#' Catch and effort aggregated to the net set level from a fictional\n#' gill net survey of Rainbow Trout (*Oncorhynchus mykiss*) at\n#' Horsefly Lake, British Columbia.\n#'\n#' @format A data frame with columns:\n#'\n#' - `set_number` Integer. Net set identifier.\n#' - `catch` Integer. Number of fish caught per set.\n#' - `effort` Integer. Number of net-nights per set.\n#' @source Fictional data for illustration purposes.\n#'\n#' @examples\n#' cpue(horsefly_sample)\n\"horsefly_sample\"\n\n\ndocument()\n\n\nload_all()\n\nThe dataset now appears in data(package = \"fishr\"). Open it directly by name and check its documentation with ?horsefly_sample. Because it already has catch and effort columns, it passes directly to cpue():\n\nhorsefly_sample\n\ncpue(horsefly_sample)\n\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#fetching-live-data-with-httr2",
+    "href": "data-packages.html#fetching-live-data-with-httr2",
+    "title": "Data in Packages",
+    "section": "Fetching live data with httr2",
+    "text": "Fetching live data with httr2\nSo far we have been dealing with package data: objects bundled into the package that users can load directly. Now we shift to package functionality: an exported function that fetches live data on demand. The distinction matters because fetch_kluane_data() is not a dataset. It is a function that happens to return data. It lives in R/, is documented with roxygen2, and is tested like any other function. The Kluane Lake Trout data is updated regularly, so a function that always returns the current snapshot is more useful than a static copy bundled at build time.\n\nAdd httr2 to your package\n\nusethis::use_package(\"httr2\")\n\nThis adds httr2 to the Imports field in DESCRIPTION. Any function that uses httr2 needs this.\n\n\nThe Government of Canada Open Data API\nThe Government of Canada publishes open data through a CKAN data portal. CKAN exposes a simple REST API where you query a resource by ID.\nThe Kluane Lake Trout dataset lives at:\n\nDataset page: open.canada.ca/data/en/dataset/307fce02-71cf-4902-b485-57a70cfafe2b\nAPI endpoint: https://open.canada.ca/data/en/api/3/action/datastore_search\nKathleen Lake resource ID: af1e5730-34bd-4314-831c-1d940d99e1a7\n\nThe response is JSON with a result.records array where each element is one row.\n\n\nBuilding fetch_kluane_data()\nCreate R/fetch-kluane.R:\n\n#' Fetch Kluane Lake Trout survey data\n#'\n#' Retrieves gill net survey records from the Government of Canada open data\n#' portal via the CKAN datastore API. Returns individual fish records from\n#' standardised gill net surveys at lakes in Kluane National Park, Yukon.\n#'\n#' @param limit Integer. Maximum number of records to fetch (default 2000).\n#'\n#' @return A data frame with columns `lake`, `year`, `set_number`, `species`,\n#'   `fork_length_mm`, and `weight_g`.\n#' @export\n#'\n#' @examples\n#' \\dontrun{\n#' kluane &lt;- fetch_kluane_data()\n#' head(kluane)\n#' }\n#' # \\dontrun{} prevents this example from running during R CMD check\n#' # since it requires a network connection.\nfetch_kluane_data &lt;- function(limit = 2000) {\n  req &lt;- httr2::request(\n    \"https://open.canada.ca/data/en/api/3/action/datastore_search\"\n  )\n  req &lt;- httr2::req_url_query(\n    req,\n    resource_id = \"af1e5730-34bd-4314-831c-1d940d99e1a7\",\n    limit = limit\n  )\n  resp &lt;- httr2::req_perform(req)\n\n  # simplifyVector = TRUE converts the JSON array of objects to a data frame\n  # and coerces JSON null values to NA automatically.\n  records &lt;- httr2::resp_body_json(resp, simplifyVector = TRUE)$result$records\n\n  # The first record is a bilingual EN/FR column header row, not data.\n  records &lt;- records[-1, ]\n\n  data.frame(\n    lake = records$Lake,\n    year = as.integer(records$Year),\n    set_number = as.integer(records[[\"Set Number\"]]),\n    species = records$Species,\n    fork_length_mm = as.numeric(records[[\"Fork Length (millimetres)\"]]),\n    weight_g = as.numeric(records[[\"Weight (grams)\"]]),\n    stringsAsFactors = FALSE\n  )\n}\n\nWalk through the httr2 steps:\n\nrequest() - create a request object pointing at the base URL\nreq_url_query() - append query parameters to the request (?resource_id=...&limit=...)\nreq_perform() - execute the HTTP GET and return a response object\nresp_body_json(..., simplifyVector = TRUE) - parse the JSON body and coerce the array of records directly to a data frame\n\n\n\nTrying it out\n\nload_all()\n\nkluane &lt;- fetch_kluane_data()\nhead(kluane)\nnrow(kluane)\n\n\n\nConnecting to cpue()\nEach row is one fish from one net set. To compute CPUE we count fish per set and supply an effort value. We assume effort is 1 per set here for illustrative purposes only - in practice, effort would be derived from the data (e.g., soak time in hours):\n\nfish &lt;- kluane[kluane$species != \"no fish\", ]\n\nsurvey_df &lt;- data.frame(\n  catch = as.integer(table(fish$set_number)),\n  effort = 1L\n)\n\nlt_cpue &lt;- cpue(survey_df)\nsummary(lt_cpue)\n\nThis works because cpue() is a generic with a data.frame method - passing a data frame with catch and effort columns dispatches to cpue.data.frame() automatically, as we built in the OOP session. Real-world data is now flowing through the same function without any changes to it.\n\n\nHandling HTTP errors\nAfter performing the request, use resp_check_status() to raise an informative error on any 4xx or 5xx response. This makes the check explicit and visible in the function body:\n\nfetch_kluane_data &lt;- function(limit = 2000) {\n  req &lt;- httr2::request(\n    \"https://open.canada.ca/data/en/api/3/action/datastore_search\"\n  )\n  req &lt;- httr2::req_url_query(\n    req,\n    resource_id = \"af1e5730-34bd-4314-831c-1d940d99e1a7\",\n    limit = limit\n  )\n  resp &lt;- httr2::req_perform(req)\n  httr2::resp_check_status(resp)\n\n  records &lt;- httr2::resp_body_json(resp, simplifyVector = TRUE)$result$records\n  records &lt;- records[-1, ]\n\n  data.frame(\n    lake = records$Lake,\n    year = as.integer(records$Year),\n    set_number = as.integer(records[[\"Set Number\"]]),\n    species = records$Species,\n    fork_length_mm = as.numeric(records[[\"Fork Length (millimetres)\"]]),\n    weight_g = as.numeric(records[[\"Weight (grams)\"]]),\n    stringsAsFactors = FALSE\n  )\n}\n\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\n\n\n\n\nNoteTesting functions that call HTTP APIs\n\n\n\nTesting functions that make real HTTP requests is an important topic we do not cover here. The key challenge is that tests should not depend on an external server being available. The vcr and httptest2 packages both solve this by recording real HTTP interactions and replaying them during tests, keeping your test suite fast and self-contained.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#internal-data",
+    "href": "data-packages.html#internal-data",
+    "title": "Data in Packages",
+    "section": "Internal data",
+    "text": "Internal data\nSome data belongs to the package but should not be visible to users. Lookup tables, constants, and calibration coefficients are all good candidates for internal data. The key constraint: internal data powers package behaviour without appearing in the user’s namespace.\n\nCreating internal data\nInternal data lives in R/sysdata.rda, not in data/. It is created with use_data() using internal = TRUE:\n\nuse_data_raw(\"gear-types\")\n\n\n# data-raw/gear_types.R\ngear_types &lt;- data.frame(\n  gear_type = c(\n    \"nordic_gillnet\",\n    \"sinking_longline\",\n    \"fyke_net\",\n    \"electrofishing\"\n  ),\n  gear_factor = c(1.0, 0.72, 1.35, 0.45),\n  description = c(\n    \"Nordic multi-mesh gillnet (standard reference gear)\",\n    \"Sinking baited longline\",\n    \"Passive fyke net trap\",\n    \"Electrofishing unit\"\n  ),\n  stringsAsFactors = FALSE\n)\n\nusethis::use_data(gear_types, internal = TRUE, overwrite = TRUE)\n\n\nsource(\"data-raw/gear_types.R\")\n\nuse_data(..., internal = TRUE) writes all objects passed to it into a single R/sysdata.rda file. Every function in the package can access gear_types directly, but it does not appear in ls() for users and is not exported.\n\n\nUsing internal data in a function\nThis is where internal data becomes genuinely useful. Instead of asking users to supply a numeric gear_factor (a “magic number” only fisheries scientists would know), we let them name the gear and look up the factor automatically.\nUpdate cpue.numeric() and cpue.data.frame() in R/cpue.R, replacing gear_factor with gear_type in both:\n\n#' @rdname cpue\n#' @param gear_type Character. Gear type used for sampling. Must be one of the\n#'   types in the internal `gear_types` table. Defaults to `\"nordic_gillnet\"`,\n#'   the standard reference gear (factor = 1.0).\n#' @export\ncpue.numeric &lt;- function(\n  x,\n  effort,\n  gear_type = \"nordic_gillnet\",\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  if (!gear_type %in% gear_types$gear_type) {\n    stop(\n      \"`gear_type` must be one of: \",\n      paste(gear_types$gear_type, collapse = \", \"),\n      call. = FALSE\n    )\n  }\n\n  gear_factor &lt;- gear_types$gear_factor[gear_types$gear_type == gear_type]\n\n  method &lt;- match.arg(method)\n  validate_numeric_inputs(x = x, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(x), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(method, ratio = x / effort, log = log(x / effort))\n\n  new_cpue_result(\n    cpue_values = raw_cpue * gear_factor,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(x)\n  )\n}\n\n#' @rdname cpue\n#' @param catch_col Character. Name of the catch column (default `\"catch\"`).\n#' @param effort_col Character. Name of the effort column (default `\"effort\"`).\n#' @export\ncpue.data.frame &lt;- function(\n  x,\n  catch_col = \"catch\",\n  effort_col = \"effort\",\n  gear_type = \"nordic_gillnet\",\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  if (!catch_col %in% names(x)) {\n    stop(\"Column '\", catch_col, \"' not found in data frame.\", call. = FALSE)\n  }\n  if (!effort_col %in% names(x)) {\n    stop(\"Column '\", effort_col, \"' not found in data frame.\", call. = FALSE)\n  }\n\n  cpue(\n    x = x[[catch_col]],\n    effort = x[[effort_col]],\n    gear_type = gear_type,\n    method = method,\n    verbose = verbose,\n    ...\n  )\n}\n\nThe error message is generated dynamically from the internal table. If you add a gear type to data-raw/gear_types.R and re-run the script, it appears in the error automatically - no manual string editing required.\n\n\nTrying it out\n\nload_all()\n\ncpue(100, 10) # default: nordic_gillnet -&gt; 10\ncpue(100, 10, gear_type = \"fyke_net\") # factor 1.35 -&gt; 13.5\ncpue(100, 10, gear_type = \"trapnet\") # error: lists valid types\n\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "data-packages.html#your-turn",
+    "href": "data-packages.html#your-turn",
+    "title": "Data in Packages",
+    "section": "Your turn",
+    "text": "Your turn\nGoal: Extend the gear type table with a new gear, verify the validation error updates automatically, and use the new gear in a CPUE calculation.\n\nOpen data-raw/gear_types.R and add a new row for \"trap_net\" with a gear factor of 1.1 and a description of your choice.\nRe-run the script and reload the package:\n\n\nsource(\"data-raw/gear_types.R\")\nload_all()\n\n\nConfirm that the new gear type works and that the error message for unknown types now lists \"trap_net\":\n\n\ncpue(100, 10, gear_type = \"trap_net\") # should return 110\ncpue(100, 10, gear_type = \"unknown\") # error should now list trap_net\n\nThe error message was never hard-coded - it was always computed from the table. Adding a row was the only change needed.\n\nChanging cpue() to use gear_type instead of gear_factor broke the existing tests for gear standardization. Run the tests and identify which ones are failing, then update tests/testthat/test-cpue.R to fix them and add a test for the new validation error:\n\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Data in Packages"
+    ]
+  },
+  {
+    "objectID": "documentation.html",
+    "href": "documentation.html",
+    "title": "Advanced Documentation",
+    "section": "",
+    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @param effort Numeric vector of effort (e.g., hours).\n#' @param ... Additional arguments passed to [cpue()].\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nAnd here is the documentation for cpue():\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Advanced Documentation"
+    ]
+  },
+  {
+    "objectID": "documentation.html#the-problem-with-duplicated-documentation",
+    "href": "documentation.html#the-problem-with-duplicated-documentation",
+    "title": "Advanced Documentation",
+    "section": "",
+    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @param effort Numeric vector of effort (e.g., hours).\n#' @param ... Additional arguments passed to [cpue()].\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nAnd here is the documentation for cpue():\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Advanced Documentation"
+    ]
+  },
+  {
+    "objectID": "documentation.html#inheritparams",
+    "href": "documentation.html#inheritparams",
+    "title": "Advanced Documentation",
+    "section": "(inheritParams?)",
+    "text": "(inheritParams?)\n@inheritParams copies parameter documentation from another function into the current one. You specify the source function, and roxygen2 copies the @param entries for any parameter whose name matches.\nReplace the hand-written @param catch and @param effort with:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @inheritParams cpue\n#' @param ... Additional arguments passed to `cpue()`.\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nroxygen2 looks at the @param tags in cpue() and copies documentation for any parameter that:\n\nappears in the current function’s signature, and\nis not already documented in the current function\n\nSo catch and effort get pulled in from cpue(). gear_factor, method, and verbose are skipped because they are not explicit parameters of biomass_index().\n\ndocument()\n\nOpen the help page to confirm:\n\n?biomass_index\n\nThe catch and effort parameter descriptions now match cpue() exactly - and they will stay in sync automatically whenever cpue() docs change.\n\n\n\n\n\n\nTip\n\n\n\n@inheritParams can chain across functions. If function C inherits from B which inherits from A, roxygen2 resolves the full chain. It also works across packages: @inheritParams pkg::function.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Advanced Documentation"
+    ]
+  },
+  {
+    "objectID": "documentation.html#inheritdotparams",
+    "href": "documentation.html#inheritdotparams",
+    "title": "Advanced Documentation",
+    "section": "(inheritDotParams?)",
+    "text": "(inheritDotParams?)\n@param ... is vague. The user has to follow the cross-reference to cpue() and work out which arguments apply. @inheritDotParams generates a proper description that names the forwarded arguments and links their documentation automatically.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @inheritParams cpue\n#' @inheritDotParams cpue -catch -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nThe -catch -effort syntax excludes those parameters from the generated ... description, since they are already documented explicitly above. What remains - gear_factor, method, verbose - gets rendered as a formatted list linking back to ?cpue.\n\ndocument()\n?biomass_index\n\nThe ... entry now reads something like:\n\n… Arguments passed to cpue(): gear_factor Numeric adjustment for gear standardisation… method One of “ratio” or “log”… verbose Logical; if TRUE, prints processing information…\n\nUsers can see exactly what they can pass through without leaving the help page.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Advanced Documentation"
+    ]
+  },
+  {
+    "objectID": "documentation.html#markdown-and-cross-references",
+    "href": "documentation.html#markdown-and-cross-references",
+    "title": "Advanced Documentation",
+    "section": "Markdown and cross-references",
+    "text": "Markdown and cross-references\nroxygen2 supports standard Markdown formatting in all text fields: @description, @details, @param, @return, @seealso, and others.\n\nInline formatting\nThe basics work as expected:\n\n#' Calculate Biomass Index\n#'\n#' Calculates a biomass index by multiplying CPUE by area swept. Returns\n#' `NA` for any row where either input is `NA`.\n#'\n#' @param cpue Numeric vector of CPUE values (units: kg/hr).\n#' @param area_swept Numeric vector of area swept in **km²**.\n#' @return A numeric vector the same length as `cpue`.\n\n\nBackticks render as inline code: cpue, NA, TRUE\n**text** renders as bold\n*text* renders as italic\n\n\n\nLists\nUse standard Markdown lists in @details or @description:\n\n#' @details\n#' Two modes of use:\n#'\n#' - Provide `cpue` directly for a simple calculation.\n#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.\n#'\n#' Any additional arguments in `...` are forwarded to [cpue()].\n\nBlank lines between the tag and the list content are required - without them roxygen2 treats the hyphens as literal text.\n\n\nLinking to functions\nThe most common form is the function name followed by () in square brackets:\n\n#' Calculates biomass index from CPUE and area swept.\n#' See [cpue()] for computing CPUE values from raw catch and effort.\n\nThe () suffix tells roxygen2 this is a function link. This generates a code-formatted link that takes the user directly to ?cpue when they click it in the help document or a pkgdown site.\n\n\nLinking across packages\nTo link to a function in another package, use the :: operator inside the brackets:\n\n#' @param data A data frame. See [dplyr::filter()] for subsetting rows.\n\nThis creates a link that opens ?dplyr::filter. R CMD check may produce a NOTE - “Undeclared package ‘dplyr’ in Rd xrefs”. Adding the package to Suggests in your DESCRIPTION silences it; you do not need Imports.\n\n\nCustom link text\nTo display different text than the function name, use the [text][target()] form:\n\n#' Returns the same structure as [the CPUE function][cpue()].\n\nThis renders as “the CPUE function” with a link to ?cpue. Use this sparingly - the function name itself is usually the most informative link text.\n\n\nThe (seealso?) tag\n\n#' @seealso [cpue()] to compute CPUE values from raw catch and effort.\n#' @seealso [validate_numeric_inputs()] for the shared input validation logic.\n\n@seealso renders in its own section at the bottom of the help page. Use it for functions that are related but not directly referenced in the body of the docs.\n\n\nSummary\n\n\n\nSyntax\nResult\n\n\n\n\n[cpue()]\nLink to ?cpue in this package\n\n\n[fishr::cpue()]\nLink to ?fishr::cpue in another package\n\n\n[some text][cpue()]\n“some text” linking to ?cpue\n\n\n\nUse links freely in @description, @details, @param, @return, and @seealso. A well-linked help page lets users navigate the package without leaving the help system.",
+    "crumbs": [
+      "Day 2: Advanced Testing and Debugging",
+      "Advanced Documentation"
+    ]
+  },
+  {
+    "objectID": "git-github.html",
+    "href": "git-github.html",
+    "title": "Git/GitHub for Collaborative Development",
+    "section": "",
+    "text": "back to slides - git workflow overview\n\n\n\ngit_sitrep()\n\nMake sure we have pushed all of our changes up to this point.\n\ngit push origin main",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Git/GitHub for Collaborative Development"
+    ]
+  },
+  {
+    "objectID": "git-github.html#git-workflow-review",
+    "href": "git-github.html#git-workflow-review",
+    "title": "Git/GitHub for Collaborative Development",
+    "section": "",
+    "text": "back to slides - git workflow overview\n\n\n\ngit_sitrep()\n\nMake sure we have pushed all of our changes up to this point.\n\ngit push origin main",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Git/GitHub for Collaborative Development"
+    ]
+  },
+  {
+    "objectID": "git-github.html#continuous-integration",
+    "href": "git-github.html#continuous-integration",
+    "title": "Git/GitHub for Collaborative Development",
+    "section": "Continuous Integration",
+    "text": "Continuous Integration\n\nAdd GitHub Actions for R CMD check\n\nuse_github_action(\"check-standard\")\n\nThis creates .github/workflows/R-CMD-check.yaml that runs R CMD check on multiple platforms whenever you push.\nIt also adds a “R CMD check” status badge to your README. Look at your README.Rmd badges section, then rebuild, and check() locally.\n\nbuild_readme()\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\nCommit your changes, and push.\n\n\n\n\nView your check results\nAfter pushing, go to your repo’s “Actions” tab to see the workflow run.",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Git/GitHub for Collaborative Development"
+    ]
+  },
+  {
+    "objectID": "git-github.html#setting-up-air",
+    "href": "git-github.html#setting-up-air",
+    "title": "Git/GitHub for Collaborative Development",
+    "section": "Setting Up Air",
+    "text": "Setting Up Air\nAir is a fast R formatter that automatically formats your code every time you save a .R file. It helps you keep your mind focused on the code, and most importantly eases collaboration because it forces a consistent style among you and your collaborators.\n\nInstall Air in your project\n\nuse_air(vscode = FALSE)\n\nIn RStudio, change these settings:\n\n\nInstall the Air command line utility. Otherwise, the first time Air is run (i.e., the first time you save a file), it will be downloaded and installed automatically.",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Git/GitHub for Collaborative Development"
+    ]
+  },
+  {
+    "objectID": "git-github.html#pull-request-workflows",
+    "href": "git-github.html#pull-request-workflows",
+    "title": "Git/GitHub for Collaborative Development",
+    "section": "Pull Request Workflows",
+    "text": "Pull Request Workflows\nback to slides - PR workflow overview\n\nStart a new feature branch\n\npr_init(\"add-biomass-function\")\n\nThis creates and checks out a new branch.\n\n\nWrite a new function\n\nuse_r(\"biomass\")\n\nAdd a simple biomass calculation function:\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept.\n#'\n#' @param cpue Numeric vector of CPUE values\n#' @param area_swept Numeric vector of area swept (e.g., km²)\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)\n#' biomass_index(cpue = salmon_cpue, area_swept = 5)\nbiomass_index &lt;- function(cpue, area_swept) {\n  cpue * area_swept\n}\n\n\n\nDocument and check\n\ndocument()\nload_all()\n\nbiomass_index(10, 5)\n\ncheck()\n\n\n\nPush your branch and create a PR\n\npr_push()\n\nThis pushes your branch and opens a browser to create the PR.\n\n\nWorking with PRs\n\n# Pause work on current PR (switch back to main)\npr_pause()\n\n# Resume work on a PR\npr_resume(\"add-biomass-function\")\n\n# After PR is merged, clean up\npr_finish()\n\n\n\nFetch and review someone else’s PR\n\npr_fetch(123) # PR number\n\n\n\nRun a final check\n\ncheck()",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Git/GitHub for Collaborative Development"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html",
+    "href": "object-oriented-programming.html",
+    "title": "Object-Oriented Programming in R",
+    "section": "",
+    "text": "You already use object-oriented programming (OOP) patterns constantly in R, even if you have not thought about it explicitly.\nLet’s look at the plot() and summary() functions.\n\nx_norm &lt;- rnorm(5000)\nplot(x_norm)\n\nsummary(mtcars)\nplot(mtcars)\nplot(mtcars$mpg, mtcars$hp)\n\nmtcars_model &lt;- lm(mpg ~ wt, data = mtcars)\nsummary(mtcars_model)\nplot(mtcars_model)\n\nThe same function - summary() - does something completely different depending on what you hand it. A numeric vector gets a five-number summary. A data frame gets column summaries. A linear model fit gets coefficients, standard errors, and p-values. The function name stays the same; the behaviour adapts to the data.\nThis is one of the most powerful ideas in OOP: you write code that calls print() or plot() or summary(), and the object itself determines what happens.\nWe are going to:\n\nCreate a new S3 class cpue_result to wrap CPUE calculations with metadata\nWrite print, summary, and plot methods for it\nConvert cpue() and biomass_index() into generics that work with both numeric vectors and data frames",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#introduction",
+    "href": "object-oriented-programming.html#introduction",
+    "title": "Object-Oriented Programming in R",
+    "section": "",
+    "text": "You already use object-oriented programming (OOP) patterns constantly in R, even if you have not thought about it explicitly.\nLet’s look at the plot() and summary() functions.\n\nx_norm &lt;- rnorm(5000)\nplot(x_norm)\n\nsummary(mtcars)\nplot(mtcars)\nplot(mtcars$mpg, mtcars$hp)\n\nmtcars_model &lt;- lm(mpg ~ wt, data = mtcars)\nsummary(mtcars_model)\nplot(mtcars_model)\n\nThe same function - summary() - does something completely different depending on what you hand it. A numeric vector gets a five-number summary. A data frame gets column summaries. A linear model fit gets coefficients, standard errors, and p-values. The function name stays the same; the behaviour adapts to the data.\nThis is one of the most powerful ideas in OOP: you write code that calls print() or plot() or summary(), and the object itself determines what happens.\nWe are going to:\n\nCreate a new S3 class cpue_result to wrap CPUE calculations with metadata\nWrite print, summary, and plot methods for it\nConvert cpue() and biomass_index() into generics that work with both numeric vectors and data frames",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#oop-systems-in-r",
+    "href": "object-oriented-programming.html#oop-systems-in-r",
+    "title": "Object-Oriented Programming in R",
+    "section": "OOP Systems in R",
+    "text": "OOP Systems in R\nR has several OOP systems. They differ in formality and where methods live.\n\n\n\n\n\n\n\n\n\n\nSystem\nDispatch\nMethods live on…\nFormality\nCommon in\n\n\n\n\nS3\nSingle (first argument)\nThe generic function\nInformal\nBase R, tidyverse, most packages\n\n\nS4\nMultiple arguments\nThe generic function\nFormal (classes, validity)\nBioconductor, methods-heavy packages\n\n\nS7\nMultiple arguments\nThe generic function\nFormal (classes, properties, validation)\nSome new packages (successor to S3 and S4)\n\n\nR6\nSingle\nThe object itself\nModerate (via R6 package)\nMutable state, encapsulation\n\n\n\nFor package development, S3 covers the vast majority of use cases. S4 is worth learning if you work in Bioconductor or need multiple dispatch. S7 is designed as the eventual successor to both S3 and S4 - it combines the simplicity of S3 with more of the rigor of S4 (formal class definitions, property validation, multiple dispatch). If you are starting a new package and want more structure than S3 provides, S7 is worth considering, though S3 remains the dominant system in practice.\nWe will focus on S3 today, with a brief look at R6 at the end.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#s3-in-depth",
+    "href": "object-oriented-programming.html#s3-in-depth",
+    "title": "Object-Oriented Programming in R",
+    "section": "S3 in Depth",
+    "text": "S3 in Depth\nS3 is the most widely used OOP system in R. It is simple, flexible, and what base R itself uses.\n\nHow S3 works\nAn S3 object is just a regular R object (list, vector, data frame, etc.) with a class attribute. When you call a generic function like print(x), R looks at class(x) and dispatches to the appropriate method.\n\nclass(x_norm)\nclass(mtcars)\nclass(mtcars_model)\n\n\n\nSeeing the dispatch chain\n\n# What methods exist for print?\nmethods(generic.function = \"print\")\n\n# What methods exist for a class?\nmethods(class = \"data.frame\")\n\n\n\nThe dispatch mechanism\nWhen you call summary(x) where x has class \"foo\":\n\nR looks for summary.foo\nIf not found, looks for summary.default\nIf neither exists, throws an error\n\nThis is called single dispatch - the method is chosen based on the class of the first argument only.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#creating-an-s3-class",
+    "href": "object-oriented-programming.html#creating-an-s3-class",
+    "title": "Object-Oriented Programming in R",
+    "section": "Creating an S3 Class",
+    "text": "Creating an S3 Class\nOur cpue() function returns a plain numeric vector:\n\nresult &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\nclass(result)\n\nThat class is just \"numeric\". When we print(result), R dispatches to print.numeric and shows raw numbers. What if we want CPUE output to identify itself - to carry context about the calculation and display it in a useful way?\n\nThe simplest way: class() &lt;-\nThe most direct way to create an S3 class is to set the class attribute on an existing object. Let’s modify cpue() to tag its output. Add two lines at the end of the function body in R/cpue.R:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  result &lt;- raw_cpue * gear_factor\n  class(result) &lt;- \"cpue_result\"\n  result\n}\n\n\nload_all()\n\nresult &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\nresult\nclass(result)\n\nNow R knows this is a cpue_result. We can write a print method for it.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#writing-methods",
+    "href": "object-oriented-programming.html#writing-methods",
+    "title": "Object-Oriented Programming in R",
+    "section": "Writing Methods",
+    "text": "Writing Methods\n\nprint method\nThe print method controls what users see when they type an object name at the console. When you type result and hit Enter, R calls print(result) behind the scenes - this is called autoprinting. R looks at the class of the object, finds print.cpue_result, and calls that. Without a custom print method, R falls back to print.default, which is why our tagged vector currently displays as raw numbers.\n\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"CPUE Results for\", length(x), \"records\\n\")\n  cat(\"Values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nImportant details:\n\nThe function name must be print.&lt;classname&gt;\nAlways include ... in the signature (required by the print generic)\nReturn invisible(x) so assignment still works: y &lt;- print(x)\nUse cat() rather than print() inside print methods to avoid recursion\n\n\ndocument()\nload_all()\n\nresult\n\nThat is the entire mechanism behind S3 dispatch: set a class, write a function.classname method, and R connects the two automatically.\nNote that although result looks different when we print it, it is still a numeric vector under the hood:\n\nis.numeric(result)\nunclass(result)\n\n\n\nAdding metadata with attributes\nA bare numeric vector with a class label has no context. What gear factor was used? What method was used? R objects can carry arbitrary attributes - named metadata attached to the object. Let’s update the function body again:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  result &lt;- raw_cpue * gear_factor\n  attr(result, \"gear_factor\") &lt;- gear_factor\n  attr(result, \"n_records\") &lt;- length(catch)\n  attr(result, \"method\") &lt;- method\n  class(result) &lt;- \"cpue_result\"\n  result\n}\n\n\nload_all()\n\nresult &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\nattr(result, \"gear_factor\")\nattr(result, \"n_records\")\nattr(result, \"method\")\n\nNow our print method can be more informative:\n\n#' @export\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result\\n\")\n  cat(\"Records:\", attr(x, \"n_records\"), \"\\n\")\n  cat(\"Gear factor:\", attr(x, \"gear_factor\"), \"\\n\")\n  cat(\"Method:\", attr(x, \"method\"), \"\\n\")\n  cat(\"CPUE values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nAs a class accumulates more fields, setting attributes one by one gets unwieldy. There is a better pattern.\n\n\nCreate a constructor function\nFor anything beyond a very basic class, the standard practice is to create a constructor function that builds the object in one place. A common naming convention, recommended in Advanced R, is new_&lt;classname&gt;.\n\n#' Create a cpue result object\n#'\n#' @param cpue_values Numeric vector of CPUE values.\n#' @param method Character string indicating the calculation method.\n#' @param gear_factor Numeric gear correction factor used.\n#' @param n_records Integer number of records processed.\n#'\n#' @return A `cpue_result` object.\n#' @noRd\nnew_cpue_result &lt;- function(cpue_values, method, gear_factor, n_records) {\n  structure(\n    cpue_values, # The data\n    method = method, # Attributes specifying metadata\n    gear_factor = gear_factor,\n    n_records = n_records,\n    class = \"cpue_result\" # class is a special attribute\n  )\n}\n\nA few things changed:\n\nstructure() sets multiple attributes at once - including class - instead of separate attr() and class() &lt;- calls\nAll object creation is centralised\n\n\n#' Summarize a CPUE survey\n#'\n#' Calculates CPUE from catch and effort data and returns a structured\n#' `cpue_result` object with metadata about the calculation.\n#'\n#' @param catch Numeric vector of catch values.\n#' @param effort Numeric vector of effort values.\n#' @param gear_factor Numeric gear correction factor (default 1).\n#' @param method Calculation method: \"ratio\" or \"log\".\n#'\n#' @return A `cpue_result` object.\n#' @export\n#'\n#' @examples\n#' cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  # ...cpue body here\n\n  new_cpue_result(\n    cpue_values = result,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(catch)\n  )\n}\n\n\nload_all()\n\nresult &lt;- cpue(\n  catch = c(100, 200, 300, 150),\n  effort = c(10, 20, 15, 30)\n)\n\nresult\n\n\n\nsummary method\nsummary should compute and return a useful statistical summary:\n\n#' @export\nsummary.cpue_result &lt;- function(object, ...) {\n  stats &lt;- list(\n    method = attr(object, \"method\"),\n    n_records = attr(object, \"n_records\"),\n    gear_factor = attr(object, \"gear_factor\"),\n    mean_cpue = mean(object),\n    median_cpue = stats::median(object),\n    sd_cpue = stats::sd(object),\n    range_cpue = range(object)\n  )\n\n  structure(stats, class = \"summary.cpue_result\")\n}\n\n#' @export\nprint.summary.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result Summary\\n\")\n  cat(\"---------------------\\n\")\n  cat(\"Method:      \", x$method, \"\\n\")\n  cat(\"Records:     \", x$n_records, \"\\n\")\n  cat(\"Gear factor: \", x$gear_factor, \"\\n\")\n  cat(\"Mean CPUE:   \", round(x$mean_cpue, 2), \"\\n\")\n  cat(\"Median CPUE: \", round(x$median_cpue, 2), \"\\n\")\n  cat(\"SD CPUE:     \", round(x$sd_cpue, 2), \"\\n\")\n  cat(\n    \"CPUE Range:    \",\n    round(x$range_cpue[1], 2),\n    \"-\",\n    round(x$range_cpue[2], 2),\n    \"\\n\"\n  )\n  invisible(x)\n}\n\nNote that summary returns an object of class summary.cpue_result, which has its own print method. This is the standard pattern in base R (see summary.lm).\n\ndocument()\nload_all()\n\nsummary(result)\n\n\n\nYour turn: Make a plot() method\nPlot methods must be named plot.&lt;classname&gt;, take x as the first argument, and include ... in the signature.\nNote that you don’t need to use base plot() in a plot method - you can use ggplot2 or any other plotting system.\n\n#' @export\nplot.cpue_result &lt;- function(x, ...) {\n  plot(\n    seq_along(x),\n    x,\n    type = \"b\",\n    xlab = \"Record\",\n    ylab = \"CPUE\",\n    main = paste(\"CPUE -\", attr(x, \"method\"), \"method\"),\n    ...\n  )\n}\n\nThe ... passes through to plot.default, allowing users to customize (colours, line types, etc.) without us having to anticipate every option.\n\ndocument()\nload_all()\n\nplot(result)\nplot(result, col = \"steelblue\", pch = 19)\n\n\n\nRegistering S3 methods\nFor your methods to work when the package is installed (not just with load_all()), they need to appear in the NAMESPACE file. The @export tag on each method handles this via roxygen2.\n\ndocument()\n\nLook at the NAMESPACE file. What do you see different about S3 methods compared to regular functions?\nS3method(print,cpue_result)\nS3method(summary,cpue_result)\nS3method(plot,cpue_result)\n\n\nTesting the class\nWe should update our tests to verify that cpue() returns the right class. testthat provides expect_s3_class() for exactly this:\n\ntest_that(\"cpue() returns a cpue_result object\", {\n  result &lt;- cpue(c(100, 200), c(10, 20))\n  expect_s3_class(result, \"cpue_result\")\n})\n\nWe can also test that the metadata attributes are set correctly:\n\ntest_that(\"cpue_result carries calculation metadata\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15), method = \"log\")\n  expect_equal(attr(result, \"method\"), \"log\")\n  expect_equal(attr(result, \"gear_factor\"), 1)\n  expect_equal(attr(result, \"n_records\"), 3)\n})\n\nAnd snapshot tests are a natural fit for print methods, since they capture the exact console output:\n\ntest_that(\"print.cpue_result displays expected output\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\n  expect_snapshot(print(result))\n})\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#creating-your-own-generics-and-methods",
+    "href": "object-oriented-programming.html#creating-your-own-generics-and-methods",
+    "title": "Object-Oriented Programming in R",
+    "section": "Creating your own generics and methods",
+    "text": "Creating your own generics and methods\nSo far we have built new classes and created methods for existing generics. But one of the most practical uses of S3 is creating your own generics, so the same function name works on different types of input.\nOur cpue() function currently takes numeric vectors:\n\ncpue(catch = c(100, 200), effort = c(10, 20))\n\nBut users often have their data in a data frame. Instead of making them extract columns every time, we can make cpue() work directly on data frames too. The same function call adapts its behaviour depending on what the user passes in - just like summary() does in base R.\n\nStep 1: Make cpue a generic\nWe replace the function body with UseMethod(\"cpue\"). The first argument becomes x by convention, since it could be either a numeric vector or a data frame:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param x Input data: a numeric vector of catch values, or a data frame\n#'   containing catch and effort columns.\n#' @param ... Additional arguments passed to methods.\n#'\n#' @export\ncpue &lt;- function(x, ...) {\n  UseMethod(\"cpue\")\n}\n\n\n\nStep 2: Move the existing implementation into cpue.numeric\nThe existing code becomes the numeric method. The first argument changes from catch to x to match the generic’s signature, but the logic is identical:\n\n#' @rdname cpue\n#'\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(c(100, 200), c(10, 20), method = \"log\")\ncpue.numeric &lt;- function(\n  x,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(x = x, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(x), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = x / effort,\n    log = log(x / effort)\n  )\n\n  new_cpue_result(\n    cpue_values = raw_cpue * gear_factor,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(x)\n  )\n}\n\nAll existing code that calls cpue() with positional arguments continues to work - R dispatches to cpue.numeric because the first argument is numeric.\n\n\n\n\n\n\nWarningNamed argument change\n\n\n\nThe first argument was renamed from catch to x to match the generic’s signature. Any call using named arguments - cpue(catch = 100, effort = 10) - will now fail because catch is no longer a parameter. Update these to use positional arguments: cpue(100, 10).\n\n\n\n\nStep 3: Add a data frame method\n\n#' @rdname cpue\n#' @param catch_col Name of the catch column (default `\"catch\"`).\n#' @param effort_col Name of the effort column (default `\"effort\"`).\n#' @export\ncpue.data.frame &lt;- function(\n  x,\n  catch_col = \"catch\",\n  effort_col = \"effort\",\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  if (!catch_col %in% names(x)) {\n    stop(\"Column '\", catch_col, \"' not found in data frame.\", call. = FALSE)\n  }\n  if (!effort_col %in% names(x)) {\n    stop(\"Column '\", effort_col, \"' not found in data frame.\", call. = FALSE)\n  }\n\n  # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.\n  # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.\n  cpue(\n    x = x[[catch_col]],\n    effort = x[[effort_col]],\n    gear_factor = gear_factor,\n    method = method,\n    verbose = verbose,\n    ...\n  )\n}\n\nThe data frame method extracts the right columns and calls cpue() again with numeric vectors, which dispatches to cpue.numeric. This layering - where one method calls the generic again with different input - is a common and effective pattern.\n\n\nStep 4: Add a .default method\nIt’s good practice to add a default method that throws an informative error if the user passes in an unsupported type. If the generic can’t find a method for the class of x, it will fall back to cpue.default:\n\n#' @rdname cpue\n#' @export\ncpue.default &lt;- function(x, ...) {\n  stop(\"Unsupported input type for cpue(): \", class(x), call. = FALSE)\n}\n\n\n\nUpdate biomass_index documentation\nConverting cpue into a generic changed its signature from cpue(catch, effort, ...) to cpue(x, ...). The @inheritParams cpue tag on biomass_index was inheriting catch and effort docs from the old function - those params no longer exist on the generic.\nUpdate biomass_index to inherit from cpue.numeric instead, since that is the method it actually calls. Because cpue.numeric names its first argument x rather than catch, add @param catch back explicitly:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @inheritParams cpue.numeric\n#' @inheritDotParams cpue.numeric -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\n\ndocument()\nload_all()\n\n# Still works with vectors\ncpue(c(100, 200), c(10, 20))\n\n# Now also works with data frames\nfishing_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 20, 15)\n)\n\ncpue(fishing_data)\n\n# Custom column names\ntrawl_data &lt;- data.frame(\n  kg = c(50, 100, 150),\n  hours = c(5, 10, 8)\n)\n\ncpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n\n\n\nUpdating and adding tests\nTwo things have changed that may break existing tests:\n\nNamed argument calls: tests using cpue(catch = ..., effort = ...) will fail now that the argument is named x. Change these to positional calls.\nReturn type: cpue() now returns a cpue_result object, not a plain numeric. expect_equal() compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in as.numeric() for numeric comparisons: expect_equal(as.numeric(cpue(100, 10)), 10).\n\nSome existing snapshots will also be stale since the print format changed. Run snapshot_accept() after check() to accept the updated snapshots.\nNow add tests for the data frame method and the default error:\n\ntest_that(\"cpue.data.frame dispatches correctly\", {\n  fishing_data &lt;- data.frame(\n    catch = c(100, 200, 300),\n    effort = c(10, 20, 15)\n  )\n  result &lt;- cpue(fishing_data)\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10, 20))\n})\n\ntest_that(\"cpue.data.frame works with custom column names\", {\n  trawl_data &lt;- data.frame(\n    kg = c(50, 100),\n    hours = c(5, 10)\n  )\n  result &lt;- cpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10))\n})\n\ntest_that(\"cpue.data.frame errors on missing columns\", {\n  df &lt;- data.frame(x = 1, y = 2)\n  expect_snapshot(cpue(df), error = TRUE)\n})\n\ntest_that(\"cpue.default gives informative error\", {\n  expect_snapshot(cpue(\"not valid\"), error = TRUE)\n})\n\n\n\n\n\n\n\nTipMake a commit",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#when-to-use-oop-in-packages",
+    "href": "object-oriented-programming.html#when-to-use-oop-in-packages",
+    "title": "Object-Oriented Programming in R",
+    "section": "When to Use OOP in Packages",
+    "text": "When to Use OOP in Packages\nS3 classes are worth reaching for when:\n\nYour function returns complex results that benefit from custom print/summary/plot methods\nYou want other packages to be able to extend your work with new methods\nYou want to create a consistent interface when your users want to do the same things with different types of input (e.g., numeric vectors, data frames, model fits)\n\nThey are probably not needed when:\n\nA simple named list or data frame communicates the result clearly\nThere is only one way to display or summarize the output\nThe function returns a scalar or vector with obvious meaning",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "object-oriented-programming.html#recap",
+    "href": "object-oriented-programming.html#recap",
+    "title": "Object-Oriented Programming in R",
+    "section": "Recap",
+    "text": "Recap\n\nR has multiple OOP systems (S3, S4, R6) - S3 is the most common and covers most use cases\nS3 objects are regular R objects with a class attribute\nThe same function (print, summary, plot) does different things for different classes - the object determines the behaviour, not the caller\nConstructors (new_*) build valid objects\nWrite print, summary, and plot methods to make your classes pleasant to work with\nCreate custom generics with UseMethod() for domain-specific operations\nTest classes with expect_s3_class() and snapshot tests for print output",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Object-Oriented Programming"
+    ]
+  },
+  {
+    "objectID": "releasing-your-r-package.html",
+    "href": "releasing-your-r-package.html",
+    "title": "Releasing Your R Package",
+    "section": "",
+    "text": "See slides."
+  },
+  {
+    "objectID": "slides/releasing-slides.html#licensing",
+    "href": "slides/releasing-slides.html#licensing",
+    "title": "Sharing Your Package",
+    "section": "Licensing",
+    "text": "Licensing\n\n\n\n\n\nJust because your code is on GitHub doesn’t make it open source\n\nThe default is “All rights reserved”\n\nChoose a license that fits your intentions for the package\nCRAN requires an open source license for submission"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#common-licenses",
+    "href": "slides/releasing-slides.html#common-licenses",
+    "title": "Sharing Your Package",
+    "section": "Common licenses",
+    "text": "Common licenses\nApply with usethis::use_*_license()\n\n\n\n\n\n\n\n\n\n\n\nLicense\nType\nAttribution required\nPatent grant\nCopyleft\nUse function\n\n\n\n\nMIT\nPermissive\nYes\nNo\nNo\nuse_mit_license()\n\n\nApache-2.0\nPermissive\nYes\nYes\nNo\nuse_apache_license()\n\n\nGPL-3\nCopyleft\nYes\nYes\nYes (strong/viral)\nuse_gpl_license()\n\n\nLGPL-3\nWeak copyleft\nYes\nYes\nYes (allows linking)\nuse_lgpl_license()\n\n\nCC-BY\nCreative Commons Attribution\nYes\nNo\nNo\nuse_ccby_license()\n\n\nCC0\nPublic domain\nNo\nNo\nNo\nuse_cc0_license()\n\n\n\n\n\nMIT: Very short and simple; keep copyright & license notice.\nApache-2.0: Explicitly grant patent rights to users and contributors. You can’t contribute code and then sue users for patent infringement.\nGPL-3: Requires derivative works to be distributed under GPL-3 (strong/viral copyleft).\nLGPL-3 (Lesser GPL v3): Allows linking from proprietary software; modifications to the library itself must be LGPL.\nCC0: Effectively places data in the public domain — good for datasets.\nCC-BY: Suitable for data packages where attribution is required; not share‑alike."
+  },
+  {
+    "objectID": "slides/releasing-slides.html#github-distribution",
+    "href": "slides/releasing-slides.html#github-distribution",
+    "title": "Sharing Your Package",
+    "section": "GitHub distribution",
+    "text": "GitHub distribution\nInstalling from GitHub comes free with the development practices we have already discussed.\n\nGreat for niche user bases who are comfortable with R\nNo automatic update notifications (update.packages() won’t catch it)\nNeed careful branching to avoid breaking users on main"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#r-universe",
+    "href": "slides/releasing-slides.html#r-universe",
+    "title": "Sharing Your Package",
+    "section": "R-Universe",
+    "text": "R-Universe\n\nService that builds and hosts R packages from GitHub repositories.\n\nA good option for a collection of packages from your organisation.\n\nBuilds binaries automatically\nWorks with install.packages() via a custom repository URL\nNo CRAN review process\n\nR-Universe Documentation: https://docs.r-universe.dev"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#setting-up-r-universe",
+    "href": "slides/releasing-slides.html#setting-up-r-universe",
+    "title": "Sharing Your Package",
+    "section": "Setting up R-Universe",
+    "text": "Setting up R-Universe\n1. Create a GitHub repo named &lt;username&gt;.r-universe.dev\n2. Add a packages.json registry file:\n[\n  {\n    \"package\": \"fishr\",\n    \"url\": \"https://github.com/boshek/fishr\",\n    \"branch\": \"*release\"\n  }\n]\n3. Install the r-universe GitHub App on your account\n4. Wait ~1 hour - your universe appears at https://&lt;username&gt;.r-universe.dev\nhttps://docs.r-universe.dev/publish/set-up.html"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#installing-from-r-universe",
+    "href": "slides/releasing-slides.html#installing-from-r-universe",
+    "title": "Sharing Your Package",
+    "section": "Installing from R-Universe",
+    "text": "Installing from R-Universe\nUsers install your package like any CRAN package, but with an additional repository URL:\n\ninstall.packages(\n  \"fishr\",\n  repos = c(\n    boshek = \"https://boshek.r-universe.dev\",\n    CRAN = \"https://cloud.r-project.org\"\n  )\n)\n\n\nOr set it once in .Rprofile:\n\noptions(repos = c(\n  boshek = \"https://boshek.r-universe.dev\",\n  CRAN   = \"https://cloud.r-project.org\"\n))\n\nThen you can install with a simple install.packages()\n\ninstall.packages(\"fishr\")"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#cran",
+    "href": "slides/releasing-slides.html#cran",
+    "title": "Sharing Your Package",
+    "section": "CRAN",
+    "text": "CRAN\nWhere most R users expect to find packages.\n\nBuilds binaries for Windows and macOS\nUpdates tracked by update.packages()\nDistinct versioned releases\nStringent review process"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#if-it-hurts-do-it-more-often",
+    "href": "slides/releasing-slides.html#if-it-hurts-do-it-more-often",
+    "title": "Sharing Your Package",
+    "section": "“If it hurts, do it more often”",
+    "text": "“If it hurts, do it more often”\n\nMartin Fowler: https://martinfowler.com/bliki/FrequencyReducesDifficulty.html"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#releasing-to-cran",
+    "href": "slides/releasing-slides.html#releasing-to-cran",
+    "title": "Sharing Your Package",
+    "section": "Releasing to CRAN",
+    "text": "Releasing to CRAN\n\nusethis::use_release_issue()\n\n\n\n\n\n\nGood to use even if you’re not submitting to CRAN\n\nhelps you track the release process and ensures you don’t forget important steps.\n\nEdit/remove items that don’t apply (e.g., reverse dependency checks, blog post etc)\n\n\n\nCan seem daunting, but the tooling makes it manageable. Very stringent requirements - but they exist to protect users."
+  },
+  {
+    "objectID": "slides/releasing-slides.html#releasing-to-cran-tldr",
+    "href": "slides/releasing-slides.html#releasing-to-cran-tldr",
+    "title": "Sharing Your Package",
+    "section": "Releasing to CRAN: TLDR",
+    "text": "Releasing to CRAN: TLDR\n\nrelease()\n\n\n\nI use this instead of submit_cran()\nRuns through an additional list of pre-flight checks\nBuilds the package bundle\nSubmits to CRAN\n\nThis is a pre-flight checklist that complements your ongoing efforts to keep the package passing R CMD check cleanly."
+  },
+  {
+    "objectID": "slides/releasing-slides.html#the-release-process",
+    "href": "slides/releasing-slides.html#the-release-process",
+    "title": "Sharing Your Package",
+    "section": "The release process",
+    "text": "The release process\n\nDetermine the release type (patch, minor, or major - dictates version number)\nUpdate documentation: README.(R)md and NEWS.md\ncheck() on multiple operating systems and R versions\nReverse dependency checks (if other packages depend on yours)\nSubmit to CRAN and wait for acceptance\nCreate a GitHub release and increment the version number for the next cycle"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#use_news_md",
+    "href": "slides/releasing-slides.html#use_news_md",
+    "title": "Sharing Your Package",
+    "section": "use_news_md()",
+    "text": "use_news_md()\n\nuse_news_md()\n\nAdds a NEWS.md file to your package.\n\n\nTracks version numbers\nRecords user-facing changes between versions\nDisplayed on CRAN and rendered by pkgdown"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#use_cran_comments",
+    "href": "slides/releasing-slides.html#use_cran_comments",
+    "title": "Sharing Your Package",
+    "section": "use_cran_comments()",
+    "text": "use_cran_comments()\n\nuse_cran_comments()\n\nCreates cran-comments.md - submitted alongside your package:\n## R CMD check results\n\n0 errors | 0 warnings | 1 note\n\n* This is a new release.\n\nNotes: - Most times the template is sufficient - Note any CRAN check failures you are aware of and how you addressed them - There is always at least one NOTE on initial submission (“New submission”)"
+  },
+  {
+    "objectID": "slides/releasing-slides.html#if-your-submission-is-rejected",
+    "href": "slides/releasing-slides.html#if-your-submission-is-rejected",
+    "title": "Sharing Your Package",
+    "section": "If your submission is rejected",
+    "text": "If your submission is rejected\nDo not despair - it happens to everyone, including R-core and tidyverse developers.\n\nFrom the CRAN robot: fix the problem and resubmit\nFrom a human reviewer: do not reply to the email and do not argue - update cran-comments.md to explain how you addressed the issues, then resubmit"
+  },
+  {
+    "objectID": "testing-part1.html",
+    "href": "testing-part1.html",
+    "title": "Testing with testthat - Part 1",
+    "section": "",
+    "text": "First, let’s start a fresh branch for our tests:\n\npr_init(\"add-tests\")\n\n\n\n\nuse_testthat()\n\nThis creates:\n\ntests/testthat/ directory for test files\ntests/testthat.R to run tests\nAdds testthat to Suggests in DESCRIPTION\n\n\n\n\nAll new code should have an accompanying test.\nTests for R/{name}.R go in tests/testthat/test-{name}.R.\n\nuse_test(\"cpue\")\n\nThis creates tests/testthat/test-cpue.R matching your R/cpue.R file.",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#test-infrastructure-setup",
+    "href": "testing-part1.html#test-infrastructure-setup",
+    "title": "Testing with testthat - Part 1",
+    "section": "",
+    "text": "First, let’s start a fresh branch for our tests:\n\npr_init(\"add-tests\")\n\n\n\n\nuse_testthat()\n\nThis creates:\n\ntests/testthat/ directory for test files\ntests/testthat.R to run tests\nAdds testthat to Suggests in DESCRIPTION\n\n\n\n\nAll new code should have an accompanying test.\nTests for R/{name}.R go in tests/testthat/test-{name}.R.\n\nuse_test(\"cpue\")\n\nThis creates tests/testthat/test-cpue.R matching your R/cpue.R file.",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#writing-tests",
+    "href": "testing-part1.html#writing-tests",
+    "title": "Testing with testthat - Part 1",
+    "section": "Writing Tests",
+    "text": "Writing Tests\n\nBasic test structure\n\ntest_that(\"cpue calculates simple ratio correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10), 10)\n  expect_equal(cpue(catch = 50, effort = 2), 25)\n})\n\n\ntest_that(\"cpue handles vectors of data\", {\n  catches &lt;- c(100, 200, 300)\n  efforts &lt;- c(10, 10, 10)\n  expected_results &lt;- c(10, 20, 30)\n\n  expect_equal(cpue(catches, efforts), expected_results)\n})\n\nWhen possible, use a specific expectation which will give an informative failure message, instead of expect_true() or expect_false(). For example, instead of:\n\nexpect_true(is.numeric(cpue(100, 10)))\n\nUse:\n\nexpect_type(cpue(100, 10), \"double\")\n\n\n\nTesting optional arguments\n\ntest_that(\"gear_factor standardization scales correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)\n  expect_equal(\n    cpue(catch = 100, effort = 10),\n    cpue(catch = 100, effort = 10, gear_factor = 1)\n  )\n})\n\n\n\nTesting edge cases\n\ntest_that(\"cpue handles zero catch and missing data\", {\n  expect_equal(cpue(catch = 0, effort = 10), 0)\n\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\n\nRun your tests\n\ntest()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\npr_push()",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#test-helpers-and-fixtures",
+    "href": "testing-part1.html#test-helpers-and-fixtures",
+    "title": "Testing with testthat - Part 1",
+    "section": "Test Helpers and Fixtures",
+    "text": "Test Helpers and Fixtures\n\nCreate a test helper file\n\nuse_test_helper()\n\nTest helpers are loaded before tests run. Create tests/testthat/helper.R:\n\n# tests/testthat/helper.R\n\n# Helper function to generate sample fishing data\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(\n    catch = runif(n, 10, 500),\n    effort = runif(n, 1, 20),\n    gear_factor = runif(n, 1, 5)\n  )\n}\n\n\n\nUsing helpers in tests\n\ntest_that(\"cpue works with generated data\", {\n  data &lt;- generate_fishing_data(n = 5)\n\n  result &lt;- cpue(data$catch, data$effort)\n\n  expect_equal(\n    result,\n    c(34.053, 9.065, 19.239, 135.640, 6.372),\n    ignore_attr = TRUE,\n    tolerance = 1e-3\n  )\n})\n\n\n\nCreate a setup file\nSetup runs once before all tests. Create tests/testthat/setup.R:\n\n# tests/testthat/setup.R\n\n# Set up test fixtures that are expensive to create\n# (only created once, shared across all tests)\n\n# Reference dataset for testing\nreference_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 10, 10),\n  expected_cpue = c(10, 20, 30)\n)\n\n\n\nUsing setup objects in tests\nObjects created in setup.R are available to all tests:\n\ntest_that(\"cpue matches reference data\", {\n  result &lt;- cpue(reference_data$catch, reference_data$effort)\n\n  expect_equal(result, reference_data$expected_cpue)\n})",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#testing-different-function-types",
+    "href": "testing-part1.html#testing-different-function-types",
+    "title": "Testing with testthat - Part 1",
+    "section": "Testing Different Function Types",
+    "text": "Testing Different Function Types\n\nTesting return types and structure\n\ntest_that(\"cpue returns numeric vector\", {\n  result &lt;- cpue(c(100, 200), c(10, 20))\n\n  expect_type(result, \"double\")\n  expect_length(result, 2)\n})\n\n\n\nTesting with expect_message\nLet’s add a verbose parameter to cpue so we can test messages. Don’t forget to update the function documentation with the new verbose argument.\nUpdate R/cpue.R – add the parameter and update the roxygen documentation:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear standardization.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric adjustment for gear standardization (default is 1)\n#' @param verbose Logical indicating whether to print processing messages (default is FALSE)\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(100, 10, gear_factor = 0.5)\ncpue &lt;- function(catch, effort, gear_factor = 1, verbose = FALSE) {\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\nNow test the message:\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_message(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE),\n    \"Processing 2 records\"\n  )\n})\n\ntest_that(\"cpue is silent by default\", {\n  expect_no_message(cpue(100, 10))\n})\n\n\n\nTesting with expect_warning\n\ntest_that(\"cpue warns when vector lengths don't match\", {\n  expect_warning(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20)),\n    \"longer object length is not a multiple of shorter object length\"\n  )\n\n  expect_no_warning(cpue(100, 10))\n})",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#snapshot-testing-introduction",
+    "href": "testing-part1.html#snapshot-testing-introduction",
+    "title": "Testing with testthat - Part 1",
+    "section": "Snapshot Testing Introduction",
+    "text": "Snapshot Testing Introduction\nSnapshot testing captures output and compares against a saved reference.\n\nWhen to use snapshots\n\nComplex text output (print methods, messages)\nErrors and warnings\n\nWhen testing errors and warnings, don’t us expect_error() or expect_warning(). Instead, use expect_snapshot(error = TRUE) for errors and expect_snapshot() for warnings because these allow the user to review the full text of the output.\n\nPlots (with vdiffr package)\n\n\n\nBasic snapshot test\n\ntest_that(\"cpue error message is informative\", {\n  expect_snapshot(\n    cpue(\"not a number\", 10),\n    error = TRUE\n  )\n})\n\n\n\nFirst run creates the snapshot\nWhen you first run this test, testthat creates a snapshot file in tests/testthat/_snaps/, and you will get a warning that a new snapshot was added.\n\ntest()\n\n\n\nReviewing snapshot changes\n\n# After modifying output, review changes\nsnapshot_review()\n\n\n\nSnapshot testing for warnings\nLet’s update our warning test to use snapshots so we can review the full warning and save ourselves from having to copy and paste the warning text into our test code.\n\ntest_that(\"cpue produces no warnings with valid input\", {\n  expect_snapshot(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20))\n  )\n\n  expect_no_warning(cpue(100, 10))\n})\n\n\n\nYour turn\nUpdate your message test to use snapshots instead of expect_message()\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_snapshot(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE)\n  )\n  expect_no_message(cpue(100, 10))\n})\n\nWe’ll dive deeper into snapshot testing in Part 2",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#run-all-tests-and-check",
+    "href": "testing-part1.html#run-all-tests-and-check",
+    "title": "Testing with testthat - Part 1",
+    "section": "Run All Tests and Check",
+    "text": "Run All Tests and Check\n\ntest()\n\ncheck()",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#your-turn-1",
+    "href": "testing-part1.html#your-turn-1",
+    "title": "Testing with testthat - Part 1",
+    "section": "Your Turn",
+    "text": "Your Turn\nAdd some tests for biomass_index(). Try to make at least one snapshot test.\nWith R/biomass.R open, run:\n\nuse_test()\n\nOr\n\nuse_test(\"biomass\")\n\n\nOur solutions\nYours may look different. Let’s discuss!\n\ntest_that(\"biomass_index calculates correctly\", {\n  expect_equal(biomass_index(cpue = 10, area_swept = 5), 50)\n  expect_equal(biomass_index(cpue = 20, area_swept = 2.5), 50)\n})\n\ntest_that(\"biomass_index handles vectors\", {\n  cpue_vals &lt;- c(10, 20, 30)\n  area_vals &lt;- c(5, 5, 5)\n\n  expect_equal(biomass_index(cpue_vals, area_vals), c(50, 100, 150))\n})\n\ntest_that(\"biomass_index throws error on invalid input\", {\n  expect_snapshot(biomass_index(\"ten\", 5), error = TRUE)\n  expect_snapshot(biomass_index(10, \"five\"), error = TRUE)\n})",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  },
+  {
+    "objectID": "testing-part1.html#navigating-tests---interactive-testing-testing-single-files-testing-the-whole-package",
+    "href": "testing-part1.html#navigating-tests---interactive-testing-testing-single-files-testing-the-whole-package",
+    "title": "Testing with testthat - Part 1",
+    "section": "Navigating tests - interactive testing, testing single files, testing the whole package",
+    "text": "Navigating tests - interactive testing, testing single files, testing the whole package\nYou will often want to:\n\nRun a single test interactively\nTest a file\nTest the whole package\n\n\nRun a test interactively\nRun with Ctrl+Enter as you would any other code.\nThis is one place it’s important that your tests are self-contained. If there is a lot of infrastructure set up outside your test_that() blocks it is difficult to do interactive testing.\n\n\nTest a file\n\ndevtools::test_active_file()\n\nMap a keyboard shortcut to this: Ctrl/Cmd+T\n\n\nTest the whole package\n\ndevtools::test()\n\nMap a keyboard shortcut to this: Shift+Ctrl/Cmd+T",
+    "crumbs": [
+      "Day 1: Foundations",
+      "Testing with testthat - Part 1"
+    ]
+  }
+]
