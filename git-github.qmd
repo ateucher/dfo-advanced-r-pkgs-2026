@@ -8,7 +8,8 @@ format: html
 Make sure we have pushed all of our changes up to this point.
 
 ```{bash}
-git push origin main
+git pull
+git push
 ```
 
 ## Pull Request Workflows
@@ -37,7 +38,7 @@ pr_init("add-ci")
 ### Add GitHub Actions for R CMD check
 
 ```{r}
-use_github_action("check-standard")
+use_github_action()
 ```
 
 This creates `.github/workflows/R-CMD-check.yaml` that runs `R CMD check` on multiple platforms whenever you push.
@@ -84,7 +85,7 @@ pr_init("use-air")
 ### Install Air in your project
 
 ```{r}
-use_air(vscode = FALSE)
+use_air()
 ```
 
 In RStudio, change these settings:
@@ -96,6 +97,14 @@ In RStudio, change these settings:
 [Install the Air command line utility](https://posit-dev.github.io/air/cli.html).
 Otherwise, the first time Air is run (i.e., the first time you save a file),
 it will be downloaded and installed automatically.
+
+### Format your whole project
+
+In the terminal, run:
+
+```default
+air format .
+```
 
 ### Push and open a PR
 

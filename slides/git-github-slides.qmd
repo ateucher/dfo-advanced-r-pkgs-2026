@@ -78,6 +78,7 @@ Even when working alone, PRs are valuable:
 ::: {.incremental}
 - Check code runs before it reaches `main`
 - You get a diff to review your own/others' work
+- Allows efficient code review and discussion
 - Allows fearless experimentation
 :::
 
@@ -85,16 +86,41 @@ Even when working alone, PRs are valuable:
 With collaborators, PRs also enable **code review**.
 :::
 
+## Steps
+
+1. Create a new branch
+2. Make changes, commit, and push the branch to GitHub
+3. Open a Pull Request (PR) on GitHub
+4. Discuss and review the PR
+5. Merge the PR into the main branch
+6. Pull the latest changes to your local main branch
+
 ## The `usethis` PR helpers
 
 | Function | What it does |
-|---|---|
+|-|---|
 | `pr_init("name")` | Create and switch to a new branch |
 | `pr_push()` | Push branch, open PR on GitHub |
+| `pr_pull()` | Pull latest changes on that branch from GitHub |
+| `pr_merge_main()` | Merge latest changes from `main` into your branch |
+| `pr_finish()` | Clean up after merge |
+\
+
+::: {.fragment}
+
+### Other useful ones
+
+| Function | What it does |
+|---|---|
 | `pr_pause()` | Stash work, return to `main` |
 | `pr_resume("name")` | Return to a branch |
 | `pr_fetch(123)` | Check out someone else's PR |
-| `pr_finish()` | Clean up after merge |
+
+:::
+
+::: {.notes}
+These also help us avoid merge conflicts by doing a lot of "pull before you work" and "pull before you push" automatically.
+:::
 
 ## Basic PR workflow with `usethis` PR helpers
 
@@ -133,6 +159,8 @@ flowchart LR
     style PF fill:#f4a261,color:#000,stroke:none
 ```
 
+Demonstrates the full workflow: <https://usethis.r-lib.org/articles/pr-functions.html>
+
 ## Starting a branch
 
 ```{r}
@@ -158,7 +186,6 @@ usethis::pr_push()
 ::: {.fragment}
 - Pushes your branch to GitHub
 - Opens your browser to the "Create pull request" page
-- Pre-fills the branch comparison
 :::
 
 ## Writing a good PR description
@@ -170,10 +197,6 @@ usethis::pr_push()
 - What problem does this solve?
 - Any design decisions worth explaining?
 - Anything reviewers should pay attention to?
-
-::: {.fragment}
-A good PR description is a gift to your future self and your collaborators.
-:::
 
 ## After review and merge
 
@@ -202,7 +225,7 @@ usethis::pr_resume("my-branch-name")         # pick up where you left off
 This is useful when someone asks you to review their PR while you're mid-work, or when you need to make a quick fix to main.
 :::
 
-## Reviewing someone else's PR
+## Reviewing someone else's PR locally
 
 ```{r}
 usethis::pr_fetch(1)    # check out PR #1 locally
@@ -264,6 +287,8 @@ flowchart LR
     style PRe fill:#f4a261,color:#000,stroke:none
 ```
 
+Demonstrates the full workflow: <https://usethis.r-lib.org/articles/pr-functions.html>
+
 # Continuous Integration
 
 ## Why CI?
@@ -293,22 +318,23 @@ usethis::pr_init("add-ci")
 
 ### <https://github.com/r-lib/actions>
 
+\
+
 ```{r}
 usethis::use_github_action()
 ```
 
-- `"check-standard"`: Runs R CMD check when you push
-- `"test-coverage"`: Compute test coverage and report at codecov.io (Requires an account and API key)
-- `"pr-commands"`: Enables automatic documentation and styling of code via special PR comments
-And more…
+
+- `"check-standard"`: Runs `R CMD check` on several platforms when you push
+- `"test-coverage"`: Compute test coverage and report at codecov.io 
+- And more… (<https://github.com/r-lib/actions/tree/v2/examples>)
 
 ::: {.fragment}
 Creates `.github/workflows/R-CMD-check.yaml` which runs `R CMD check` on:
 
-- Ubuntu (release R)
 - macOS (release R)
 - Windows (release R)
-- Ubuntu (devel R)
+- Ubuntu (release, devel, and oldrel R)
 :::
 
 ## Add a status badge
@@ -326,6 +352,8 @@ Then push and open the PR:
 ```{r}
 usethis::pr_push()
 ```
+
+Write a good PR title and description, then submit the PR.
 
 Watch the Actions tab - CI runs on the PR branch before anything merges to `main`.
 :::
@@ -370,7 +398,7 @@ usethis::pr_init("use-air")
 ## Set up Air in your project
 
 ```{r}
-use_air(vscode = FALSE)
+use_air()
 ```
 
 In RStudio, change these settings:
@@ -385,7 +413,7 @@ Install the Air command line utility: <https://posit-dev.github.io/air/cli.html>
 Air will be downloaded automatically on first save if you haven't installed the CLI.
 :::
 
-## Format your project
+## Format your whole project
 
 ```default
 air format .
@@ -462,14 +490,15 @@ Commit when `check()` passes cleanly.
 usethis::pr_push()
 ```
 
-::: {.notes}
-Walk through the GitHub PR creation UI. Title should match the branch intent. 
-Body should explain *why*, not just *what* - the diff already shows what changed.
-Review, make comments, approve, and merge the PR on GitHub.
-:::
-
 ## Merge and clean up
 
 ```{r}
 usethis::pr_finish()
 ```
+
+## Resources
+
+- Happy Git and GitHub for the useR: <https://happygitwithr.com/>
+- `usethis::pr_*` helpers: <https://usethis.r-lib.org/articles/pr-functions.html>
+- GitHub Actions for R: <https://github.com/r-lib/actions>
+- Air code formatter: <https://posit-dev.github.io/air/>
