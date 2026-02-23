@@ -1,0 +1,443 @@
+---
+title: "Git/GitHub for Collaborative Development"
+subtitle: "Advanced R Package Development"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Git workflow review
+2. Pull request workflows with `usethis`
+3. Continuous integration with GitHub Actions
+4. Code formatting with Air
+5. Adding a function via PR
+
+# Git Workflow Review
+
+## Where we left off
+
+Make sure all changes from the fundamentals session are committed and pushed:
+
+```{bash}
+git push origin main
+```
+
+::: {.notes}
+Quick check - everyone should have a fishr package with `cpue()` and basic documentation, all pushed to GitHub. 
+If anyone is behind, now is the time to catch up before we add CI.
+:::
+
+## The core loop
+
+Every day of package development follows the same loop:
+
+::: {.incremental}
+1. Pull latest changes
+2. Make a small, focused change
+3. Test that it works
+4. Commit with a clear message
+5. Push
+:::
+
+::: {.fragment}
+Pull requests add a **review step** between commit and merge to `main`.
+:::
+
+# Pull Request Workflows
+
+## Collaborating
+
+- Git is a *distributed* version control system
+- Each collaborator has a full copy of the repository, including its history
+- All collaborators can push changes to the remote repository (given they have permission)
+- Changes made by collaborators can be pulled into your local repository
+
+## Why pull requests?
+
+```{mermaid}
+%%| eval: true
+%%| echo: false
+%%| label: pull-request
+%%| fig-width: 14
+%%| file: pull-request.mmd
+```
+
+Even when working alone, PRs are valuable:
+
+::: {.incremental}
+- Check code runs before it reaches `main`
+- You get a diff to review your own/others' work
+- A clean history of *why* changes were made
+- Allows fearless experimentation
+:::
+
+::: {.fragment}
+With collaborators, PRs also enable **code review** - the single biggest driver of code quality.
+:::
+
+## The `usethis` PR helpers
+
+| Function | What it does |
+|---|---|
+| `pr_init("name")` | Create and switch to a new branch |
+| `pr_push()` | Push branch, open PR on GitHub |
+| `pr_pause()` | Stash work, return to `main` |
+| `pr_resume("name")` | Return to a branch |
+| `pr_fetch(123)` | Check out someone else's PR |
+| `pr_finish()` | Clean up after merge |
+
+## The PR workflow: overview
+
+```{mermaid}
+%%| eval: true
+%%| echo: false
+%%| label: pr-helpers
+%%| fig-width: 16
+%%| fig-height: 8
+
+---
+config:
+  theme: base
+  themeVariables:
+    fontSize: 30px
+---
+
+flowchart LR
+    A([main]) --> PI["pr_init()"] --> B([Branch])
+    B --> C[Write & test]
+    C --> PP["pr_push()"] --> D([GitHub PR])
+    D --> E{Review}
+    E --> C
+    E -->|Merged| F([main updated])
+    F --> PF["pr_finish()"] --> G([Clean state])
+
+    style A fill:#2d6a4f,color:#fff,stroke:none
+    style F fill:#2d6a4f,color:#fff,stroke:none
+    style G fill:#2d6a4f,color:#fff,stroke:none
+    style B fill:#1d3557,color:#fff,stroke:none
+    style D fill:#457b9d,color:#fff,stroke:none
+    style E fill:#e63946,color:#fff,stroke:none
+    style C fill:#333,color:#fff,stroke:#666
+    style PI fill:#f4a261,color:#000,stroke:none
+    style PP fill:#f4a261,color:#000,stroke:none
+    style PF fill:#f4a261,color:#000,stroke:none
+```
+
+## Starting a branch
+
+```{r}
+usethis::pr_init("my-branch-name")
+```
+
+::: {.fragment}
+- Creates and checks out the branch immediately
+- You are now isolated from `main`
+- Branch names: short, descriptive, hyphenated
+:::
+
+::: {.notes}
+A reader should be able to guess what the PR does from the branch name alone.
+:::
+
+## Pushing and opening a PR
+
+```{r}
+usethis::pr_push()
+```
+
+::: {.fragment}
+- Pushes your branch to GitHub
+- Opens your browser to the "Create pull request" page
+- Pre-fills the branch comparison
+:::
+
+## Writing a good PR description
+
+**Title:** Short, imperative - "Add biomass_index function"
+
+**Body:**
+
+- What problem does this solve?
+- Any design decisions worth explaining?
+- Anything reviewers should pay attention to?
+
+::: {.fragment}
+A good PR description is a gift to your future self and your collaborators.
+:::
+
+## After review and merge
+
+Once the PR is approved and merged on GitHub:
+
+```{r}
+usethis::pr_finish()
+```
+
+::: {.fragment}
+- Switches back to `main`
+- Pulls the latest changes (including your merged work)
+- Deletes the local feature branch
+:::
+
+## Pausing and resuming
+
+If you need to switch context mid-PR:
+
+```{r}
+usethis::pr_pause()                          # return to main
+usethis::pr_resume("my-branch-name")         # pick up where you left off
+```
+
+::: {.notes}
+This is useful when someone asks you to review their PR while you're mid-work, or when you need to make a quick fix to main.
+:::
+
+## Reviewing someone else's PR
+
+```{r}
+usethis::pr_fetch(1)    # check out PR #1 locally
+```
+
+::: {.fragment}
+Run their code, run their tests, leave an informed review on GitHub.
+
+```{r}
+usethis::pr_finish()    # clean up when done reviewing
+```
+:::
+
+## The full picture
+
+```{mermaid}
+%%| eval: true
+%%| echo: false
+flowchart LR
+    A([main]) --> PI["pr_init()"] --> B([your branch])
+    B --> C[Write & test]
+    C --> PP["pr_push()"] --> D([GitHub PR])
+    D --> E{Review}
+    E -->|Changes needed| C
+    E -->|Approved & merged| F([main updated])
+    F --> PF["pr_finish()"] --> A
+
+    D --> PFetch["pr_fetch()"] --> G([reviewer's local])
+    G -->|review & comment| D
+
+    B --> PA["pr_pause()"] --> A
+    A --> PRe["pr_resume()"] --> B
+
+    style A fill:#2d6a4f,color:#fff,stroke:none
+    style F fill:#2d6a4f,color:#fff,stroke:none
+    style B fill:#1d3557,color:#fff,stroke:none
+    style G fill:#1d3557,color:#fff,stroke:none
+    style D fill:#457b9d,color:#fff,stroke:none
+    style E fill:#e63946,color:#fff,stroke:none
+    style C fill:#333,color:#fff,stroke:#666
+    style PI fill:#f4a261,color:#000,stroke:none
+    style PP fill:#f4a261,color:#000,stroke:none
+    style PF fill:#f4a261,color:#000,stroke:none
+    style PFetch fill:#f4a261,color:#000,stroke:none
+    style PA fill:#f4a261,color:#000,stroke:none
+    style PRe fill:#f4a261,color:#000,stroke:none
+```
+
+# Continuous Integration
+
+## Why CI?
+
+Your package works on your machine. But does it work on:
+
+::: {.incremental}
+- Windows? macOS? Linux?
+- R 4.3? R 4.4?
+- Someone else's machine with different packages installed?
+:::
+
+::: {.fragment}
+**Continuous Integration** automatically runs checks on every push - catching problems before they reach collaborators.
+:::
+
+## Start a branch
+
+Even infrastructure changes go through a PR - CI validates itself before landing on `main`.
+
+```{r}
+usethis::pr_init("add-ci")
+```
+
+## Add R CMD check via GitHub Actions
+
+```{r}
+usethis::use_github_action("check-standard")
+```
+
+::: {.fragment}
+Creates `.github/workflows/R-CMD-check.yaml` which runs `R CMD check` on:
+
+- Ubuntu (release R)
+- macOS (release R)
+- Windows (release R)
+- Ubuntu (devel R)
+:::
+
+## Add a status badge
+
+The action also adds a badge to your `README.Rmd`:
+
+```{r}
+devtools::build_readme()
+devtools::check()
+```
+
+::: {.fragment}
+Then push and open the PR:
+
+```{r}
+usethis::pr_push()
+```
+
+Watch the Actions tab - CI runs on the PR branch before anything merges to `main`.
+:::
+
+## Viewing CI results
+
+After merging with `pr_finish()`, go to the **Actions** tab on your repo.
+
+Each push triggers a workflow run. Green checkmark = passing. Red X = something to fix.
+
+::: {.notes}
+Show this live - click into a run and show the output from R CMD check. The output is identical to what you see locally with check(). Getting comfortable reading CI output is a key skill.
+:::
+
+# Code Formatting with Air
+
+## What is Air?
+
+[Air](https://posit-dev.github.io/air/) is a fast R code formatter - it automatically reformats your code on save.
+
+**Why it matters for collaboration:**
+
+::: {.incremental}
+- Eliminates style debates in code review
+- Reduces noisy diffs (no more whitespace-only changes)
+- Keeps everyone's code consistent without thinking about it
+:::
+
+## Start a branch
+
+```{r}
+usethis::pr_init("add-air-formatter")
+```
+
+## Set up Air in your project
+
+```{r}
+usethis::use_air(vscode = FALSE)
+```
+
+Then in RStudio, enable format on save:
+
+- **Tools > Global Options > Code > Formatting** - set formatter to Air
+- **Tools > Global Options > Code > Saving** - enable "Format on save"
+
+::: {.fragment}
+Air will be downloaded automatically on first save if you haven't installed the CLI.
+:::
+
+::: {.notes}
+Show the two RStudio settings dialogs. The CLI installation is optional - Air can run without it via the R package, but the CLI is faster.
+:::
+
+## Push and merge
+
+```{r}
+usethis::pr_push()
+```
+
+Review the diff - Air may reformat existing code in the PR. That's fine; it's a one-time cleanup.
+
+```{r}
+usethis::pr_finish()
+```
+
+# Adding a Function via PR
+
+## Start a branch
+
+```{r}
+usethis::pr_init("add-biomass-function")
+```
+
+## Write the function
+
+```{r}
+usethis::use_r("biomass")
+```
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values
+#' @param area_swept Numeric vector of area swept (km²)
+#' @return A numeric vector of biomass index values
+#' @export
+#' @examples
+#' biomass_index(cpue = 10, area_swept = 5)
+biomass_index <- function(cpue, area_swept) {
+  cpue * area_swept
+}
+```
+
+## Document and check
+
+```{r}
+devtools::document()
+devtools::load_all()
+
+biomass_index(10, 5)
+
+devtools::check()
+```
+
+Commit when `check()` passes cleanly.
+
+## Push and open a PR
+
+```{r}
+usethis::pr_push()
+```
+
+::: {.notes}
+Walk through the GitHub PR creation UI. Title should match the branch intent. Body should explain *why*, not just *what* - the diff already shows what changed.
+:::
+
+# Your Turn
+
+## Exercise
+
+::: {.incremental}
+1. Start a branch: `pr_init("add-biomass-function")`
+2. Create `R/biomass.R` with the `biomass_index()` function
+3. Document with `document()`, check with `check()`
+4. Push with `pr_push()` and open a PR on GitHub
+5. Review the diff - does the PR description tell the story?
+:::
+
+::: {.fragment}
+We will use this PR throughout the testing session.
+:::
+
+::: {.notes}
+Give people 10-15 minutes. Walk around and help anyone who gets stuck on the GitHub PR creation step. The goal is everyone has an open PR by the end of this exercise.
+:::

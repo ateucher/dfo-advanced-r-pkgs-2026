@@ -5,21 +5,36 @@ format: html
 
 ## Git Workflow Review
 
-***back to slides - git workflow overview***
-
-### Check your git status
-
-```{r}
-git_sitrep()
-```
-
 Make sure we have pushed all of our changes up to this point.
 
 ```{bash}
 git push origin main
 ```
 
+## Pull Request Workflows
+
+***back to slides - PR workflow overview***
+
+The `usethis` PR helpers manage the full lifecycle of a pull request from your R console. We'll use them for everything from here on - including setting up CI and Air.
+
+The helpers you'll use most:
+
+- `pr_init("branch-name")` - create and switch to a new branch
+- `pr_push()` - push your branch and open a PR on GitHub
+- `pr_pause()` - stash work and return to `main`
+- `pr_resume("branch-name")` - return to a branch
+- `pr_fetch(123)` - check out someone else's PR locally
+- `pr_finish()` - clean up after a PR is merged
+
 ## Continuous Integration
+
+Good habit: even infrastructure changes like adding CI go through a PR. That way CI itself validates the CI setup before it lands on `main`.
+
+### Start a branch
+
+```{r}
+pr_init("add-ci")
+```
 
 ### Add GitHub Actions for R CMD check
 
@@ -37,19 +52,36 @@ build_readme()
 check()
 ```
 
-::: {.callout-tip}
-## Make a commit
-Commit your changes, and push.
-:::
+### Push and open a PR
+
+```{r}
+pr_push()
+```
+
+This pushes your branch and opens a browser to create the PR. After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to `main`.
+
+### Merge and clean up
+
+Once CI passes and the PR is merged on GitHub:
+
+```{r}
+pr_finish()
+```
 
 ### View your check results
 
-After pushing, go to your repo's "Actions" tab to see the workflow run.
+After merging, go to your repo's "Actions" tab to see the workflow run on `main`.
 
 ## Setting Up Air
 
-[Air](https://posit-dev.github.io/air/) is a fast R formatter that automatically formats your code every time you save a `.R` file. 
+[Air](https://posit-dev.github.io/air/) is a fast R formatter that automatically formats your code every time you save a `.R` file.
 It helps you keep your mind focused on the code, and most importantly eases collaboration because it forces a consistent style among you and your collaborators.
+
+### Start a branch
+
+```{r}
+pr_init("add-air-formatter")
+```
 
 ### Install Air in your project
 
@@ -63,21 +95,31 @@ In RStudio, change these settings:
 
 ![](img/rstudio-options-format-on-save.png)
 
-[Install the Air command line utility](https://posit-dev.github.io/air/cli.html). 
-Otherwise, the first time Air is run (i.e., the first time you save a file), 
+[Install the Air command line utility](https://posit-dev.github.io/air/cli.html).
+Otherwise, the first time Air is run (i.e., the first time you save a file),
 it will be downloaded and installed automatically.
 
-## Pull Request Workflows
+### Push and open a PR
 
-***back to slides - PR workflow overview***
+```{r}
+pr_push()
+```
+
+### Merge and clean up
+
+```{r}
+pr_finish()
+```
+
+## Adding a New Function via PR
+
+Now we'll go through the full PR workflow for a real feature: adding a `biomass_index()` function to `fishr`.
 
 ### Start a new feature branch
 
 ```{r}
 pr_init("add-biomass-function")
 ```
-
-This creates and checks out a new branch.
 
 ### Write a new function
 
@@ -125,30 +167,27 @@ pr_push()
 
 This pushes your branch and opens a browser to create the PR.
 
-### Working with PRs
-
-```{r}
-# Pause work on current PR (switch back to main)
-pr_pause()
-
-# Resume work on a PR
-pr_resume("add-biomass-function")
-
-# After PR is merged, clean up
-pr_finish()
-```
-
 ### Fetch and review someone else's PR
+
+While waiting for review, you can check out a collaborator's PR locally:
 
 ```{r}
 pr_fetch(123) # PR number
 ```
 
+This lets you run their code, run their tests, and leave an informed review.
 
-### Run a final check
+When done reviewing, return to your own work:
 
 ```{r}
-check()
+pr_pause() # if you were on a branch
+pr_resume("add-biomass-function")
+```
+
+### After PR is merged
+
+```{r}
+pr_finish()
 ```
 
 <!-- TODO: Decide if we want to add Air CI -->

@@ -23,6 +23,8 @@ website:
         menu:
           - text: "Introduction"
             href: slides/intro-slides.html
+          - text: "Day 1, Session 2: Git/GitHub for Collaborative Development"
+            href: slides/git-github-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
