@@ -28,8 +28,6 @@ The helpers you'll use most:
 
 ## Continuous Integration
 
-Good habit: even infrastructure changes like adding CI go through a PR. That way CI itself validates the CI setup before it lands on `main`.
-
 ### Start a branch
 
 ```{r}
@@ -80,7 +78,7 @@ It helps you keep your mind focused on the code, and most importantly eases coll
 ### Start a branch
 
 ```{r}
-pr_init("add-air-formatter")
+pr_init("use-air")
 ```
 
 ### Install Air in your project
@@ -189,5 +187,3 @@ pr_resume("add-biomass-function")
 ```{r}
 pr_finish()
 ```
-
-<!-- TODO: Decide if we want to add Air CI -->

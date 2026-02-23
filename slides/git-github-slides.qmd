@@ -1,6 +1,5 @@
 ---
-title: "Git/GitHub for Collaborative Development"
-subtitle: "Advanced R Package Development"
+title: "Git and GitHub for Collaborative Development"
 format:
   revealjs:
     height: 900
@@ -30,7 +29,8 @@ execute:
 Make sure all changes from the fundamentals session are committed and pushed:
 
 ```{bash}
-git push origin main
+git pull
+git push
 ```
 
 ::: {.notes}
@@ -78,12 +78,11 @@ Even when working alone, PRs are valuable:
 ::: {.incremental}
 - Check code runs before it reaches `main`
 - You get a diff to review your own/others' work
-- A clean history of *why* changes were made
 - Allows fearless experimentation
 :::
 
 ::: {.fragment}
-With collaborators, PRs also enable **code review** - the single biggest driver of code quality.
+With collaborators, PRs also enable **code review**.
 :::
 
 ## The `usethis` PR helpers
@@ -97,7 +96,7 @@ With collaborators, PRs also enable **code review** - the single biggest driver 
 | `pr_fetch(123)` | Check out someone else's PR |
 | `pr_finish()` | Clean up after merge |
 
-## The PR workflow: overview
+## Basic PR workflow with `usethis` PR helpers
 
 ```{mermaid}
 %%| eval: true
@@ -212,8 +211,10 @@ usethis::pr_fetch(1)    # check out PR #1 locally
 ::: {.fragment}
 Run their code, run their tests, leave an informed review on GitHub.
 
+Once the PR is merged, clean up your local branch and delete the PR branch:
+
 ```{r}
-usethis::pr_finish()    # clean up when done reviewing
+usethis::pr_finish()
 ```
 :::
 
@@ -222,6 +223,17 @@ usethis::pr_finish()    # clean up when done reviewing
 ```{mermaid}
 %%| eval: true
 %%| echo: false
+%%| label: pr-helpers-full
+%%| fig-width: 16
+%%| fig-height: 8
+
+---
+config:
+  theme: base
+  themeVariables:
+    fontSize: 20px
+---
+
 flowchart LR
     A([main]) --> PI["pr_init()"] --> B([your branch])
     B --> C[Write & test]
@@ -260,17 +272,18 @@ Your package works on your machine. But does it work on:
 
 ::: {.incremental}
 - Windows? macOS? Linux?
-- R 4.3? R 4.4?
-- Someone else's machine with different packages installed?
+- R 4.4? R-devel?
 :::
 
 ::: {.fragment}
-**Continuous Integration** automatically runs checks on every push - catching problems before they reach collaborators.
+**Continuous Integration** automatically runs checks on every push
+
+- In practice, we’re going to use GitHub Actions, a free workflow automation service included with your GitHub account
 :::
 
-## Start a branch
+## We will add CI via a Pull Request
 
-Even infrastructure changes go through a PR - CI validates itself before landing on `main`.
+Create a new branch:
 
 ```{r}
 usethis::pr_init("add-ci")
@@ -278,9 +291,16 @@ usethis::pr_init("add-ci")
 
 ## Add R CMD check via GitHub Actions
 
+### <https://github.com/r-lib/actions>
+
 ```{r}
-usethis::use_github_action("check-standard")
+usethis::use_github_action()
 ```
+
+- `"check-standard"`: Runs R CMD check when you push
+- `"test-coverage"`: Compute test coverage and report at codecov.io (Requires an account and API key)
+- `"pr-commands"`: Enables automatic documentation and styling of code via special PR comments
+And more…
 
 ::: {.fragment}
 Creates `.github/workflows/R-CMD-check.yaml` which runs `R CMD check` on:
@@ -312,13 +332,20 @@ Watch the Actions tab - CI runs on the PR branch before anything merges to `main
 
 ## Viewing CI results
 
-After merging with `pr_finish()`, go to the **Actions** tab on your repo.
+Go to the **Actions** tab on your repo.
 
-Each push triggers a workflow run. Green checkmark = passing. Red X = something to fix.
+Each push triggers a workflow run. 
+
+- ✅ Green checkmark = passing. 
+- ❌ Red X = something to fix.
 
 ::: {.notes}
 Show this live - click into a run and show the output from R CMD check. The output is identical to what you see locally with check(). Getting comfortable reading CI output is a key skill.
 :::
+
+Merge the PR on GitHub once CI is passing.
+
+Run `pr_finish()` to clean up your branch after merging.
 
 # Code Formatting with Air
 
@@ -337,27 +364,32 @@ Show this live - click into a run and show the output from R CMD check. The outp
 ## Start a branch
 
 ```{r}
-usethis::pr_init("add-air-formatter")
+usethis::pr_init("use-air")
 ```
 
 ## Set up Air in your project
 
 ```{r}
-usethis::use_air(vscode = FALSE)
+use_air(vscode = FALSE)
 ```
 
-Then in RStudio, enable format on save:
+In RStudio, change these settings:
 
-- **Tools > Global Options > Code > Formatting** - set formatter to Air
-- **Tools > Global Options > Code > Saving** - enable "Format on save"
+![](img/rstudio-options-air-formatter.png){height=250}
 
-::: {.fragment}
+![](img/rstudio-options-format-on-save.png){height=250}
+
+Install the Air command line utility: <https://posit-dev.github.io/air/cli.html>
+
+::: {.notes}
 Air will be downloaded automatically on first save if you haven't installed the CLI.
 :::
 
-::: {.notes}
-Show the two RStudio settings dialogs. The CLI installation is optional - Air can run without it via the R package, but the CLI is faster.
-:::
+## Format your project
+
+```default
+air format .
+```
 
 ## Push and merge
 
@@ -365,11 +397,18 @@ Show the two RStudio settings dialogs. The CLI installation is optional - Air ca
 usethis::pr_push()
 ```
 
-Review the diff - Air may reformat existing code in the PR. That's fine; it's a one-time cleanup.
+Review the diff on GitHub - you should see only formatting changes, no functional changes.
+
+\
+
+::: {.fragment}
+Merge the PR once you're happy with the changes.
 
 ```{r}
 usethis::pr_finish()
 ```
+
+:::
 
 # Adding a Function via PR
 
@@ -388,12 +427,17 @@ usethis::use_r("biomass")
 ```{r}
 #' Calculate Biomass Index
 #'
+#' Calculates biomass index from CPUE and area swept.
+#'
 #' @param cpue Numeric vector of CPUE values
-#' @param area_swept Numeric vector of area swept (km²)
+#' @param area_swept Numeric vector of area swept (e.g., km²)
+#'
 #' @return A numeric vector of biomass index values
 #' @export
+#'
 #' @examples
-#' biomass_index(cpue = 10, area_swept = 5)
+#' salmon_cpue <- cpue(catch = 2, effort = 2)
+#' biomass_index(cpue = salmon_cpue, area_swept = 5)
 biomass_index <- function(cpue, area_swept) {
   cpue * area_swept
 }
@@ -419,25 +463,13 @@ usethis::pr_push()
 ```
 
 ::: {.notes}
-Walk through the GitHub PR creation UI. Title should match the branch intent. Body should explain *why*, not just *what* - the diff already shows what changed.
+Walk through the GitHub PR creation UI. Title should match the branch intent. 
+Body should explain *why*, not just *what* - the diff already shows what changed.
+Review, make comments, approve, and merge the PR on GitHub.
 :::
 
-# Your Turn
+## Merge and clean up
 
-## Exercise
-
-::: {.incremental}
-1. Start a branch: `pr_init("add-biomass-function")`
-2. Create `R/biomass.R` with the `biomass_index()` function
-3. Document with `document()`, check with `check()`
-4. Push with `pr_push()` and open a PR on GitHub
-5. Review the diff - does the PR description tell the story?
-:::
-
-::: {.fragment}
-We will use this PR throughout the testing session.
-:::
-
-::: {.notes}
-Give people 10-15 minutes. Walk around and help anyone who gets stuck on the GitHub PR creation step. The goal is everyone has an open PR by the end of this exercise.
-:::
+```{r}
+usethis::pr_finish()
+```
