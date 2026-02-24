@@ -23,7 +23,7 @@ execute:
 4. Documentation basics
 5. Common pain points
 
-# Why Make a Package?
+# R Packages
 
 ## Why make a package?
 
@@ -79,7 +79,6 @@ A package is the fundamental unit of shareable R code. Even if you never share i
 As a developer, you mostly live in the source form. Bundle and binary are intermediate forms you rarely touch directly — devtools handles them. Installed is what users have after `install.packages()`. In memory is what you get after `library()` — this is the only state where you can actually use the package. `load_all()` shortcuts straight from source to in-memory without going through the other forms.
 :::
 
-# Package Structure
 
 ## Package structure
 
@@ -91,6 +90,34 @@ mypackage/
   DESCRIPTION  <- Package metadata
   NAMESPACE    <- Exports (auto-generated)
 ```
+
+## Let's make a package!
+
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**We will**
+
+- Create a simple package
+- Use git to track our changes
+- Push the code to a repository on GitHub
+- Create tests for our functions
+- Create documentation for our functions 
+- Focus on workflows
+:::
+
+::: {.column width="50%"}
+**We won't**
+
+- Cover every aspect of R package development
+- Create a package website
+:::
+
+::::
+
+
+
 
 # Lay the Foundations
 
