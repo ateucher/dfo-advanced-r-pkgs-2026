@@ -1,0 +1,476 @@
+---
+title: "Testing with testthat"
+subtitle: "Part 2"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Updating snapshots
+2. Writing clean tests with `withr`
+3. Test coverage with `covr`
+
+# Updating Snapshots
+
+## Where we left off
+
+In "Function Design Best Practices" we added input validation with better error messages.
+
+::: {.fragment}
+Our snapshot tests captured the *old* error output - they will now fail.
+:::
+
+::: {.fragment}
+```{r}
+test()
+```
+:::
+
+::: {.notes}
+Give participants a moment to run test() so they can see the failure. The failure message will say something like "Snapshot of `cpue("not a number", 10)` has changed". This is expected - walk them through why.
+:::
+
+## What a snapshot failure looks like
+
+```
+── Failure (test-cpue.R:14:3): cpue error message is informative ──────────────
+Snapshot of `cpue("not a number", 10)` has changed:
+old[3] == "  non-numeric argument to binary operator"
+new[3] == "  catch must be numeric, not character"
+```
+
+::: {.fragment}
+The test is doing its job: it detected that your output changed.
+:::
+
+::: {.fragment}
+Now you decide: is this the output you *intended*?
+:::
+
+## Reviewing snapshot changes
+
+```{r}
+snapshot_review()   # interactive diff viewer
+```
+
+::: {.fragment}
+If the new output is correct:
+
+```{r}
+snapshot_accept()   # accept all pending changes
+```
+:::
+
+::: {.notes}
+snapshot_review() opens an interactive Shiny app showing old vs. new output side by side. Walk through it live. snapshot_accept() writes the new output to the _snaps/ files. Remind participants to commit the updated snapshots.
+:::
+
+## The snapshot workflow
+
+::: {.incremental}
+1. Change something (a function, an error message, a print method)
+2. Run `test()` - snapshot tests fail
+3. Run `snapshot_review()` - inspect the diff
+4. Accept if the change is intentional, fix the code if it is not
+5. Commit the updated `.md` files in `tests/testthat/_snaps/`
+:::
+
+::: {.fragment}
+::: {.notebox}
+This cycle will repeat throughout the course. That is normal and expected.
+:::
+:::
+
+# Writing Clean Tests
+
+## Tests and global state
+
+A test that changes global state can affect tests that run after it, 
+_AND_ it can affect the user’s session if they run tests interactively.
+
+::: {.fragment}
+**Global state includes:**
+
+- Options (`getOption()`)
+- Environment variables
+- Working directory
+- Random seed
+- Files on disk
+:::
+
+::: {.fragment}
+The fix: make every change *local* to the test that needs it.
+:::
+
+::: {.notes}
+global state is anything that persists across function calls and affects how code behaves - shared mutable context that outlives the call that changed it.
+:::
+
+## withr
+
+The `withr` package provides helpers to make temporary changes that are automatically reversed.
+
+::: {.fragment}
+
+```{r}
+use_package("withr", type = "Suggests")
+```
+
+:::
+
+::: {.fragment .question}
+Aside: Why do we set `type = "Suggests"` for withr?
+:::
+
+## Two families of `withr_` helpers:
+
+| Prefix | Scope | Use for |
+|--------|-------|---------|
+| `local_*` | Runs until the current environment exits | Inside `test_that()` |
+| `with_*` | Runs for one expression | Wrapping a single call |
+
+examples:
+
+::: {.columns}
+::: {.column}
+
+``` r
+getOption("digits")
+#> [1] 7
+pi
+#> [1] 3.141593
+
+withr::with_options(
+  list(digits = 2),
+  print(pi)
+)
+#> [1] 3.1
+
+getOption("digits")
+#> [1] 7
+```
+
+:::
+::: {.column}
+
+```{r}
+Sys.time()
+#> [1] "2026-02-23 12:24:34 PST"
+
+withr::with_timezone(
+  "Europe/Paris", 
+  print(Sys.time())
+)
+#> [1] "2026-02-23 21:25:36 CET"
+
+withr::with_timezone(
+  "America/New_York", 
+  print(Sys.time())
+)
+#> [1] "2026-02-23 15:26:13 EST"
+
+Sys.time()
+#> [1] "2026-02-23 12:26:39 PST"
+```
+
+:::
+:::
+
+
+## Recall: verbose via a package option
+
+`cpue()` reads verbosity from an option:
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) { ... }
+```
+
+::: {.fragment}
+Tests that set `fishr.verbose = TRUE` must restore the original value afterward - or they will leak into other tests.
+:::
+
+## Testing options with `local_options`
+
+```{r}
+test_that("cpue uses verbosity when option set to TRUE", {
+  withr::local_options(fishr.verbose = TRUE) # reset when this block exits
+
+  expect_snapshot(cpue(100, 10))
+})
+
+test_that("cpue is not verbose when option set to FALSE", {
+  withr::local_options(fishr.verbose = FALSE) # reset when this block exits
+
+  expect_silent(cpue(100, 10))
+})
+```
+
+::: {.notes}
+Emphasise that without local_options, the first test would leave fishr.verbose = TRUE in the session, which would cause the second test to fail even though the logic is correct. This is a classic test pollution bug.
+:::
+
+## `with_options` for a single assertion
+
+```{r}
+test_that("cpue verbosity falls back to FALSE when not set", {
+  withr::with_options(
+    list(fishr.verbose = NULL), # reset as soon as this expression finishes
+    expect_no_message(cpue(100, 10))
+  )
+})
+```
+
+# Your Turn
+
+## Exercise
+
+Add the same `verbose` argument to `biomass_index()` and write clean tests for it.
+
+::: {.fragment}
+1. Update `R/biomass.R` to read from `getOption("fishr.verbose", FALSE)`
+2. Open the test file: `use_test("biomass")`
+3. Write tests using `withr::local_options()`
+4. Run `test()` and accept any new snapshots
+:::
+
+::: {.fragment}
+::: {.question}
+How would you test that the verbose message is correct?
+:::
+:::
+
+## Solution
+
+```{r}
+test_that("biomass_index uses verbosity when set as an option", {
+  withr::local_options(fishr.verbose = TRUE)
+
+  expect_snapshot(biomass_index(cpue = 5, area_swept = 100))
+})
+
+test_that("biomass_index verbosity falls back to FALSE when not set", {
+  withr::local_options(fishr.verbose = NULL)
+
+  expect_no_message(biomass_index(cpue = 5, area_swept = 100))
+})
+```
+
+# More withr Helpers
+
+## Common helpers
+
+| Helper | Resets |
+|--------|--------|
+| `local_options()` / `with_options()` | R options |
+| `local_envvar()` / `with_envvar()` | Environment variables |
+| `local_dir()` / `with_dir()` | Working directory |
+| `local_tempfile()` / `with_tempfile()` | Temp file (deleted after) |
+| `local_tempdir()` / `with_tempdir()` | Temp directory (deleted after) |
+| `local_seed()` / `with_seed()` | Random seed |
+| `defer()` | Custom cleanup code |
+
+## Example: testing file output
+
+```{r}
+test_that("results can be written to a file", {
+  outfile <- withr::local_tempfile(fileext = ".csv")
+
+  write_cpue_results(cpue(100, 10), file = outfile)
+
+  expect_true(file.exists(outfile))
+  expect_equal(nrow(read.csv(outfile)), 1)
+})
+# outfile is deleted automatically after the test
+```
+
+## Quiz
+
+::: {.question}
+Where have we already altered the global state in our test helpers?
+:::
+
+::: {.fragment}
+`tests/testthat/helper.R` calls `set.seed()` directly - this sets the seed for the entire session.
+
+```{r}
+# Before
+generate_fishing_data <- function(n = 10) {
+  set.seed(67)
+  data.frame(...)
+}
+```
+
+```{r}
+# After
+generate_fishing_data <- function(n = 10) {
+  withr::local_seed(67)
+  data.frame(...)
+}
+```
+
+:::
+
+::: {.notes}
+local_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function.
+:::
+
+# Test Coverage with covr
+
+## Why measure coverage?
+
+Coverage tracks which lines of your code are *executed* when your tests run.
+
+::: {.incremental}
+- Reveals untested code paths - the gaps you didn't notice
+- Gives you an objective starting point when inheriting a package
+- CI can report coverage changes on every PR
+:::
+
+::: {.fragment}
+Coverage tells you where tests are *absent*. It does not tell you whether the tests you have are any good.
+:::
+
+## Set up covr
+
+```{r}
+use_package("covr", type = "Suggests")
+```
+
+## Run package coverage
+
+```{r}
+library(covr)
+
+cov <- package_coverage()
+cov
+```
+
+::: {.fragment}
+Prints a per-file coverage percentage:
+
+```
+fishr Coverage: 87.50%
+R/biomass.R: 75.00%
+R/cpue.R:    93.75%
+```
+:::
+
+::: {.fragment}
+For a single overall number:
+
+```{r}
+percent_coverage(cov)
+```
+:::
+
+::: {.notes}
+package_coverage() loads the package, runs all your tests, and records which lines were hit. It takes the same time as running test(). The output already tells a useful story - which files have the most gaps.
+:::
+
+## Finding untested code
+
+```{r}
+zero_coverage(cov)
+```
+
+::: {.fragment}
+Returns a data frame of every line with zero hits. In RStudio, these appear as clickable markers - you can jump straight to the uncovered line.
+:::
+
+
+## Visual report
+
+```{r}
+report(cov)
+```
+
+::: {.fragment}
+Opens an HTML page showing each file with lines colour-coded:
+
+- Green: covered
+- Red: not covered
+:::
+
+::: {.notes}
+Show this live. The visual report makes it immediately obvious which branches are untested - for example, an error-handling path that is never triggered by tests.
+:::
+
+## Active file coverage
+
+```{r}
+devtools::test_coverage_active_file()
+```
+
+::: {.fragment}
+Runs coverage only for the file you are editing - much faster than the full package.
+
+Consider binding this to a keyboard shortcut: `Ctrl/Cmd + R`
+:::
+
+## Excluding lines
+
+Some lines are not worth testing - interactive-only code paths, print methods, and so on.
+
+```{r}
+if (interactive()) {
+  # nocov start
+  browse_results(x)
+} # nocov end
+```
+
+::: {.fragment}
+Or exclude a single line:
+
+```{r}
+stop("Column must be numeric") # nocov
+```
+
+:::
+
+## Coverage in CI
+
+Add a GitHub Actions workflow that reports coverage on every push:
+
+```{r}
+usethis::use_github_action("test-coverage")
+```
+
+::: {.fragment}
+By default this uploads results to [Codecov](https://about.codecov.io/), which tracks coverage over time and comments on pull requests with coverage diffs.
+
+You will need to add a `CODECOV_TOKEN` repository secret - see the session notes for setup details.
+:::
+
+::: {.notes}
+If participants do not want a Codecov account, they can edit the generated workflow to remove the codecov/codecov-action upload step. Coverage will still be printed to the Actions log on every run.
+:::
+
+## A word on coverage targets
+
+::: {.incremental}
+- High coverage is useful as a guide for finding gaps
+- Chasing 100% is rarely worthwhile
+- Coverage tells you which lines were *executed*, not whether the tests verify correct behaviour
+- A test that runs code without assertions inflates the number without adding value
+:::
+
+::: {.fragment}
+Focus on covering the important logic paths and edge cases - not the number.
+:::

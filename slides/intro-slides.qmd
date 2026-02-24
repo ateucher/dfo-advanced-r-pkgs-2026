@@ -40,41 +40,20 @@ This is a three-day course for people who want to build R packages that are robu
 Cameras. Remind everyone about the code of conduct briefly - it's about creating a safe learning environment.
 :::
 
-## Sticky Notes
-
-::: columns
-::: {.column width="50%"}
-<div style="width:300px; height:300px; background-color:#ff69b4; margin-bottom:1rem;"></div>
-
-**PINK**
-
-I'm stuck, please send help
-:::
-
-::: {.column width="50%"}
-<div style="width:300px; height:300px; background-color:#4caf50; margin-bottom:1rem;"></div>
-
-**GREEN**
-
-I'm good, let's move on
-:::
-:::
 
 ## Sticky Notes (online)
 
 ::: columns
 ::: {.column width="50%"}
-<div style="width:300px; height:300px; background-color:#ff69b4; margin-bottom:1rem;"></div>
 
-**PINK = I'm stuck** [✋]{style="font-size:2em;"}       
+**I'm stuck** [✋]{style="font-size:2em;"}       
 
 Use the Zoom Raise Hand reaction
 :::
 
 ::: {.column width="50%"}
-<div style="width:300px; height:300px; background-color:#4caf50; margin-bottom:1rem;"></div>
 
-**GREEN = I'm good** [👍]{style="font-size:2em;"}       
+**I'm good** [👍]{style="font-size:2em;"}       
 
 Use the Thumbs Up reaction
 :::
@@ -116,7 +95,8 @@ Run these two commands and make sure they succeed before we begin:
 devtools::has_devel()
 ```
 
-Look for "Your system is ready to build packages!"
+Look for 
+`Your system is ready to build packages!`
 
 
 
@@ -125,7 +105,8 @@ Look for "Your system is ready to build packages!"
 usethis::git_sitrep()
 ```
 
-Look for `Personal access token for 'https://github.com': '<discovered>'`
+Look for 
+`Personal access token for 'https://github.com': '<discovered>'`
 :::
 
 ::: {.notes}

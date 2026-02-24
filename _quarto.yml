@@ -8,12 +8,13 @@ project:
 
 website:
   title: "📦 Advanced R Package Development"
+  favicon: favicon.svg
   site-url: http://andyteucher.ca/dfo-advanced-r-pkgs-2026/
   navbar:
     background: secondary
     right:
       - icon: github
-        href: https://github.com/boshek/2026-feb-course-planning
+        href: https://github.com/ateucher/dfo-advanced-r-pkgs-2026
         aria-label: GitHub
     left:
       - href: index.qmd
@@ -23,13 +24,21 @@ website:
         menu:
           - text: "Introduction"
             href: slides/intro-slides.html
+          - text: "Day 1, Session 1: Package Development Fundamentals"
+            href: slides/package-fundamentals-slides.html
+          - text: "Day 1, Session 2: Git/GitHub for Collaborative Development"
+            href: slides/git-github-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
+          - text: "Day 2, Session 2: Testing Part 2"
+            href: slides/testing-part2-slides.html
+          - text: "Day 2, Session 3: Advanced Documentation"
+            href: slides/documentation-slides.html
           - text: "Day 3, Session 2: Data in Packages"
             href: slides/data-packages-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
             href: slides/releasing-slides.html
-  repo-url: https://github.com/boshek/2026-feb-course-planning
+  repo-url: https://github.com/ateucher/dfo-advanced-r-pkgs-2026
   repo-actions: [edit, issue]
   sidebar:
     search: true
@@ -67,7 +76,7 @@ website:
           - text: "Data in Packages"
             href: data-packages.qmd
           - text: "Releasing Your R Package"
-            href: releasing-your-r-package
+            href: releasing-your-r-package.qmd
 
 bibliography: references.bib
 
@@ -84,3 +93,4 @@ format:
         - darkly
         - style-dark.scss
     toc: true
+    link-external-newwindow: true
