@@ -317,6 +317,10 @@ generate_fishing_data <- function(n = 10) {
 }
 ```
 
+:::
+
+::: {.fragment}
+
 ```{r}
 # After
 generate_fishing_data <- function(n = 10) {

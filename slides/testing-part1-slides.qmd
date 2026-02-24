@@ -158,9 +158,7 @@ test_that("gear_factor standardization scales correctly", {
 ## Testing edge cases
 
 ```{r}
-test_that("cpue handles zero catch and missing data", {
-  expect_equal(cpue(catch = 0, effort = 10), 0)
-
+test_that("cpue handles missing data", {
   expect_true(is.na(cpue(NA_real_, 10)))
   expect_true(is.na(cpue(100, NA_real_)))
 })
@@ -306,19 +304,6 @@ test_that("cpue is silent by default", {
 Always test both the positive and negative case - that the message appears when expected, and that it's absent when not.
 :::
 
-## Testing with `expect_warning`
-
-```{r}
-test_that("cpue warns when vector lengths don't match", {
-  expect_warning(
-    cpue(catch = c(100, 200, 300), effort = c(10, 20)),
-    "longer object length is not a multiple of shorter object length"
-  )
-
-  expect_no_warning(cpue(100, 10))
-})
-```
-
 # Snapshot Testing
 
 ## Overview
@@ -425,10 +410,6 @@ test() # run tests only
 
 check() # full package check (includes tests)
 ```
-
-::: {.notes}
-check() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission.
-:::
 
 # Your Turn
 
