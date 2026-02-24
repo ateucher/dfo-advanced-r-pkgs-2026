@@ -245,12 +245,12 @@ Snapshot testing captures output and compares against a saved reference.
     for warnings because these allow the user to review the full text of the output.
 - Plots (with vdiffr package)
 
-### Basic snapshot test
+### Basic snapshot test for errors
 
 ```{r}
-test_that("cpue error message is informative", {
+test_that("cpue errors when input is not numeric", {
   expect_snapshot(
-    cpue("not a number", 10),
+    cpue("five", 10),
     error = TRUE
   )
 })
@@ -271,7 +271,7 @@ Let's use snapshots so we can review the full warning
 and save ourselves from having to copy and paste the warning text into our test code.
 
 ```{r}
-test_that("cpue produces no warnings with valid input", {
+test_that("cpue warns when catch and effort lengths differ", {
   expect_snapshot(
     cpue(c(100, 200, 300), c(10, 20))
   )
@@ -280,18 +280,6 @@ test_that("cpue produces no warnings with valid input", {
 })
 ```
 
-### Your turn
-
-Update your message test to use snapshots instead of `expect_message()`
-
-```{r}
-test_that("cpue provides informative message when verbose", {
-  expect_snapshot(
-    cpue(c(100, 200), c(10, 20), verbose = TRUE)
-  )
-  expect_no_message(cpue(100, 10))
-})
-```
 
 ***We'll dive deeper into snapshot testing in Part 2***
 
