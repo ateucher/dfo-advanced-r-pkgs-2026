@@ -169,6 +169,30 @@ View with gh cli: `gh pr view 1 --repo boshek/fishr`
 **STYLE:**
 - Use Canadian English spellings throughout all course materials (behaviour, colour, centre, etc.). Code identifiers that match R conventions (e.g., `center` in `scale()`) are exempt.
 
+**QUARTO:**
+
+When putting an R code block in a div, there must be a blank line between the opening fence of the div
+and the opening fence of the code block, and there must be a blank line after the closing 
+fence of the code block and the closing fence of the the div:
+
+Good:
+
+::: {.fragment}
+
+```{r}
+1+1
+```
+
+:::
+
+Bad:
+
+::: {.fragment}
+```{r}
+1+1
+```
+:::
+
 **REMEMBER:**
 - This is a beginner-focused group - don't assume advanced knowledge
 - Each session should include practical exercises, not just lecture
