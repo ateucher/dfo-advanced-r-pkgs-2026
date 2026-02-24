@@ -113,6 +113,10 @@ _AND_ it can affect the user’s session if they run tests interactively.
 The fix: make every change *local* to the test that needs it.
 :::
 
+::: {.notes}
+global state is anything that persists across function calls and affects how code behaves - shared mutable context that outlives the call that changed it.
+:::
+
 ## withr
 
 The `withr` package provides helpers to make temporary changes that are automatically reversed.
