@@ -21,9 +21,8 @@ execute:
 2. Print debugging
 3. `browser()`: interactive debugging
 4. Breakpoints, `debug()`, and `debugonce()`
-5. Debugging failing tests
-6. `rlang::last_trace()`
-7. Strategy summary
+5. `rlang::last_trace()`
+6. Strategy summary
 
 # Reading Error Messages
 
@@ -165,7 +164,7 @@ Once inside the browser you have a mini command language:
 | `where` | Show the call stack (like `traceback()` while paused) |
 
 ::: {.fragment}
-You can also run any R expression: `ls()`, `str(raw_cpue)`, etc.
+You can also run any R expression: `ls()`, `str(catch)`, etc.
 :::
 
 ## RStudio debug toolbar
@@ -267,64 +266,6 @@ Type a frame number to browse into it, inspect variables, then `0` to exit.
 ```{r}
 options(error = NULL)  # reset to default when done
 ```
-:::
-
-# Debugging Failing Tests
-
-## browser() inside test_that()
-
-```{r}
-test_that("cpue calculates correctly", {
-  browser()
-  result <- cpue(catch = 100, effort = 10)
-  expect_equal(result, 10)
-})
-```
-
-::: {.fragment}
-Run this interactively with `Ctrl+Enter` — **not** with `test()`.
-
-The test runner captures output differently; interactive execution gives the full browser experience.
-:::
-
-## Narrow down with test_active_file()
-
-When a test fails, don't run the full suite repeatedly. Focus on the failing file:
-
-```{r}
-devtools::test_active_file()
-```
-
-## "Passes alone, fails with test()"
-
-A test passes when you run it by itself but fails when running the full suite.
-
-::: {.fragment}
-This is almost always **leftover state**: a previous test changed something and didn't clean up.
-
-(Options, global variables, files, random seed — exactly what `withr` guards against.)
-:::
-
-::: {.fragment}
-**Debugging strategy:**
-
-1. Binary search: run half the suite to find which prior test causes the problem
-2. Look for side effects: `options()`, `Sys.setenv()`, file creation, `set.seed()`
-3. Fix with `withr::local_*` in the offending test
-:::
-
-## Snapshot mismatches
-
-When a snapshot test fails, don't guess what changed:
-
-```{r}
-snapshot_review()
-```
-
-::: {.fragment}
-Opens a side-by-side diff of the old snapshot and the new output.
-
-Accept if the change is intentional, fix the code if it is not.
 :::
 
 # rlang::last_trace()
