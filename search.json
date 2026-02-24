@@ -485,7 +485,11 @@
     "href": "releasing-your-r-package.html",
     "title": "Releasing Your R Package",
     "section": "",
-    "text": "See slides."
+    "text": "See slides.",
+    "crumbs": [
+      "Day 3: Advanced Topics and Application",
+      "Releasing Your R Package"
+    ]
   },
   {
     "objectID": "object-oriented-programming.html",
