@@ -33,6 +33,10 @@ Please ensure you have completed the steps in [System Setup](setup.html)
 
 See the [Course Schedule](course-schedule.qmd) for the full program.
 
+## Code of Conduct
+
+Please review and adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Instructors
 
 [Andy Teucher](https://andyteucher.ca) is a freelance data scientist and package developer with a passion for teaching others how to use data science tools to make their work more efficient and reproducible. His background is in conservation biology, with an MSc in Ecology from the University of Calgary. He has spent much of his career as a data scientist in government, where he made it his mission to promote and teach open, reproducible data science practices. He has written many R packages for internal use in his teams as well as for a broader audience, with several hosted on CRAN. Andy especially enjoys developing packages to make it easier to work with spatial data in R. Andy is a certified Software Carpentry and Data Carpentry instructor, and has led many workshops teaching programming skills to scientists and data professionals.
