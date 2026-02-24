@@ -304,7 +304,7 @@
 <p><code>@inheritParams</code> also works across packages: <code>@inheritParams pkg::function</code></p>
 </div>
 <aside class="notes">
-<p>Point out that <span class="citation" data-cites="inheritParams">(<a href="" role="doc-biblioref" onclick="return false;"><strong>inheritParams?</strong></a>)</span> can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.</p>
+<p>Point out that <code>@inheritParams</code> can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -372,7 +372,7 @@ The user has to go to the <code>?cpue()</code> help and figure it out for themse
  <code>gear_factor</code> Numeric adjustment for gear standardisation…<br>
  <code>method</code> One of “ratio” or “log”…</p>
 <aside class="notes">
-<p>Before <span class="citation" data-cites="inheritDotParams">(<a href="" role="doc-biblioref" onclick="return false;"><strong>inheritDotParams?</strong></a>)</span>, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.</p>
+<p>Before <code>@inherit</code>DotParams`, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
