@@ -10,28 +10,46 @@ Our `biomass_index()` function is in good shape after our testing sessions. Here
 ```{r}
 #' Calculate Biomass Index
 #'
-#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
-#'   and `effort`.
-#' @param area_swept Numeric vector of area swept (e.g., km²).
-#' @param catch Numeric vector of catch (e.g., kg).
-#' @param effort Numeric vector of effort (e.g., hours).
-#' @param ... Additional arguments passed to [cpue()].
+#' Calculates biomass index from CPUE and area swept. Can optionally
+#' compute CPUE from catch and effort data.
+#'
+#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are
+#'   provided, this is computed automatically.
+#' @param area_swept Numeric vector of area swept (e.g., km^2^)
+#' @param catch Optional numeric vector of catch. If provided with `effort`,
+#'   CPUE is computed via `cpue()`.
+#' @param effort Optional numeric vector of effort. Required if `catch` is
+#'   provided.
+#' @param verbose Logical; print processing info? Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+#' @param ... Additional arguments passed to `cpue()` when computing from
+#'   catch and effort (e.g., `method`, `gear_factor`).
+#'
+#' @return A numeric vector of biomass index values
 #' @export
-biomass_index <- function(
-  cpue = NULL,
-  area_swept,
-  catch = NULL,
-  effort = NULL,
-  ...
-) {
-  # ...
-}
+#'
+#' @examples
 ```
 
 And here is the documentation for `cpue()`:
 
 ```{r}
-
+#' Calculate Catch Per Unit Effort (CPUE)
+#'
+#' Calculates CPUE from catch and effort data, with optional gear
+#' standardization. Supports ratio and log-transformed methods.
+#'
+#' @param catch Numeric vector of catch (e.g., kg)
+#' @param effort Numeric vector of effort (e.g., hours)
+#' @param gear_factor Numeric scalar for gear standardization (default 1)
+#' @param method Character; one of `"ratio"` (default) or `"log"`.
+#' @param verbose Logical; print processing info? Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+#'
+#' @return A numeric vector of CPUE values
+#' @export
+#'
+#' @examples
 ```
 
 There are two documentation problems here:
@@ -39,18 +57,18 @@ There are two documentation problems here:
 1. `catch` and `effort` are already documented in `cpue()`. If the description of those parameters ever changes, we have two places to update.
 2. The `@param ...` says "Additional arguments passed to `cpue()`" but gives the user no information about *which* arguments are accepted or what they do.
 
-## @inheritParams
+## `@inheritParams`
 
 `@inheritParams` copies parameter documentation from another function into the current one. You specify the source function, and roxygen2 copies the `@param` entries for any parameter whose name matches.
 
-Replace the hand-written `@param catch` and `@param effort` with:
+Replace the duplicated parameters with:
 
 ```{r}
 #' Calculate Biomass Index
 #'
 #' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
 #'   and `effort`.
-#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param area_swept Numeric vector of area swept (e.g., km^2^).
 #' @inheritParams cpue
 #' @param ... Additional arguments passed to `cpue()`.
 #' @export
@@ -59,6 +77,7 @@ biomass_index <- function(
   area_swept,
   catch = NULL,
   effort = NULL,
+  verbose = getOption("fishr.verbose", FALSE),
   ...
 ) {
   # ...
@@ -70,9 +89,6 @@ roxygen2 looks at the `@param` tags in `cpue()` and copies documentation for any
 - appears in the current function's signature, **and**
 - is not already documented in the current function
 
-So `catch` and `effort` get pulled in from `cpue()`. 
-`gear_factor`, `method`, and `verbose` are skipped because they are not explicit parameters of `biomass_index()`.
-
 ```{r}
 document()
 ```
@@ -83,13 +99,13 @@ Open the help page to confirm:
 ?biomass_index
 ```
 
-The `catch` and `effort` parameter descriptions now match `cpue()` exactly - and they will stay in sync automatically whenever `cpue()` docs change.
+The duplicated parameter descriptions now match `cpue()` exactly - and they will stay in sync automatically whenever `cpue()` docs change.
 
 ::: {.callout-tip}
 `@inheritParams` can chain across functions. If function C inherits from B which inherits from A, roxygen2 resolves the full chain. It also works across packages: `@inheritParams pkg::function`.
 :::
 
-## @inheritDotParams
+## `@inheritDotParams`
 
 `@param ...` is vague. The user has to follow the cross-reference to `cpue()` and work out which arguments apply. `@inheritDotParams` generates a proper description that names the forwarded arguments and links their documentation automatically.
 
@@ -98,7 +114,7 @@ The `catch` and `effort` parameter descriptions now match `cpue()` exactly - and
 #'
 #' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
 #'   and `effort`.
-#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param area_swept Numeric vector of area swept (e.g., km^2^).
 #' @inheritParams cpue
 #' @inheritDotParams cpue -catch -effort
 #' @export
@@ -120,13 +136,6 @@ document()
 ?biomass_index
 ```
 
-The `...` entry now reads something like:
-
-> **...** Arguments passed to `cpue()`:
-> `gear_factor` Numeric adjustment for gear standardisation...
-> `method` One of "ratio" or "log"...
-> `verbose` Logical; if TRUE, prints processing information...
-
 Users can see exactly what they can pass through without leaving the help page.
 
 ## Markdown and cross-references
@@ -144,7 +153,7 @@ The basics work as expected:
 #' `NA` for any row where either input is `NA`.
 #'
 #' @param cpue Numeric vector of CPUE values (units: kg/hr).
-#' @param area_swept Numeric vector of area swept in **km²**.
+#' @param area_swept Numeric vector of area swept in **km^2^**.
 #' @return A numeric vector the same length as `cpue`.
 ```
 
