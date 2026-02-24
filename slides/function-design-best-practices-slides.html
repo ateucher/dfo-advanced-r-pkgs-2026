@@ -592,11 +592,22 @@
 <li>If we used <code>cpue = 0</code>, there’s no way to tell whether the user passed zero intentionally or just didn’t provide a value</li>
 </ul>
 </section>
+<section id="document-and-check-1" class="slide level2">
+<h2>Document and check</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">document</span>()</span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="make-a-commit-1" class="slide level2">
+<h2>Make a commit</h2>
+</section>
 <section id="pitfalls-of" class="slide level2">
 <h2>Pitfalls of …</h2>
 <ul>
 <li>Arguments passed through <code>...</code> must be named - positional matching doesn’t work through the ellipsis</li>
-<li>Misspelled arguments are silently absorbed: <code>cpue(100, 10, mthod = "log")</code> won’t error</li>
+<li>Misspelled arguments are silently absorbed: <code>biomass_index(area_swept = 5, catch = 100, effort = 10, mthod = "log")</code> won’t error</li>
 <li>Errors from inner functions can be hard to trace</li>
 </ul>
 <div class="fragment">
@@ -611,7 +622,7 @@
 <section id="declaring-a-dependency" class="slide level2">
 <h2>Declaring a dependency</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">use_package</span>(<span class="st">"rlang"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">use_package</span>(<span class="st">"rlang"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Adds <code>rlang</code> to <code>Imports</code> in <code>DESCRIPTION</code>. Call functions using <code>::</code>:</p>
@@ -621,26 +632,49 @@
 <section id="catching-unused-dots" class="slide level2">
 <h2>Catching unused dots</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
-<span id="cb19-2"><a></a>  <span class="at">cpue =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-3"><a></a>  area_swept,</span>
-<span id="cb19-4"><a></a>  <span class="at">catch =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-5"><a></a>  <span class="at">effort =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-6"><a></a>  ...</span>
-<span id="cb19-7"><a></a>) {</span>
-<span id="cb19-8"><a></a>  rlang<span class="sc">::</span><span class="fu">check_dots_used</span>()</span>
-<span id="cb19-9"><a></a></span>
-<span id="cb19-10"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue) <span class="sc">&amp;&amp;</span> (<span class="sc">!</span><span class="fu">is.null</span>(catch) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(effort))) {</span>
-<span id="cb19-11"><a></a>    cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(catch, effort, ...)</span>
-<span id="cb19-12"><a></a>  }</span>
-<span id="cb19-13"><a></a></span>
-<span id="cb19-14"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue)) {</span>
-<span id="cb19-15"><a></a>    <span class="fu">stop</span>(<span class="st">"Must provide either 'cpue' or both 'catch' and 'effort'."</span>)</span>
-<span id="cb19-16"><a></a>  }</span>
-<span id="cb19-17"><a></a></span>
-<span id="cb19-18"><a></a>  cpue <span class="sc">*</span> area_swept</span>
-<span id="cb19-19"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
+<span id="cb20-2"><a></a>  <span class="at">cpue =</span> <span class="cn">NULL</span>,</span>
+<span id="cb20-3"><a></a>  area_swept,</span>
+<span id="cb20-4"><a></a>  <span class="at">catch =</span> <span class="cn">NULL</span>,</span>
+<span id="cb20-5"><a></a>  <span class="at">effort =</span> <span class="cn">NULL</span>,</span>
+<span id="cb20-6"><a></a>  ...</span>
+<span id="cb20-7"><a></a>) {</span>
+<span id="cb20-8"><a></a>  rlang<span class="sc">::</span><span class="fu">check_dots_used</span>()</span>
+<span id="cb20-9"><a></a></span>
+<span id="cb20-10"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue) <span class="sc">&amp;&amp;</span> (<span class="sc">!</span><span class="fu">is.null</span>(catch) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(effort))) {</span>
+<span id="cb20-11"><a></a>    cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(catch, effort, ...)</span>
+<span id="cb20-12"><a></a>  }</span>
+<span id="cb20-13"><a></a></span>
+<span id="cb20-14"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue)) {</span>
+<span id="cb20-15"><a></a>    <span class="fu">stop</span>(<span class="st">"Must provide either 'cpue' or both 'catch' and 'effort'."</span>)</span>
+<span id="cb20-16"><a></a>  }</span>
+<span id="cb20-17"><a></a></span>
+<span id="cb20-18"><a></a>  cpue <span class="sc">*</span> area_swept</span>
+<span id="cb20-19"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="example" class="slide level2">
+<h2>Example</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">load_all</span>()</span>
+<span id="cb21-2"><a></a></span>
+<span id="cb21-3"><a></a><span class="co"># Valid: method is passed through to cpue()</span></span>
+<span id="cb21-4"><a></a><span class="fu">biomass_index</span>(<span class="at">area_swept =</span> <span class="dv">5</span>, <span class="at">catch =</span> <span class="dv">100</span>, <span class="at">effort =</span> <span class="dv">10</span>, <span class="at">method =</span> <span class="st">"log"</span>)</span>
+<span id="cb21-5"><a></a></span>
+<span id="cb21-6"><a></a><span class="co"># Typo: now caught immediately instead of silently ignored</span></span>
+<span id="cb21-7"><a></a><span class="fu">biomass_index</span>(<span class="at">area_swept =</span> <span class="dv">5</span>, <span class="at">catch =</span> <span class="dv">100</span>, <span class="at">effort =</span> <span class="dv">10</span>, <span class="at">mthod =</span> <span class="st">"log"</span>)</span>
+<span id="cb21-8"><a></a><span class="co">#&gt; Error: In `biomass_index()`, argument `mthod` is not used.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="document-and-check-2" class="slide level2">
+<h2>Document and check</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">document</span>()</span>
+<span id="cb22-2"><a></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="make-a-commit-2" class="slide level2">
+<h2>Make a commit</h2>
 </section></section>
 <section>
 <section id="dry-dont-repeat-yourself" class="title-slide slide level1 center">
@@ -650,10 +684,10 @@
 <section id="the-problem-with-repetition" class="slide level2">
 <h2>The problem with repetition</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="co"># Repetitive</span></span>
-<span id="cb20-2"><a></a>sum_of_squares_2 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb20-3"><a></a>sum_of_squares_3 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span><span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb20-4"><a></a>sum_of_squares_4 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">^</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># Repetitive</span></span>
+<span id="cb23-2"><a></a>sum_of_squares_2 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb23-3"><a></a>sum_of_squares_3 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb23-4"><a></a>sum_of_squares_4 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">2</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span><span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span><span class="sc">^</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Problems:</p>
@@ -667,16 +701,16 @@
 <section id="refactor-to-use-functions" class="slide level2">
 <h2>Refactor to use functions</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="co"># DRY version</span></span>
-<span id="cb21-2"><a></a>square <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb21-3"><a></a></span>
-<span id="cb21-4"><a></a>sum_of_squares <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
-<span id="cb21-5"><a></a>  <span class="fu">sum</span>(<span class="fu">square</span>(<span class="fu">seq_len</span>(n)))</span>
-<span id="cb21-6"><a></a>}</span>
-<span id="cb21-7"><a></a></span>
-<span id="cb21-8"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">2</span>)</span>
-<span id="cb21-9"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">3</span>)</span>
-<span id="cb21-10"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="co"># DRY version</span></span>
+<span id="cb24-2"><a></a>square <span class="ot">&lt;-</span> <span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb24-3"><a></a></span>
+<span id="cb24-4"><a></a>sum_of_squares <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb24-5"><a></a>  <span class="fu">sum</span>(<span class="fu">square</span>(<span class="fu">seq_len</span>(n)))</span>
+<span id="cb24-6"><a></a>}</span>
+<span id="cb24-7"><a></a></span>
+<span id="cb24-8"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">2</span>)</span>
+<span id="cb24-9"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">3</span>)</span>
+<span id="cb24-10"><a></a><span class="fu">sum_of_squares</span>(<span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Small, focused functions that do one thing well. Easier to test, read, and reuse.</p>
 </section>
@@ -695,8 +729,8 @@
 <section id="why-validate-inputs" class="slide level2">
 <h2>Why validate inputs?</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">cpue</span>(<span class="st">"one hundred"</span>, <span class="dv">10</span>)</span>
-<span id="cb22-2"><a></a><span class="co">#&gt; Error in catch/effort : non-numeric argument to binary operator</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">cpue</span>(<span class="st">"one hundred"</span>, <span class="dv">10</span>)</span>
+<span id="cb25-2"><a></a><span class="co">#&gt; Error in catch/effort : non-numeric argument to binary operator</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Unhelpful - doesn’t say which argument is the problem or what was expected.</p>
@@ -706,61 +740,60 @@
 <section id="a-validation-helper" class="slide level2">
 <h2>A validation helper</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># R/utils.R</span></span>
-<span id="cb23-2"><a></a></span>
-<span id="cb23-3"><a></a><span class="co">#' @noRd</span></span>
-<span id="cb23-4"><a></a>validate_numeric_inputs <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
-<span id="cb23-5"><a></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
-<span id="cb23-6"><a></a>  arg_names <span class="ot">&lt;-</span> <span class="fu">names</span>(args)</span>
-<span id="cb23-7"><a></a></span>
-<span id="cb23-8"><a></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(args)) {</span>
-<span id="cb23-9"><a></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(args[[i]])) {</span>
-<span id="cb23-10"><a></a>      <span class="fu">stop</span>(</span>
-<span id="cb23-11"><a></a>        <span class="st">"'"</span>,</span>
-<span id="cb23-12"><a></a>        arg_names[i],</span>
-<span id="cb23-13"><a></a>        <span class="st">"' must be numeric, got "</span>,</span>
-<span id="cb23-14"><a></a>        <span class="fu">class</span>(args[[i]])[<span class="dv">1</span>],</span>
-<span id="cb23-15"><a></a>        <span class="st">"."</span>,</span>
-<span id="cb23-16"><a></a>        <span class="at">call. =</span> <span class="cn">FALSE</span></span>
-<span id="cb23-17"><a></a>      )</span>
-<span id="cb23-18"><a></a>    }</span>
-<span id="cb23-19"><a></a>  }</span>
-<span id="cb23-20"><a></a></span>
-<span id="cb23-21"><a></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
-<span id="cb23-22"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="co"># R/utils.R</span></span>
+<span id="cb26-2"><a></a></span>
+<span id="cb26-3"><a></a><span class="co">#' @noRd</span></span>
+<span id="cb26-4"><a></a>validate_numeric_inputs <span class="ot">&lt;-</span> <span class="cf">function</span>(...) {</span>
+<span id="cb26-5"><a></a>  args <span class="ot">&lt;-</span> <span class="fu">list</span>(...)</span>
+<span id="cb26-6"><a></a>  arg_names <span class="ot">&lt;-</span> <span class="fu">names</span>(args)</span>
+<span id="cb26-7"><a></a></span>
+<span id="cb26-8"><a></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(args)) {</span>
+<span id="cb26-9"><a></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(args[[i]])) {</span>
+<span id="cb26-10"><a></a>      <span class="fu">stop</span>(</span>
+<span id="cb26-11"><a></a>        <span class="st">"'"</span>,</span>
+<span id="cb26-12"><a></a>        arg_names[i],</span>
+<span id="cb26-13"><a></a>        <span class="st">"' must be numeric, got "</span>,</span>
+<span id="cb26-14"><a></a>        <span class="fu">class</span>(args[[i]])[<span class="dv">1</span>],</span>
+<span id="cb26-15"><a></a>        <span class="st">"."</span>,</span>
+<span id="cb26-16"><a></a>        <span class="at">call. =</span> <span class="cn">FALSE</span></span>
+<span id="cb26-17"><a></a>      )</span>
+<span id="cb26-18"><a></a>    }</span>
+<span id="cb26-19"><a></a>  }</span>
+<span id="cb26-20"><a></a></span>
+<span id="cb26-21"><a></a>  <span class="fu">invisible</span>(<span class="cn">NULL</span>)</span>
+<span id="cb26-22"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><code>@noRd</code> tells roxygen2 not to generate a <code>.Rd</code> file - internal helpers don’t need public docs.</p>
 </section>
 <section id="add-validation-to-cpue" class="slide level2">
 <h2>Add validation to cpue</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>cpue <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
-<span id="cb24-2"><a></a>  catch,</span>
-<span id="cb24-3"><a></a>  effort,</span>
-<span id="cb24-4"><a></a>  <span class="at">gear_factor =</span> <span class="dv">1</span>,</span>
-<span id="cb24-5"><a></a>  <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"ratio"</span>, <span class="st">"log"</span>),</span>
-<span id="cb24-6"><a></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"fishr.verbose"</span>, <span class="cn">FALSE</span>)</span>
-<span id="cb24-7"><a></a>) {</span>
-<span id="cb24-8"><a></a>  method <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(method)</span>
-<span id="cb24-9"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">catch =</span> catch, <span class="at">effort =</span> effort)</span>
-<span id="cb24-10"><a></a></span>
-<span id="cb24-11"><a></a>  <span class="cf">if</span> (verbose) {</span>
-<span id="cb24-12"><a></a>    <span class="fu">message</span>(<span class="st">"Processing "</span>, <span class="fu">length</span>(catch), <span class="st">" records using "</span>, method, <span class="st">" method"</span>)</span>
-<span id="cb24-13"><a></a>  }</span>
-<span id="cb24-14"><a></a></span>
-<span id="cb24-15"><a></a>  raw_cpue <span class="ot">&lt;-</span> <span class="cf">switch</span>(method, <span class="at">ratio =</span> catch <span class="sc">/</span> effort, <span class="at">log =</span> <span class="fu">log</span>(catch <span class="sc">/</span> effort))</span>
-<span id="cb24-16"><a></a>  raw_cpue <span class="sc">*</span> gear_factor</span>
-<span id="cb24-17"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>cpue <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
+<span id="cb27-2"><a></a>  catch,</span>
+<span id="cb27-3"><a></a>  effort,</span>
+<span id="cb27-4"><a></a>  <span class="at">gear_factor =</span> <span class="dv">1</span>,</span>
+<span id="cb27-5"><a></a>  <span class="at">method =</span> <span class="fu">c</span>(<span class="st">"ratio"</span>, <span class="st">"log"</span>),</span>
+<span id="cb27-6"><a></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"fishr.verbose"</span>, <span class="cn">FALSE</span>)</span>
+<span id="cb27-7"><a></a>) {</span>
+<span id="cb27-8"><a></a>  method <span class="ot">&lt;-</span> <span class="fu">match.arg</span>(method)</span>
+<span id="cb27-9"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">catch =</span> catch, <span class="at">effort =</span> effort)</span>
+<span id="cb27-10"><a></a></span>
+<span id="cb27-11"><a></a>  <span class="cf">if</span> (verbose) {</span>
+<span id="cb27-12"><a></a>    <span class="fu">message</span>(<span class="st">"Processing "</span>, <span class="fu">length</span>(catch), <span class="st">" records using "</span>, method, <span class="st">" method"</span>)</span>
+<span id="cb27-13"><a></a>  }</span>
+<span id="cb27-14"><a></a></span>
+<span id="cb27-15"><a></a>  raw_cpue <span class="ot">&lt;-</span> <span class="cf">switch</span>(method, <span class="at">ratio =</span> catch <span class="sc">/</span> effort, <span class="at">log =</span> <span class="fu">log</span>(catch <span class="sc">/</span> effort))</span>
+<span id="cb27-16"><a></a>  raw_cpue <span class="sc">*</span> gear_factor</span>
+<span id="cb27-17"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="verify-the-helper-works" class="slide level2">
 <h2>Verify the helper works</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">load_all</span>()</span>
-<span id="cb25-2"><a></a></span>
-<span id="cb25-3"><a></a><span class="fu">cpue</span>(<span class="dv">100</span>, <span class="dv">10</span>) <span class="co"># Good input</span></span>
-<span id="cb25-4"><a></a><span class="fu">cpue</span>(<span class="st">"high"</span>, <span class="dv">10</span>) <span class="co"># 'catch' must be numeric, got character.</span></span>
-<span id="cb25-5"><a></a><span class="fu">biomass_index</span>(<span class="at">cpue =</span> <span class="st">"ten"</span>, <span class="at">area_swept =</span> <span class="dv">5</span>) <span class="co"># 'cpue' must be numeric...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">load_all</span>()</span>
+<span id="cb28-2"><a></a></span>
+<span id="cb28-3"><a></a><span class="fu">cpue</span>(<span class="dv">100</span>, <span class="dv">10</span>) <span class="co"># Good input</span></span>
+<span id="cb28-4"><a></a><span class="fu">cpue</span>(<span class="st">"high"</span>, <span class="dv">10</span>) <span class="co"># 'catch' must be numeric, got character.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="where-to-put-helpers" class="slide level2">
@@ -772,6 +805,16 @@
 <div class="fragment">
 <p>Good rule of thumb: start with the helper in the same file. Move it to <code>utils.R</code> only when a second function needs it.</p>
 </div>
+</section>
+<section id="document-and-check-3" class="slide level2">
+<h2>Document and check</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">document</span>()</span>
+<span id="cb29-2"><a></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="make-a-commit-3" class="slide level2">
+<h2>Make a commit</h2>
 </section></section>
 <section>
 <section id="function-composition" class="title-slide slide level1 center">
@@ -781,22 +824,22 @@
 <section id="composed-workflow" class="slide level2">
 <h2>Composed workflow</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">load_all</span>()</span>
-<span id="cb26-2"><a></a></span>
-<span id="cb26-3"><a></a><span class="co"># Step by step</span></span>
-<span id="cb26-4"><a></a>my_cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(<span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
-<span id="cb26-5"><a></a><span class="fu">biomass_index</span>(<span class="at">cpue =</span> my_cpue, <span class="at">area_swept =</span> <span class="dv">50</span>)</span>
-<span id="cb26-6"><a></a></span>
-<span id="cb26-7"><a></a><span class="co"># Or in one call, thanks to ... pass-through</span></span>
-<span id="cb26-8"><a></a><span class="fu">biomass_index</span>(<span class="at">area_swept =</span> <span class="dv">50</span>, <span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
-<span id="cb26-9"><a></a></span>
-<span id="cb26-10"><a></a><span class="co"># With options passed through</span></span>
-<span id="cb26-11"><a></a><span class="fu">biomass_index</span>(</span>
-<span id="cb26-12"><a></a>  <span class="at">area_swept =</span> <span class="dv">50</span>,</span>
-<span id="cb26-13"><a></a>  <span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>),</span>
-<span id="cb26-14"><a></a>  <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>),</span>
-<span id="cb26-15"><a></a>  <span class="at">method =</span> <span class="st">"log"</span></span>
-<span id="cb26-16"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">load_all</span>()</span>
+<span id="cb30-2"><a></a></span>
+<span id="cb30-3"><a></a><span class="co"># Step by step</span></span>
+<span id="cb30-4"><a></a>my_cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(<span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
+<span id="cb30-5"><a></a><span class="fu">biomass_index</span>(<span class="at">cpue =</span> my_cpue, <span class="at">area_swept =</span> <span class="dv">50</span>)</span>
+<span id="cb30-6"><a></a></span>
+<span id="cb30-7"><a></a><span class="co"># Or in one call, thanks to ... pass-through</span></span>
+<span id="cb30-8"><a></a><span class="fu">biomass_index</span>(<span class="at">area_swept =</span> <span class="dv">50</span>, <span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>))</span>
+<span id="cb30-9"><a></a></span>
+<span id="cb30-10"><a></a><span class="co"># With options passed through</span></span>
+<span id="cb30-11"><a></a><span class="fu">biomass_index</span>(</span>
+<span id="cb30-12"><a></a>  <span class="at">area_swept =</span> <span class="dv">50</span>,</span>
+<span id="cb30-13"><a></a>  <span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>),</span>
+<span id="cb30-14"><a></a>  <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>),</span>
+<span id="cb30-15"><a></a>  <span class="at">method =</span> <span class="st">"log"</span></span>
+<span id="cb30-16"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="composability-is-the-payoff" class="slide level2">
@@ -831,40 +874,43 @@
 <h2>Solution</h2>
 <p>Add the <code>@param</code> and argument to <code>R/biomass.R</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co">#' @param verbose Logical; print processing info? Default from</span></span>
-<span id="cb27-2"><a></a><span class="co">#'   `getOption("fishr.verbose", FALSE)`.</span></span>
-<span id="cb27-3"><a></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
-<span id="cb27-4"><a></a>  <span class="at">cpue =</span> <span class="cn">NULL</span>,</span>
-<span id="cb27-5"><a></a>  area_swept,</span>
-<span id="cb27-6"><a></a>  <span class="at">catch =</span> <span class="cn">NULL</span>,</span>
-<span id="cb27-7"><a></a>  <span class="at">effort =</span> <span class="cn">NULL</span>,</span>
-<span id="cb27-8"><a></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"fishr.verbose"</span>, <span class="at">default =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb27-9"><a></a>  ...</span>
-<span id="cb27-10"><a></a>) {</span>
-<span id="cb27-11"><a></a>  rlang<span class="sc">::</span><span class="fu">check_dots_used</span>()</span>
-<span id="cb27-12"><a></a></span>
-<span id="cb27-13"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue) <span class="sc">&amp;&amp;</span> (<span class="sc">!</span><span class="fu">is.null</span>(catch) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(effort))) {</span>
-<span id="cb27-14"><a></a>    cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(catch, effort, <span class="at">verbose =</span> verbose, ...)</span>
-<span id="cb27-15"><a></a>  }</span>
-<span id="cb27-16"><a></a></span>
-<span id="cb27-17"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue)) {</span>
-<span id="cb27-18"><a></a>    <span class="fu">stop</span>(<span class="st">"Must provide either 'cpue' or both 'catch' and 'effort'."</span>)</span>
-<span id="cb27-19"><a></a>  }</span>
-<span id="cb27-20"><a></a></span>
-<span id="cb27-21"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">cpue =</span> cpue, <span class="at">area_swept =</span> area_swept)</span>
-<span id="cb27-22"><a></a></span>
-<span id="cb27-23"><a></a>  <span class="cf">if</span> (verbose) {</span>
-<span id="cb27-24"><a></a>    <span class="fu">message</span>(<span class="st">"calculating biomass index for "</span>, <span class="fu">length</span>(area_swept), <span class="st">" records"</span>)</span>
-<span id="cb27-25"><a></a>  }</span>
-<span id="cb27-26"><a></a></span>
-<span id="cb27-27"><a></a>  cpue <span class="sc">*</span> area_swept</span>
-<span id="cb27-28"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co">#' @param verbose Logical; print processing info? Default from</span></span>
+<span id="cb31-2"><a></a><span class="co">#'   `getOption("fishr.verbose", FALSE)`.</span></span>
+<span id="cb31-3"><a></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
+<span id="cb31-4"><a></a>  <span class="at">cpue =</span> <span class="cn">NULL</span>,</span>
+<span id="cb31-5"><a></a>  area_swept,</span>
+<span id="cb31-6"><a></a>  <span class="at">catch =</span> <span class="cn">NULL</span>,</span>
+<span id="cb31-7"><a></a>  <span class="at">effort =</span> <span class="cn">NULL</span>,</span>
+<span id="cb31-8"><a></a>  <span class="at">verbose =</span> <span class="fu">getOption</span>(<span class="st">"fishr.verbose"</span>, <span class="at">default =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb31-9"><a></a>  ...</span>
+<span id="cb31-10"><a></a>) {</span>
+<span id="cb31-11"><a></a>  rlang<span class="sc">::</span><span class="fu">check_dots_used</span>()</span>
+<span id="cb31-12"><a></a></span>
+<span id="cb31-13"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue) <span class="sc">&amp;&amp;</span> (<span class="sc">!</span><span class="fu">is.null</span>(catch) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(effort))) {</span>
+<span id="cb31-14"><a></a>    cpue <span class="ot">&lt;-</span> <span class="fu">cpue</span>(catch, effort, <span class="at">verbose =</span> verbose, ...)</span>
+<span id="cb31-15"><a></a>  }</span>
+<span id="cb31-16"><a></a></span>
+<span id="cb31-17"><a></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(cpue)) {</span>
+<span id="cb31-18"><a></a>    <span class="fu">stop</span>(<span class="st">"Must provide either 'cpue' or both 'catch' and 'effort'."</span>)</span>
+<span id="cb31-19"><a></a>  }</span>
+<span id="cb31-20"><a></a></span>
+<span id="cb31-21"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">cpue =</span> cpue, <span class="at">area_swept =</span> area_swept)</span>
+<span id="cb31-22"><a></a></span>
+<span id="cb31-23"><a></a>  <span class="cf">if</span> (verbose) {</span>
+<span id="cb31-24"><a></a>    <span class="fu">message</span>(<span class="st">"calculating biomass index for "</span>, <span class="fu">length</span>(area_swept), <span class="st">" records"</span>)</span>
+<span id="cb31-25"><a></a>  }</span>
+<span id="cb31-26"><a></a></span>
+<span id="cb31-27"><a></a>  cpue <span class="sc">*</span> area_swept</span>
+<span id="cb31-28"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Run <code>document()</code> and <code>check()</code>. Accept any updated snapshots:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>testthat<span class="sc">::</span><span class="fu">snapshot_accept</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a>testthat<span class="sc">::</span><span class="fu">snapshot_accept</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</div>
+<div class="fragment">
+<h3 id="make-a-commit-4">Make a commit</h3>
 </div>
 
 

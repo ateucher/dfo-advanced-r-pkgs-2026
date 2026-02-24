@@ -2184,11 +2184,25 @@
     "text": "Why cpue = NULL?\ncpue = NULL signals “not provided” clearly:\n\nis.null() is a reliable check for “argument not given”\nIf we used cpue = 0, there’s no way to tell whether the user passed zero intentionally or just didn’t provide a value"
   },
   {
+    "objectID": "slides/function-design-best-practices-slides.html#document-and-check-1",
+    "href": "slides/function-design-best-practices-slides.html#document-and-check-1",
+    "title": "Function Design Best Practices",
+    "section": "Document and check",
+    "text": "Document and check\n\ndocument()\n\ncheck()"
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#make-a-commit-1",
+    "href": "slides/function-design-best-practices-slides.html#make-a-commit-1",
+    "title": "Function Design Best Practices",
+    "section": "Make a commit",
+    "text": "Make a commit"
+  },
+  {
     "objectID": "slides/function-design-best-practices-slides.html#pitfalls-of",
     "href": "slides/function-design-best-practices-slides.html#pitfalls-of",
     "title": "Function Design Best Practices",
     "section": "Pitfalls of …",
-    "text": "Pitfalls of …\n\nArguments passed through ... must be named - positional matching doesn’t work through the ellipsis\nMisspelled arguments are silently absorbed: cpue(100, 10, mthod = \"log\") won’t error\nErrors from inner functions can be hard to trace\n\n\nSolution: rlang::check_dots_used() catches unused dots before they cause confusion."
+    "text": "Pitfalls of …\n\nArguments passed through ... must be named - positional matching doesn’t work through the ellipsis\nMisspelled arguments are silently absorbed: biomass_index(area_swept = 5, catch = 100, effort = 10, mthod = \"log\") won’t error\nErrors from inner functions can be hard to trace\n\n\nSolution: rlang::check_dots_used() catches unused dots before they cause confusion."
   },
   {
     "objectID": "slides/function-design-best-practices-slides.html#declaring-a-dependency",
@@ -2203,6 +2217,27 @@
     "title": "Function Design Best Practices",
     "section": "Catching unused dots",
     "text": "Catching unused dots\n\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  cpue * area_swept\n}"
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#example",
+    "href": "slides/function-design-best-practices-slides.html#example",
+    "title": "Function Design Best Practices",
+    "section": "Example",
+    "text": "Example\n\nload_all()\n\n# Valid: method is passed through to cpue()\nbiomass_index(area_swept = 5, catch = 100, effort = 10, method = \"log\")\n\n# Typo: now caught immediately instead of silently ignored\nbiomass_index(area_swept = 5, catch = 100, effort = 10, mthod = \"log\")\n#&gt; Error: In `biomass_index()`, argument `mthod` is not used."
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#document-and-check-2",
+    "href": "slides/function-design-best-practices-slides.html#document-and-check-2",
+    "title": "Function Design Best Practices",
+    "section": "Document and check",
+    "text": "Document and check\n\ndocument()\ncheck()"
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#make-a-commit-2",
+    "href": "slides/function-design-best-practices-slides.html#make-a-commit-2",
+    "title": "Function Design Best Practices",
+    "section": "Make a commit",
+    "text": "Make a commit"
   },
   {
     "objectID": "slides/function-design-best-practices-slides.html#the-problem-with-repetition",
@@ -2251,7 +2286,7 @@
     "href": "slides/function-design-best-practices-slides.html#verify-the-helper-works",
     "title": "Function Design Best Practices",
     "section": "Verify the helper works",
-    "text": "Verify the helper works\n\nload_all()\n\ncpue(100, 10) # Good input\ncpue(\"high\", 10) # 'catch' must be numeric, got character.\nbiomass_index(cpue = \"ten\", area_swept = 5) # 'cpue' must be numeric..."
+    "text": "Verify the helper works\n\nload_all()\n\ncpue(100, 10) # Good input\ncpue(\"high\", 10) # 'catch' must be numeric, got character."
   },
   {
     "objectID": "slides/function-design-best-practices-slides.html#where-to-put-helpers",
@@ -2259,6 +2294,20 @@
     "title": "Function Design Best Practices",
     "section": "Where to put helpers",
     "text": "Where to put helpers\n\nSame file as the exported function - when the helper is specific to one function. Keeps related logic together.\nR/utils.R - when the helper is used across multiple functions in the package.\n\n\nGood rule of thumb: start with the helper in the same file. Move it to utils.R only when a second function needs it."
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#document-and-check-3",
+    "href": "slides/function-design-best-practices-slides.html#document-and-check-3",
+    "title": "Function Design Best Practices",
+    "section": "Document and check",
+    "text": "Document and check\n\ndocument()\ncheck()"
+  },
+  {
+    "objectID": "slides/function-design-best-practices-slides.html#make-a-commit-3",
+    "href": "slides/function-design-best-practices-slides.html#make-a-commit-3",
+    "title": "Function Design Best Practices",
+    "section": "Make a commit",
+    "text": "Make a commit"
   },
   {
     "objectID": "slides/function-design-best-practices-slides.html#composed-workflow",
@@ -2286,7 +2335,7 @@
     "href": "slides/function-design-best-practices-slides.html#solution",
     "title": "Function Design Best Practices",
     "section": "Solution",
-    "text": "Solution\nAdd the @param and argument to R/biomass.R:\n\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  verbose = getOption(\"fishr.verbose\", default = FALSE),\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, verbose = verbose, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\n  if (verbose) {\n    message(\"calculating biomass index for \", length(area_swept), \" records\")\n  }\n\n  cpue * area_swept\n}\n\n\nRun document() and check(). Accept any updated snapshots:\n\ntestthat::snapshot_accept()"
+    "text": "Solution\nAdd the @param and argument to R/biomass.R:\n\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  verbose = getOption(\"fishr.verbose\", default = FALSE),\n  ...\n) {\n  rlang::check_dots_used()\n\n  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {\n    cpue &lt;- cpue(catch, effort, verbose = verbose, ...)\n  }\n\n  if (is.null(cpue)) {\n    stop(\"Must provide either 'cpue' or both 'catch' and 'effort'.\")\n  }\n\n  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\n  if (verbose) {\n    message(\"calculating biomass index for \", length(area_swept), \" records\")\n  }\n\n  cpue * area_swept\n}\n\n\nRun document() and check(). Accept any updated snapshots:\n\ntestthat::snapshot_accept()\n\n\n\nMake a commit"
   },
   {
     "objectID": "slides/intro-slides.html#welcome",
