@@ -190,7 +190,7 @@ usethis::pr_push()
 
 ## Writing a good PR description
 
-**Title:** Short, imperative - "Add biomass_index function"
+**Title:** Short, imperative - "Add foofy function"
 
 **Body:**
 
@@ -210,6 +210,7 @@ usethis::pr_finish()
 - Switches back to `main`
 - Pulls the latest changes (including your merged work)
 - Deletes the local feature branch
+- Deletes the remote feature branch
 :::
 
 ## Pausing and resuming
@@ -355,7 +356,7 @@ usethis::pr_push()
 
 Write a good PR title and description, then submit the PR.
 
-Watch the Actions tab - CI runs on the PR branch before anything merges to `main`.
+Watch the Actions tab - CI runs on the PR branch before we merge to `main`.
 :::
 
 ## Viewing CI results
@@ -427,16 +428,15 @@ usethis::pr_push()
 
 Review the diff on GitHub - you should see only formatting changes, no functional changes.
 
-\
+## While we wait for CI...
 
-::: {.fragment}
-Merge the PR once you're happy with the changes.
+Let's leave this PR and start a new one...
 
 ```{r}
-usethis::pr_finish()
+pr_pause()
 ```
 
-:::
+Now we're back on `main` and can start a new branch for the next feature.
 
 # Adding a Function via PR
 
@@ -487,13 +487,69 @@ Commit when `check()` passes cleanly.
 ## Push and open a PR
 
 ```{r}
-usethis::pr_push()
+pr_push()
 ```
 
-## Merge and clean up
+## Go back to the Air PR
+
+Pause the biomass PR and return to main:
+```{r}
+pr_pause()
+```
+
+. . .
+
+\
+Now resume the Air PR:
 
 ```{r}
-usethis::pr_finish()
+pr_resume() # Choose the Air PR from the menu
+```
+
+. . .
+
+\
+On Github, Merge the Air PR, then back in RStudio clean up the branch.
+```{r}
+pr_finish()
+```
+
+## Now resume the biomass PR
+
+```{r}
+pr_resume("add-biomass-function")
+```
+
+. . .
+
+\
+Get the latest changes from `main` (including the now-merged Air PR):
+
+```{r}
+pr_merge_main()
+```
+
+. . .
+
+\
+Then push the updated branch:
+
+```{r}
+pr_push()
+```
+
+. . .
+
+\
+On GitHub, review the biomass PR and merge once CI is passing.
+
+. . .
+
+\
+Finally, clean up the branch:
+
+```{r}
+pr_finish()
 ```
 
 ## Resources

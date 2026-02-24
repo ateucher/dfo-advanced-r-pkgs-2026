@@ -51,6 +51,10 @@ build_readme()
 check()
 ```
 
+::: {.callout-tip}
+## Make a commit
+:::
+
 ### Push and open a PR
 
 ```{r}
@@ -112,11 +116,16 @@ air format .
 pr_push()
 ```
 
-### Merge and clean up
+This pushes your branch and opens a browser to create the PR. 
+After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to `main`.
+
+While we wait for CI...Let's leave this PR and start a new one!
 
 ```{r}
-pr_finish()
+pr_pause()
 ```
+
+Now we're back on `main` and can start a new branch for the next feature.
 
 ## Adding a New Function via PR
 
@@ -166,6 +175,10 @@ biomass_index(10, 5)
 check()
 ```
 
+::: {.callout-tip}
+## Make a commit
+:::
+
 ### Push your branch and create a PR
 
 ```{r}
@@ -174,22 +187,51 @@ pr_push()
 
 This pushes your branch and opens a browser to create the PR.
 
-### Fetch and review someone else's PR
+## Go back to the Air PR
 
-While waiting for review, you can check out a collaborator's PR locally:
-
+Pause the biomass PR and return to main:
 ```{r}
-pr_fetch(123) # PR number
+pr_pause()
 ```
 
-This lets you run their code, run their tests, and leave an informed review.
+. . .
 
-When done reviewing, return to your own work:
+\
+Now resume the Air PR:
 
 ```{r}
-pr_pause() # if you were on a branch
+pr_resume() # Choose the Air PR from the menu
+```
+
+. . .
+
+\
+On Github, Merge the Air PR, then back in RStudio clean up the branch.
+```{r}
+usethis::pr_finish()
+```
+
+## Now resume the biomass PR
+
+```{r}
 pr_resume("add-biomass-function")
 ```
+
+Get the latest changes from `main` (including the now-merged Air PR):
+
+```{r}
+pr_merge_main()
+```
+
+Then push the updated branch:
+
+```{r}
+pr_push()
+```
+
+On GitHub, review the biomass PR and merge once CI is passing.
+
+Finally, clean up the branch:
 
 ### After PR is merged
 
