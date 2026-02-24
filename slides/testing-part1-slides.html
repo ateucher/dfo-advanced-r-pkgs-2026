@@ -378,7 +378,7 @@
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="fu">test</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
-<p>Then make a commit:</p>
+<p>Commit your initial tests, then push to open the PR:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -560,6 +560,7 @@
 <span id="cb20-2"><a></a>  <span class="fu">my_function</span>(<span class="st">"input that produces complex output"</span>),</span>
 <span id="cb20-3"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="fragment">
 <p><br>
 </p>
 <div class="cell">
@@ -571,7 +572,8 @@
 <span id="cb21-6"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
-<p>First run creates <code>tests/testthat/_snaps/cpue.md</code> - review it!</p>
+<p>First run throws a warning and creates <code>tests/testthat/_snaps/cpue.md</code> - review it!</p>
+</div>
 </div>
 </section>
 <section id="first-run" class="slide level2">
@@ -600,6 +602,10 @@
 <div class="fragment">
 <p>We’ll dive deeper into snapshot workflows in <strong>Part 2</strong>.</p>
 </div>
+</section>
+<section id="make-a-commit" class="slide level2">
+<h2>Make a commit</h2>
+<p>Commit your snapshot tests - including the <code>_snaps/</code> files testthat created.</p>
 </section></section>
 <section>
 <section id="running-your-tests" class="title-slide slide level1 center">
@@ -705,6 +711,29 @@
 <span id="cb27-14"><a></a>  <span class="fu">expect_snapshot</span>(<span class="fu">biomass_index</span>(<span class="st">"ten"</span>, <span class="dv">5</span>), <span class="at">error =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb27-15"><a></a>  <span class="fu">expect_snapshot</span>(<span class="fu">biomass_index</span>(<span class="dv">10</span>, <span class="st">"five"</span>), <span class="at">error =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb27-16"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="make-a-commit-1" class="slide level2">
+<h2>Make a commit</h2>
+<p>Commit your <code>biomass_index()</code> tests and any new snapshot files.</p>
+</section>
+<section id="merge-pr-and-clean-up" class="slide level2">
+<h2>Merge PR and clean up</h2>
+<p>Once all tests pass and <code>check()</code> is clean:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Push any remaining commits, then merge the PR on GitHub:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="fragment">
+<p>Clean up your branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div>
 
 
