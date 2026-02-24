@@ -41,11 +41,10 @@ execute:
 ::: {.column width="50%"}
 **Script**
 
-- Copy-paste to reuse across projects
+- Copy-paste to reuse across projects and run with `source` or select+run
 - Documentation in `#comments`
 - Tested less frequently
 - Functions mixed with analysis code
-- Run with  source() or select+run
 :::
 
 ::: {.column width="50%"}
@@ -55,13 +54,29 @@ execute:
 - Document in Roxygen comments to enable `?function`
 - testthat test suite
 - Functions only - clean separation
-- Versioned releases
 :::
 
 ::::
 
 ::: {.notes}
 A package is the fundamental unit of shareable R code. Even if you never share it publicly, packaging your own work enforces good habits.
+:::
+
+## Package structure and state
+
+### Five forms
+
+| | |
+|---:|:---|
+| **Source** | Directory of files with specific structure<br>What you interact with as you build a package |
+| **Bundle** | Compressed into a single file (.tar.gz) via `devtools::build()` -> R CMD build<br>Vignettes built; files in `.Rbuildignore` left behind |
+| **Binary** | Platform-specific compressed file (.tgz, .zip)<br>Made with `devtools::build(binary = TRUE)` → R CMD INSTALL --build |
+| **Installed** | Binary package decompressed into a user's library<br>`install.packages()` |
+| **In Memory** | Loaded and ready for use in an R session<br>`library()` |
+: {tbl-colwidths="[20,80]"}
+
+::: {.notes}
+As a developer, you mostly live in the source form. Bundle and binary are intermediate forms you rarely touch directly — devtools handles them. Installed is what users have after `install.packages()`. In memory is what you get after `library()` — this is the only state where you can actually use the package. `load_all()` shortcuts straight from source to in-memory without going through the other forms.
 :::
 
 # Package Structure
