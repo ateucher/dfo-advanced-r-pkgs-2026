@@ -24,6 +24,8 @@ website:
         menu:
           - text: "Introduction"
             href: slides/intro-slides.html
+          - text: "Day 1, Session 1: Package Development Fundamentals"
+            href: slides/package-fundamentals-slides.html
           - text: "Day 1, Session 2: Git/GitHub for Collaborative Development"
             href: slides/git-github-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
@@ -72,7 +74,7 @@ website:
           - text: "Data in Packages"
             href: data-packages.qmd
           - text: "Releasing Your R Package"
-            href: releasing-your-r-package
+            href: releasing-your-r-package.qmd
 
 bibliography: references.bib
 
