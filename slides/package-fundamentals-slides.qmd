@@ -188,6 +188,7 @@ Opens a new RStudio project with the basic package skeleton:
 ## Use devtools automatically
 
 ```{r}
+library(devtools)
 use_devtools()
 ```
 
@@ -216,7 +217,7 @@ use_git_config(
 )
 ```
 
-If dev_sitrep suggests package updates, do them now.
+If dev_sitrep suggests package updates, hold off updating them now (but do it later!).
 :::
 
 ## Initialize git and connect to GitHub
@@ -249,7 +250,7 @@ Creates `R/cpue.R` and opens it for editing.
 
 ## Write the function
 
-`cpue` calculates catch per unit effort - a fundamental metric in fisheries science.
+`cpue` calculates catch per unit effort.
 
 ```{r}
 cpue <- function(catch, effort, gear_factor = 1) {
@@ -335,20 +336,16 @@ RoxygenNote: 7.3.2
 Insert a template with `Ctrl+Alt+Shift+R` or `Cmd+Option+Shift+R`
 
 ```r
-#' Calculate Catch Per Unit Effort (CPUE)
+#' Title
 #'
-#' Calculates CPUE from catch and effort data, with optional gear standardization.
+#' @param catch
+#' @param effort
+#' @param gear_factor
 #'
-#' @param catch Numeric vector of catch (e.g., kg)
-#' @param effort Numeric vector of effort (e.g., hours)
-#' @param gear_factor Numeric adjustment for gear standardization (default is 1)
-#'
-#' @return A numeric vector of CPUE values
+#' @returns
 #' @export
 #'
 #' @examples
-#' cpue(100, 10)
-#' cpue(100, 10, gear_factor = 0.5)
 cpue <- function(catch, effort, gear_factor = 1) {
   ...
 }
@@ -373,6 +370,39 @@ load_all()
 ```
 
 :::
+
+# Your Turn
+
+## Exercise
+
+1. Fill in the `Title` and `Description` fields in `DESCRIPTION`
+2. Populate roxygen tags `@param`, `@return`, and `@examples`
+3. Run `document()` and verify `?cpue` works
+4. Run `check()` and resolve any warnings
+
+## Solution
+
+```r
+#' Calculate Catch Per Unit Effort (CPUE)
+#'
+#' Calculates CPUE from catch and effort data, with optional gear standardization.
+#'
+#' @param catch Numeric vector of catch (e.g., kg)
+#' @param effort Numeric vector of effort (e.g., hours)
+#' @param gear_factor Numeric adjustment for gear standardization (default is 1)
+#'
+#' @return A numeric vector of CPUE values
+#' @export
+#'
+#' @examples
+#' cpue(100, 10)
+#' cpue(100, 10, gear_factor = 0.5)
+cpue <- function(catch, effort, gear_factor = 1) {
+  ...
+}
+```
+
+
 
 ## Package development workflow (Again)
 ![](img/pkg-workflow2.png)
@@ -427,6 +457,13 @@ build_readme()
 `README.md` is what GitHub displays on your repository page.
 :::
 
+::: {.fragment}
+```{r}
+check()
+```
+:::
+
+
 ## Make a commit
 
 Commit all new changes to the DESCRIPTION file, documentation and the license.
@@ -467,11 +504,3 @@ Run `document()` regularly - it is fast and keeps `man/` files current. `check()
 Run `check()` early and often. It is much easier to fix one new problem than ten accumulated ones.
 :::
 
-# Your Turn
-
-## Exercise
-
-1. Fill in the `Title` and `Description` fields in `DESCRIPTION`
-2. Add a roxygen block above `cpue()` with `@param`, `@return`, `@export`, and `@examples`
-3. Run `document()` and verify `?cpue` works
-4. Run `check()` and resolve any warnings
