@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Advanced R Package Development – 📦 Advanced R Package Development</title>
+<title>claude – 📦 Advanced R Package Development</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -257,7 +257,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -392,74 +392,239 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#prework" id="toc-prework" class="nav-link" data-scroll-target="#prework">Prework</a></li>
-  <li><a href="#schedule" id="toc-schedule" class="nav-link" data-scroll-target="#schedule">Schedule</a></li>
-  <li><a href="#code-of-conduct" id="toc-code-of-conduct" class="nav-link" data-scroll-target="#code-of-conduct">Code of Conduct</a></li>
-  <li><a href="#instructors" id="toc-instructors" class="nav-link" data-scroll-target="#instructors">Instructors</a></li>
+  <li><a href="#advanced-r-package-development-workshop---context-file" id="toc-advanced-r-package-development-workshop---context-file" class="nav-link active" data-scroll-target="#advanced-r-package-development-workshop---context-file">Advanced R Package Development Workshop - Context File</a>
+  <ul class="collapse">
+  <li><a href="#workshop-overview" id="toc-workshop-overview" class="nav-link" data-scroll-target="#workshop-overview">Workshop Overview</a></li>
+  <li><a href="#survey-results-summary-17-responses" id="toc-survey-results-summary-17-responses" class="nav-link" data-scroll-target="#survey-results-summary-17-responses">Survey Results Summary (17 responses)</a>
+  <ul class="collapse">
+  <li><a href="#key-insights---keep-these-top-of-mind" id="toc-key-insights---keep-these-top-of-mind" class="nav-link" data-scroll-target="#key-insights---keep-these-top-of-mind">Key Insights - KEEP THESE TOP OF MIND</a></li>
+  <li><a href="#special-requests-from-survey" id="toc-special-requests-from-survey" class="nav-link" data-scroll-target="#special-requests-from-survey">Special Requests from Survey:</a></li>
+  </ul></li>
+  <li><a href="#key-decisions-made" id="toc-key-decisions-made" class="nav-link" data-scroll-target="#key-decisions-made">Key Decisions Made</a></li>
+  <li><a href="#schedule-structure" id="toc-schedule-structure" class="nav-link" data-scroll-target="#schedule-structure">Schedule Structure</a></li>
+  <li><a href="#files-in-this-project" id="toc-files-in-this-project" class="nav-link" data-scroll-target="#files-in-this-project">Files in This Project</a>
+  <ul class="collapse">
+  <li><a href="#core-content-files" id="toc-core-content-files" class="nav-link" data-scroll-target="#core-content-files">Core Content Files</a></li>
+  <li><a href="#example-package-fishr" id="toc-example-package-fishr" class="nav-link" data-scroll-target="#example-package-fishr">Example Package: fishr</a></li>
+  <li><a href="#website-infrastructure" id="toc-website-infrastructure" class="nav-link" data-scroll-target="#website-infrastructure">Website Infrastructure</a></li>
+  <li><a href="#governance" id="toc-governance" class="nav-link" data-scroll-target="#governance">Governance</a></li>
+  </ul></li>
+  <li><a href="#notes-for-course-development" id="toc-notes-for-course-development" class="nav-link" data-scroll-target="#notes-for-course-development">Notes for Course Development</a></li>
+  <li><a href="#update-log" id="toc-update-log" class="nav-link" data-scroll-target="#update-log">Update Log</a></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/Claude.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Advanced R Package Development</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
 
 
-</header>
-
-
-<p>🗓️ February 2026 24-26 ⏱️ 08:00 - 12:30 daily 🌎 Online</p>
+<section id="advanced-r-package-development-workshop---context-file" class="level1">
+<h1>Advanced R Package Development Workshop - Context File</h1>
+<p><strong>IMPORTANT:</strong> Please update this file regularly as we develop the course materials and make decisions. This helps maintain shared context when working with Claude.</p>
 <hr>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>This advanced workshop builds on the fundamentals of R package development, diving deeper into topics that will help you create robust, well-tested, and maintainable packages. Whether you’ve built one or two basic packages and want to level up your skills, or you’re looking to refine your development practices, this workshop will provide you with advanced techniques and best practices used by experienced package developers.</p>
-<p>You will learn advanced function design principles, sophisticated debugging techniques, and comprehensive testing strategies with testthat. We’ll explore object-oriented programming in R (S3, S4, and R6), best practices for including data in packages, and strategies for versioning and releasing your packages. The workshop also covers collaborative development workflows using Git and GitHub, including pull request workflows.</p>
-<p>This will be an online, interactive workshop delivered virtually over three consecutive half-days. We will be using RStudio as our primary IDE, though we’ll demonstrate Positron equivalents where relevant.</p>
-<p><strong>This workshop is for you if you…</strong></p>
+<section id="workshop-overview" class="level2">
+<h2 class="anchored" data-anchor-id="workshop-overview">Workshop Overview</h2>
 <ul>
-<li>Have built 1-2 basic R packages and want to advance your skills</li>
-<li>Want to learn best practices for function design and package architecture</li>
-<li>Are looking to improve your testing and debugging workflows</li>
-<li>Want to understand object-oriented programming in R</li>
-<li>Need to collaborate with others on package development</li>
-<li>Are ready to take your R package development to the next level</li>
+<li><strong>Duration:</strong> 3 consecutive half-days in February 2026</li>
+<li><strong>Time:</strong> 8:00 AM - 12:30 PM daily</li>
+<li><strong>Format:</strong> Three 80-minute sessions per day with 15-minute breaks</li>
+<li><strong>Participant Level:</strong> Predominantly beginners (11/17 built 1-2 packages), 5 intermediate</li>
+</ul>
+<hr>
+</section>
+<section id="survey-results-summary-17-responses" class="level2">
+<h2 class="anchored" data-anchor-id="survey-results-summary-17-responses">Survey Results Summary (17 responses)</h2>
+<section id="key-insights---keep-these-top-of-mind" class="level3">
+<h3 class="anchored" data-anchor-id="key-insights---keep-these-top-of-mind">Key Insights - KEEP THESE TOP OF MIND</h3>
+<p><strong>Previous workshop:</strong> - 5/17 attended previous workshop</p>
+<p><strong>Experience Level:</strong> - 11/17 participants are beginners (built 1-2 basic packages) - 5/17 are intermediate (built several packages) - This is a beginner-focused group - pace accordingly!</p>
+<p><strong>IDE Preference:</strong> - 10/17 prefer RStudio - 7/17 have no preference - Use RStudio as primary IDE, show Positron equivalents when relevant</p>
+<p><strong>Review Time Needed:</strong> - 14/17 want moderate review (2-3 hours) - 1/17 wants substantial review (half day) - Allocated half of Day 1 to fundamentals review</p>
+<p><strong>HIGH PRIORITY TOPICS</strong> (selected by 9+ participants): 1. Function design best practices - 16/17 selected ⭐ 2. Advanced testing with testthat - 14/17 selected ⭐ 3. Debugging techniques - 16/17 selected ⭐ 5. Package versioning and releasing - 13/17 selected ⭐ 4. Object-oriented programming - 11/17 selected ⭐</p>
+<p><strong>MEDIUM PRIORITY:</strong> - Git/GitHub PR workflows - 10/17 very, 6/17 somewhat interested - Including data in packages - 11 very interested, 5 somewhat interested - Web APIs - Mixed interest</p>
+<p><strong>LOWER PRIORITY:</strong> - GitLab Workflow extension - Mostly “somewhat interested” - User secrets - Mostly “somewhat interested” - AI-assisted development - Mixed, several not interested</p>
+<p><strong>BYOP (Bring Your Own Package):</strong> - Most prefer more instruction over BYOP time - Some open to it “if time permits” - Decision: Final 80-min session only</p>
+</section>
+<section id="special-requests-from-survey" class="level3">
+<h3 class="anchored" data-anchor-id="special-requests-from-survey">Special Requests from Survey:</h3>
+<ul>
+<li>One participant asked about compilable/pre-compiled models in packages (DECISION: too specialized, skip)</li>
+<li>Interest in handling sensitive data (API keys, passwords) - included in Day 3</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="key-decisions-made" class="level2">
+<h2 class="anchored" data-anchor-id="key-decisions-made">Key Decisions Made</h2>
+<p>✅ <strong>Included Topics:</strong> - Review of fundamentals and pain points (half of Day 1) - Git/GitHub for collaborative development + PR workflow - Object-oriented programming (S3, S4, R6) - Debugging techniques - Function design best practices (naming, default arguments, ellipsis, composition, pure functions) - Advanced testing with testthat (clean tests, snapshot testing, mocking) - Package versioning and releasing - Data packages (internal/external data) - BYOP time (final 80 minutes)</p>
+<p>❌ <strong>Excluded Topics:</strong> - Using tidyverse in packages (skipped to focus on higher priorities, may touch on organically) - Compilable/pre-compiled models (too specialized - one-off request) - LLMs for testing/documentation - Connecting to databases - AI-assisted development (low survey interest)</p>
+<p>❓ <strong>Brief Coverage:</strong> - GitLab Workflow extension (brief mention, though not using Positron so extensions are less relevant) - Web APIs (brief coverage given mixed interest - mention httr2, could do in BYOP) - User secrets/API keys (brief coverage) - Advanced vignettes with quarto (20-25 min in final session)</p>
+<hr>
+</section>
+<section id="schedule-structure" class="level2">
+<h2 class="anchored" data-anchor-id="schedule-structure">Schedule Structure</h2>
+<p>See <code>course-schedule.qmd</code> for full schedule.</p>
+<p><strong>Day 1:</strong> Foundations - fundamentals review, Git/GitHub, testing part 1 <strong>Day 2:</strong> Robust Development - function design, testing part 2, debugging <strong>Day 3:</strong> Advanced Topics - OOP, data packages, releasing, BYOP</p>
+<hr>
+</section>
+<section id="files-in-this-project" class="level2">
+<h2 class="anchored" data-anchor-id="files-in-this-project">Files in This Project</h2>
+<section id="core-content-files" class="level3">
+<h3 class="anchored" data-anchor-id="core-content-files">Core Content Files</h3>
+<ul>
+<li><code>course-schedule.qmd</code> - Main schedule (Quarto format for website)</li>
+<li><code>index.qmd</code> - Website homepage</li>
+<li><code>CLAUDE.md</code> - This file (shared context, not rendered on site)</li>
+</ul>
+<p><strong>Day 1 Sessions:</strong> - <code>package-fundamentals.qmd</code> - Session 1: Package Creation and Metadata - <code>git-github.qmd</code> - Session 2: Git/GitHub for Collaborative Development - <code>testing-part1.qmd</code> - Session 3: Testing with testthat - Part 1</p>
+<p><strong>Day 2 Sessions:</strong> - <code>function-design-best-practices.qmd</code> - Session 1: Function Design Best Practices (naming, defaults, ellipsis, composition, pure functions - uses <code>log</code> package as running example) - <code>testing-part2.qmd</code> - Session 2: Testing with testthat - Part 2 (snapshot review, withr/clean tests, covr) - <code>documentation.qmd</code> - Session 3 (first 20 min, before debugging): Advanced Documentation (<code>@inheritParams</code>, <code>@inheritDotParams</code>, Markdown cross-references) - <code>debugging-techniques.qmd</code> - Session 3 (last 60 min): Debugging Techniques</p>
+<p><strong>Day 3 Sessions:</strong> - <code>object-oriented-programming.qmd</code> - Session 1: Object-Oriented Programming (S3, S4, R6) - <code>data-packages.qmd</code> - Session 2: Data in Packages (static data via use_data(), httr2 API functions, internal data - uses Kluane Lake Trout dataset from Parks Canada) - <code>releasing-your-r-package.qmd</code> - Session 3: Releasing Your R Package (stub) - <code>releasing-slides.qmd</code> - RevealJS slides for releasing session (licensing, distribution options, R-Universe setup, CRAN submission) - <code>releasing-your-r-package.qmd</code> - Session 2: Releasing Your R Package (stub) - <code>releasing-slides.qmd</code> - RevealJS slides for releasing session (licensing, distribution options, R-Universe setup, CRAN submission)</p>
+<p><strong>Other Content:</strong> - <code>setup.qmd</code> - System setup instructions for participants - <code>_parking-lot.qmd</code> - Parking lot / scratch notes</p>
+</section>
+<section id="example-package-fishr" class="level3">
+<h3 class="anchored" data-anchor-id="example-package-fishr">Example Package: fishr</h3>
+<p>The course uses the <code>fishr</code> package as a running example throughout all sessions.</p>
+<ul>
+<li><strong>GitHub:</strong> https://github.com/boshek/fishr</li>
+<li><strong>Example PR:</strong> https://github.com/boshek/fishr/pull/1</li>
+</ul>
+<p>View with gh cli: <code>gh pr view 1 --repo boshek/fishr</code></p>
+<p><strong>To learn about the current structure and source code of the fishr package, consult the repo directly:</strong> use <code>gh api</code> or <code>gh browse</code> against https://github.com/boshek/fishr. Do not guess at file contents - fetch them.</p>
+<p><strong>Package contents:</strong> - <code>R/cpue.R</code> - Main function with verbose and options support - <code>R/biomass.R</code> - biomass_index function (added via PR workflow in Session 2) - <code>tests/testthat/test-cpue.R</code> - Comprehensive tests matching testing-part1.qmd - <code>tests/testthat/test-biomass.R</code> - Tests for biomass_index - <code>tests/testthat/helper.R</code> - Test helpers (generate_fishing_data, expected_cpue) - <code>tests/testthat/setup.R</code> - Test fixtures (reference_data)</p>
+</section>
+<section id="website-infrastructure" class="level3">
+<h3 class="anchored" data-anchor-id="website-infrastructure">Website Infrastructure</h3>
+<ul>
+<li><code>_quarto.yml</code> - Quarto website configuration</li>
+<li><code>style-light.scss</code> - Light theme customization</li>
+<li><code>style-dark.scss</code> - Dark theme customization</li>
+<li><code>air.toml</code> - Air formatter configuration</li>
+<li><code>.gitignore</code> - Git ignore patterns</li>
 </ul>
 </section>
-<section id="prework" class="level2">
-<h2 class="anchored" data-anchor-id="prework">Prework</h2>
-<p>Please ensure you have completed the steps in <a href="setup.html">System Setup</a></p>
-</section>
-<section id="schedule" class="level2">
-<h2 class="anchored" data-anchor-id="schedule">Schedule</h2>
-<p>See the <a href="./course-schedule.html">Course Schedule</a> for the full program.</p>
-</section>
-<section id="code-of-conduct" class="level2">
-<h2 class="anchored" data-anchor-id="code-of-conduct">Code of Conduct</h2>
-<p>Please review and adhere to our <a href="./CODE_OF_CONDUCT.html">Code of Conduct</a>.</p>
-</section>
-<section id="instructors" class="level2">
-<h2 class="anchored" data-anchor-id="instructors">Instructors</h2>
-<p><a href="https://andyteucher.ca">Andy Teucher</a> is a freelance data scientist and package developer with a passion for teaching others how to use data science tools to make their work more efficient and reproducible. His background is in conservation biology, with an MSc in Ecology from the University of Calgary. He has spent much of his career as a data scientist in government, where he made it his mission to promote and teach open, reproducible data science practices. He has written many R packages for internal use in his teams as well as for a broader audience, with several hosted on CRAN. Andy especially enjoys developing packages to make it easier to work with spatial data in R. Andy is a certified Software Carpentry and Data Carpentry instructor, and has led many workshops teaching programming skills to scientists and data professionals.</p>
-<p><a href="https://samalbers.science">Sam Albers</a> is a data scientist with 15 years experience writing code for scientific research. Sam wrote his first line of code to process data collected on salmon spawning in the Horsefly River watershed. Gradually, he ended up spending more time writing code than studying salmon and moved into a full time data scientist role in government. During that time, Sam developed several packages to facilitate reproducible research and gained a solid foundation in what it takes to build a good R package.</p>
+<section id="governance" class="level3">
+<h3 class="anchored" data-anchor-id="governance">Governance</h3>
+<ul>
+<li><code>CODE_OF_CONDUCT.md</code> - Contributor Covenant v2.1</li>
+<li><code>LICENSE.md</code> - Creative Commons Attribution-ShareAlike 4.0 International</li>
+<li><code>README.md</code> - Project README</li>
+</ul>
 <hr>
-<p><img src="https://i.creativecommons.org/l/by/4.0/88x31.png" class="img-fluid"> This work is licensed under a <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+</section>
+</section>
+<section id="notes-for-course-development" class="level2">
+<h2 class="anchored" data-anchor-id="notes-for-course-development">Notes for Course Development</h2>
+<p><strong>STYLE:</strong> - Use Canadian English spellings throughout all course materials (behaviour, colour, centre, etc.). Code identifiers that match R conventions (e.g., <code>center</code> in <code>scale()</code>) are exempt.</p>
+<p><strong>REMEMBER:</strong> - This is a beginner-focused group - don’t assume advanced knowledge - Each session should include practical exercises, not just lecture - Participants want substantial instruction time over self-directed work - Build progressively from fundamentals to advanced - Keep RStudio as primary IDE but be ready to show Positron equivalents</p>
+<p><strong>TODO (update as we work):</strong></p>
+<p><strong>Day 1 Content:</strong> - [x] Day 1, Session 1: Package Development Fundamentals (<code>package-fundamentals.qmd</code>) - [x] Day 1, Session 2: Git/GitHub for Collaborative Development (<code>git-github.qmd</code>) - [x] Day 1, Session 3: Testing with testthat - Part 1 (<code>testing-part1.qmd</code>)</p>
+<p><strong>Day 2 Content:</strong> - [x] Day 2, Session 1: Function Design Best Practices (<code>function-design-best-practices.qmd</code>) - [x] Day 2, Session 2: Testing with testthat - Part 2 (<code>testing-part2.qmd</code>) - [x] Day 2, Session 3: (first 20 min): Advanced Documentation (<code>documentation.qmd</code>) - [x] Day 2, Session 3 (last 60 min): Debugging Techniques (<code>debugging-techniques.qmd</code>)</p>
+<p><strong>Day 3 Content:</strong> - [x] Day 3, Session 1: Object-Oriented Programming (80 min) (<code>object-oriented-programming.qmd</code> - PR #15) - [~] Day 3, Session 2: Data Packages (60 min) - [x] Day 3, Session 2: Releasing (20 min) (<code>releasing-your-r-package.qmd</code> - PR #16) - [ ] Day 3, Session 3: BYOP + Advanced Vignettes (80 min)</p>
+<p><strong>Other Tasks:</strong> - [x] Prepare example package for hands-on work (fishr) - [x] Create test-writing exercises (in testing-part1.qmd) - [x] Prepare debugging scenarios - [x] Develop OOP examples - [ ] Create slides or presentation materials</p>
+<hr>
+</section>
+<section id="update-log" class="level2">
+<h2 class="anchored" data-anchor-id="update-log">Update Log</h2>
+<ul>
+<li>2026-01-03: Initial context file created with survey analysis and schedule decisions</li>
+<li>2026-01-06: Set up project infrastructure
+<ul>
+<li>Created Quarto website with light/dark themes</li>
+<li>Added CODE_OF_CONDUCT.md and LICENSE.md (CC BY-SA 4.0)</li>
+<li>Configured GitHub repo: https://github.com/boshek/2026-feb-course-planning</li>
+<li>Created Day 1, Session 1 content (<code>fundamentals-review.qmd</code>) by adapting materials from Nov 2024 course</li>
+<li>Maintained code-first style with emoji headers and minimal prose from original course</li>
+</ul></li>
+<li>2026-01-09:
+<ul>
+<li>Update survey results (now 17 responses!)</li>
+<li>Comments on topic scopes</li>
+</ul></li>
+<li>2026-01-13:
+<ul>
+<li>Completed Day 1 content files using fishr package as running example</li>
+<li>Created <code>package-fundamentals.qmd</code> (Session 1) - package creation, metadata, documentation</li>
+<li>Created <code>git-github.qmd</code> (Session 2) - GitHub setup, CI, air formatter, PR workflows</li>
+<li>Created <code>testing-part1.qmd</code> (Session 3) - testthat, clean tests with withr, helpers/fixtures, snapshots</li>
+<li>Updated fishr package to include all code shown in course materials:
+<ul>
+<li>Added verbose parameter and options support to cpue()</li>
+<li>Added biomass_index() function</li>
+<li>Added comprehensive test suite matching testing-part1.qmd</li>
+<li>Added helper.R and setup.R test infrastructure</li>
+</ul></li>
+<li>Updated _quarto.yml sidebar with Day 1 sessions</li>
+<li>Removed emojis from headers per style preference</li>
+</ul></li>
+<li>2026-01-23:
+<ul>
+<li>Added <code>_parking-lot.qmd</code> for scratch notes</li>
+<li>Began <code>function-design-best-practices.qmd</code> with input validation examples</li>
+<li>Started <code>releasing-your-r-package.qmd</code> stub</li>
+</ul></li>
+<li>2026-02-02 to 2026-02-05:
+<ul>
+<li>Substantially built out <code>testing-part2.qmd</code>:
+<ul>
+<li>Snapshot updating and review workflow (snapshot_review/snapshot_accept)</li>
+<li>Clean tests with withr (local_options, with_options, local_tempfile, local_seed, etc.)</li>
+<li>“Your turn” exercise: add verbose to biomass_index and write tests</li>
+<li>Test coverage with covr (package_coverage, zero_coverage, report, interactive checking)</li>
+<li>CI coverage setup with GitHub Actions and Codecov (including non-Codecov alternative)</li>
+<li>Coverage philosophy guidance</li>
+</ul></li>
+<li>Refined <code>testing-part1.qmd</code>: removed error class test, added expect_warning, restructured snapshot flow</li>
+<li>Updated <code>course-schedule.qmd</code> with instructor assignments and refined session descriptions</li>
+<li>Updated <code>_quarto.yml</code> sidebar with Day 2 sessions</li>
+</ul></li>
+<li>2026-02-16:
+<ul>
+<li>Created <code>debugging-techniques.qmd</code> (Day 2, Session 3):
+<ul>
+<li>Reading error messages and traceback()</li>
+<li>Print/message debugging (message vs cat vs print)</li>
+<li>browser() interactive debugging with commands table</li>
+<li>RStudio breakpoints, debug()/debugonce(), options(error = recover)</li>
+<li>Debugging failing tests (browser in tests, state leakage, snapshot mismatches)</li>
+<li>rlang::last_trace() and last_error()</li>
+<li>“Your turn” exercise: buggy standardize_effort() function</li>
+</ul></li>
+<li>Added debugging-techniques.qmd to _quarto.yml sidebar</li>
+</ul></li>
+<li>2026-02-08 to 2026-02-17:
+<ul>
+<li>Completed <code>function-design-best-practices.qmd</code> (Day 2, Session 1): naming conventions, default arguments, ellipsis, composition, pure functions - uses <code>log</code> package as running example</li>
+<li>Further refined <code>testing-part1.qmd</code>: added testing patterns, use_testthat_helper(), narrative and tip improvements</li>
+<li>Minor fixes and polish across <code>package-fundamentals.qmd</code>, <code>git-github.qmd</code>, <code>testing-part2.qmd</code></li>
+<li>Substantially updated <code>setup.qmd</code>: refined package list and setup instructions</li>
+<li><code>README.md</code> tweaks</li>
+<li>Created <code>object-oriented-programming.qmd</code> (PR #15 - Day 3, Session 1)</li>
+</ul></li>
+<li>2026-02-20:
+<ul>
+<li>Added R-Universe setup slides to <code>releasing-slides.qmd</code>: two new slides covering the four-step setup process (create GitHub repo, packages.json, install GitHub App, wait for build) and user installation patterns</li>
+</ul></li>
+<li>2026-02-21:
+<ul>
+<li>Created and substantially revised <code>data-packages.qmd</code> (Day 3, Session 2):
+<ul>
+<li>Static exported data: <code>horsefly_sample</code> (fictional Rainbow Trout catch/effort data, ready for <code>cpue()</code>)</li>
+<li>Live data via httr2: <code>fetch_kluane_data()</code> fetching from Government of Canada CKAN API (Kluane Lake Trout dataset); uses <code>resp_check_status()</code>, <code>simplifyVector = TRUE</code>; no pipe</li>
+<li>Internal data: <code>gear_types</code> lookup table replacing <code>gear_factor</code> argument in <code>cpue.numeric()</code> and <code>cpue.data.frame()</code>; error message generated dynamically from table</li>
+<li>Your turn: extend gear table, update broken tests, commit</li>
+<li>Note on HTTP API testing (vcr, httptest2)</li>
+</ul></li>
+<li>Added data-packages.qmd to _quarto.yml sidebar under Day 3</li>
+<li>Updated <code>course-schedule.qmd</code> bullets for data packages session</li>
+</ul></li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -886,4 +1051,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/Claude.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
