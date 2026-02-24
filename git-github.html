@@ -365,6 +365,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Introduction</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./slides/git-github-slides.html">
+ <span class="dropdown-text">Day 1, Session 2: Git/GitHub for Collaborative Development</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./slides/testing-part1-slides.html">
  <span class="dropdown-text">Day 1, Session 3: Testing Part 1</span></a>
   </li>  
@@ -528,28 +532,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#git-workflow-review" id="toc-git-workflow-review" class="nav-link active" data-scroll-target="#git-workflow-review">Git Workflow Review</a>
-  <ul class="collapse">
-  <li><a href="#check-your-git-status" id="toc-check-your-git-status" class="nav-link" data-scroll-target="#check-your-git-status">Check your git status</a></li>
-  </ul></li>
+  <li><a href="#git-workflow-review" id="toc-git-workflow-review" class="nav-link active" data-scroll-target="#git-workflow-review">Git Workflow Review</a></li>
+  <li><a href="#pull-request-workflows" id="toc-pull-request-workflows" class="nav-link" data-scroll-target="#pull-request-workflows">Pull Request Workflows</a></li>
   <li><a href="#continuous-integration" id="toc-continuous-integration" class="nav-link" data-scroll-target="#continuous-integration">Continuous Integration</a>
   <ul class="collapse">
+  <li><a href="#start-a-branch" id="toc-start-a-branch" class="nav-link" data-scroll-target="#start-a-branch">Start a branch</a></li>
   <li><a href="#add-github-actions-for-r-cmd-check" id="toc-add-github-actions-for-r-cmd-check" class="nav-link" data-scroll-target="#add-github-actions-for-r-cmd-check">Add GitHub Actions for R CMD check</a></li>
+  <li><a href="#push-and-open-a-pr" id="toc-push-and-open-a-pr" class="nav-link" data-scroll-target="#push-and-open-a-pr">Push and open a PR</a></li>
+  <li><a href="#merge-and-clean-up" id="toc-merge-and-clean-up" class="nav-link" data-scroll-target="#merge-and-clean-up">Merge and clean up</a></li>
   <li><a href="#view-your-check-results" id="toc-view-your-check-results" class="nav-link" data-scroll-target="#view-your-check-results">View your check results</a></li>
   </ul></li>
   <li><a href="#setting-up-air" id="toc-setting-up-air" class="nav-link" data-scroll-target="#setting-up-air">Setting Up Air</a>
   <ul class="collapse">
+  <li><a href="#start-a-branch-1" id="toc-start-a-branch-1" class="nav-link" data-scroll-target="#start-a-branch-1">Start a branch</a></li>
   <li><a href="#install-air-in-your-project" id="toc-install-air-in-your-project" class="nav-link" data-scroll-target="#install-air-in-your-project">Install Air in your project</a></li>
+  <li><a href="#format-your-whole-project" id="toc-format-your-whole-project" class="nav-link" data-scroll-target="#format-your-whole-project">Format your whole project</a></li>
+  <li><a href="#push-and-open-a-pr-1" id="toc-push-and-open-a-pr-1" class="nav-link" data-scroll-target="#push-and-open-a-pr-1">Push and open a PR</a></li>
   </ul></li>
-  <li><a href="#pull-request-workflows" id="toc-pull-request-workflows" class="nav-link" data-scroll-target="#pull-request-workflows">Pull Request Workflows</a>
+  <li><a href="#adding-a-new-function-via-pr" id="toc-adding-a-new-function-via-pr" class="nav-link" data-scroll-target="#adding-a-new-function-via-pr">Adding a New Function via PR</a>
   <ul class="collapse">
   <li><a href="#start-a-new-feature-branch" id="toc-start-a-new-feature-branch" class="nav-link" data-scroll-target="#start-a-new-feature-branch">Start a new feature branch</a></li>
   <li><a href="#write-a-new-function" id="toc-write-a-new-function" class="nav-link" data-scroll-target="#write-a-new-function">Write a new function</a></li>
   <li><a href="#document-and-check" id="toc-document-and-check" class="nav-link" data-scroll-target="#document-and-check">Document and check</a></li>
   <li><a href="#push-your-branch-and-create-a-pr" id="toc-push-your-branch-and-create-a-pr" class="nav-link" data-scroll-target="#push-your-branch-and-create-a-pr">Push your branch and create a PR</a></li>
-  <li><a href="#working-with-prs" id="toc-working-with-prs" class="nav-link" data-scroll-target="#working-with-prs">Working with PRs</a></li>
-  <li><a href="#fetch-and-review-someone-elses-pr" id="toc-fetch-and-review-someone-elses-pr" class="nav-link" data-scroll-target="#fetch-and-review-someone-elses-pr">Fetch and review someone else’s PR</a></li>
-  <li><a href="#run-a-final-check" id="toc-run-a-final-check" class="nav-link" data-scroll-target="#run-a-final-check">Run a final check</a></li>
+  </ul></li>
+  <li><a href="#go-back-to-the-air-pr" id="toc-go-back-to-the-air-pr" class="nav-link" data-scroll-target="#go-back-to-the-air-pr">Go back to the Air PR</a></li>
+  <li><a href="#now-resume-the-biomass-pr" id="toc-now-resume-the-biomass-pr" class="nav-link" data-scroll-target="#now-resume-the-biomass-pr">Now resume the biomass PR</a>
+  <ul class="collapse">
+  <li><a href="#after-pr-is-merged" id="toc-after-pr-is-merged" class="nav-link" data-scroll-target="#after-pr-is-merged">After PR is merged</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/boshek/2026-feb-course-planning/edit/main/git-github.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/boshek/2026-feb-course-planning/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -579,24 +589,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="git-workflow-review" class="level2">
 <h2 class="anchored" data-anchor-id="git-workflow-review">Git Workflow Review</h2>
-<p><strong><em>back to slides - git workflow overview</em></strong></p>
-<section id="check-your-git-status" class="level3">
-<h3 class="anchored" data-anchor-id="check-your-git-status">Check your git status</h3>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git_sitrep</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <p>Make sure we have pushed all of our changes up to this point.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin main</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
+<section id="pull-request-workflows" class="level2">
+<h2 class="anchored" data-anchor-id="pull-request-workflows">Pull Request Workflows</h2>
+<p><strong><em>back to slides - PR workflow overview</em></strong></p>
+<p>The <code>usethis</code> PR helpers manage the full lifecycle of a pull request from your R console. We’ll use them for everything from here on - including setting up CI and Air.</p>
+<p>The helpers you’ll use most:</p>
+<ul>
+<li><code>pr_init("branch-name")</code> - create and switch to a new branch</li>
+<li><code>pr_push()</code> - push your branch and open a PR on GitHub</li>
+<li><code>pr_pause()</code> - stash work and return to <code>main</code></li>
+<li><code>pr_resume("branch-name")</code> - return to a branch</li>
+<li><code>pr_fetch(123)</code> - check out someone else’s PR locally</li>
+<li><code>pr_finish()</code> - clean up after a PR is merged</li>
+</ul>
 </section>
 <section id="continuous-integration" class="level2">
 <h2 class="anchored" data-anchor-id="continuous-integration">Continuous Integration</h2>
+<section id="start-a-branch" class="level3">
+<h3 class="anchored" data-anchor-id="start-a-branch">Start a branch</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_init</span>(<span class="st">"add-ci"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
 <section id="add-github-actions-for-r-cmd-check" class="level3">
 <h3 class="anchored" data-anchor-id="add-github-actions-for-r-cmd-check">Add GitHub Actions for R CMD check</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_github_action</span>(<span class="st">"check-standard"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_github_action</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This creates <code>.github/workflows/R-CMD-check.yaml</code> that runs <code>R CMD check</code> on multiple platforms whenever you push.</p>
 <p>It also adds a “R CMD check” status badge to your README. Look at your README.Rmd badges section, then rebuild, and <code>check()</code> locally.</p>
@@ -605,7 +629,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-tip callout-empty-content callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -615,107 +639,171 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Commit your changes, and push.</p>
+
 </div>
+</div>
+</section>
+<section id="push-and-open-a-pr" class="level3">
+<h3 class="anchored" data-anchor-id="push-and-open-a-pr">Push and open a PR</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This pushes your branch and opens a browser to create the PR. After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to <code>main</code>.</p>
+</section>
+<section id="merge-and-clean-up" class="level3">
+<h3 class="anchored" data-anchor-id="merge-and-clean-up">Merge and clean up</h3>
+<p>Once CI passes and the PR is merged on GitHub:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="view-your-check-results" class="level3">
 <h3 class="anchored" data-anchor-id="view-your-check-results">View your check results</h3>
-<p>After pushing, go to your repo’s “Actions” tab to see the workflow run.</p>
+<p>After merging, go to your repo’s “Actions” tab to see the workflow run on <code>main</code>.</p>
 </section>
 </section>
 <section id="setting-up-air" class="level2">
 <h2 class="anchored" data-anchor-id="setting-up-air">Setting Up Air</h2>
 <p><a href="https://posit-dev.github.io/air/">Air</a> is a fast R formatter that automatically formats your code every time you save a <code>.R</code> file. It helps you keep your mind focused on the code, and most importantly eases collaboration because it forces a consistent style among you and your collaborators.</p>
+<section id="start-a-branch-1" class="level3">
+<h3 class="anchored" data-anchor-id="start-a-branch-1">Start a branch</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_init</span>(<span class="st">"use-air"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
 <section id="install-air-in-your-project" class="level3">
 <h3 class="anchored" data-anchor-id="install-air-in-your-project">Install Air in your project</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_air</span>(<span class="at">vscode =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_air</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In RStudio, change these settings:</p>
 <p><img src="img/rstudio-options-air-formatter.png" class="img-fluid"></p>
 <p><img src="img/rstudio-options-format-on-save.png" class="img-fluid"></p>
 <p><a href="https://posit-dev.github.io/air/cli.html">Install the Air command line utility</a>. Otherwise, the first time Air is run (i.e., the first time you save a file), it will be downloaded and installed automatically.</p>
 </section>
+<section id="format-your-whole-project" class="level3">
+<h3 class="anchored" data-anchor-id="format-your-whole-project">Format your whole project</h3>
+<p>In the terminal, run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>air format .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="pull-request-workflows" class="level2">
-<h2 class="anchored" data-anchor-id="pull-request-workflows">Pull Request Workflows</h2>
-<p><strong><em>back to slides - PR workflow overview</em></strong></p>
+<section id="push-and-open-a-pr-1" class="level3">
+<h3 class="anchored" data-anchor-id="push-and-open-a-pr-1">Push and open a PR</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This pushes your branch and opens a browser to create the PR. After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to <code>main</code>.</p>
+<p>While we wait for CI…Let’s leave this PR and start a new one!</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_pause</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now we’re back on <code>main</code> and can start a new branch for the next feature.</p>
+</section>
+</section>
+<section id="adding-a-new-function-via-pr" class="level2">
+<h2 class="anchored" data-anchor-id="adding-a-new-function-via-pr">Adding a New Function via PR</h2>
+<p>Now we’ll go through the full PR workflow for a real feature: adding a <code>biomass_index()</code> function to <code>fishr</code>.</p>
 <section id="start-a-new-feature-branch" class="level3">
 <h3 class="anchored" data-anchor-id="start-a-new-feature-branch">Start a new feature branch</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_init</span>(<span class="st">"add-biomass-function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_init</span>(<span class="st">"add-biomass-function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>This creates and checks out a new branch.</p>
 </section>
 <section id="write-a-new-function" class="level3">
 <h3 class="anchored" data-anchor-id="write-a-new-function">Write a new function</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_r</span>(<span class="st">"biomass"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">use_r</span>(<span class="st">"biomass"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Add a simple biomass calculation function:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Calculate Biomass Index</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' Calculates biomass index from CPUE and area swept.</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param cpue Numeric vector of CPUE values</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km²)</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return A numeric vector of biomass index values</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' @export</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#' @examples</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#' biomass_index(cpue = salmon_cpue, area_swept = 5)</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(cpue, area_swept) {</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  cpue <span class="sc">*</span> area_swept</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Calculate Biomass Index</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' Calculates biomass index from CPUE and area swept.</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param cpue Numeric vector of CPUE values</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km²)</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return A numeric vector of biomass index values</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#' @export</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#' @examples</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#' biomass_index(cpue = salmon_cpue, area_swept = 5)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(cpue, area_swept) {</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  cpue <span class="sc">*</span> area_swept</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="document-and-check" class="level3">
 <h3 class="anchored" data-anchor-id="document-and-check">Document and check</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">document</span>()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load_all</span>()</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">biomass_index</span>(<span class="dv">10</span>, <span class="dv">5</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">document</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load_all</span>()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">biomass_index</span>(<span class="dv">10</span>, <span class="dv">5</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-empty-content callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Make a commit
+</div>
+</div>
+<div class="callout-body-container callout-body">
+
+</div>
 </div>
 </section>
 <section id="push-your-branch-and-create-a-pr" class="level3">
 <h3 class="anchored" data-anchor-id="push-your-branch-and-create-a-pr">Push your branch and create a PR</h3>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This pushes your branch and opens a browser to create the PR.</p>
 </section>
-<section id="working-with-prs" class="level3">
-<h3 class="anchored" data-anchor-id="working-with-prs">Working with PRs</h3>
+</section>
+<section id="go-back-to-the-air-pr" class="level2">
+<h2 class="anchored" data-anchor-id="go-back-to-the-air-pr">Go back to the Air PR</h2>
+<p>Pause the biomass PR and return to main:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pause work on current PR (switch back to main)</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_pause</span>()</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Resume work on a PR</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_resume</span>(<span class="st">"add-biomass-function"</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># After PR is merged, clean up</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_pause</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>. . .</p>
+<p><br>
+Now resume the Air PR:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_resume</span>() <span class="co"># Choose the Air PR from the menu</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>. . .</p>
+<p><br>
+On Github, Merge the Air PR, then back in RStudio clean up the branch.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="fetch-and-review-someone-elses-pr" class="level3">
-<h3 class="anchored" data-anchor-id="fetch-and-review-someone-elses-pr">Fetch and review someone else’s PR</h3>
+<section id="now-resume-the-biomass-pr" class="level2">
+<h2 class="anchored" data-anchor-id="now-resume-the-biomass-pr">Now resume the biomass PR</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_fetch</span>(<span class="dv">123</span>) <span class="co"># PR number</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_resume</span>(<span class="st">"add-biomass-function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="run-a-final-check" class="level3">
-<h3 class="anchored" data-anchor-id="run-a-final-check">Run a final check</h3>
+<p>Get the latest changes from <code>main</code> (including the now-merged Air PR):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_merge_main</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<!-- TODO: Decide if we want to add Air CI -->
+<p>Then push the updated branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>On GitHub, review the biomass PR and merge once CI is passing.</p>
+<p>Finally, clean up the branch:</p>
+<section id="after-pr-is-merged" class="level3">
+<h3 class="anchored" data-anchor-id="after-pr-is-merged">After PR is merged</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 
 
 </section>

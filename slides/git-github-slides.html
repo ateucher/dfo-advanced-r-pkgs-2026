@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.27">
+
+  <title>📦 Advanced R Package Development – Git and GitHub for Collaborative Development</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #97947a;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #97947a;  padding-left: 4px; }
+    div.sourceCode
+      { color: #f8f8f2; background-color: #2b2b2b; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #f8f8f2; } /* Normal */
+    code span.al { color: #dcc6e0; } /* Alert */
+    code span.an { color: #d4d0ab; } /* Annotation */
+    code span.at { color: #ffd700; } /* Attribute */
+    code span.bn { color: #dcc6e0; } /* BaseN */
+    code span.bu { color: #f5ab35; } /* BuiltIn */
+    code span.cf { color: #ffa07a; } /* ControlFlow */
+    code span.ch { color: #abe338; } /* Char */
+    code span.cn { color: #ffa07a; } /* Constant */
+    code span.co { color: #d4d0ab; } /* Comment */
+    code span.cv { color: #d4d0ab; font-style: italic; } /* CommentVar */
+    code span.do { color: #d4d0ab; font-style: italic; } /* Documentation */
+    code span.dt { color: #dcc6e0; } /* DataType */
+    code span.dv { color: #dcc6e0; } /* DecVal */
+    code span.er { color: #dcc6e0; } /* Error */
+    code span.ex { color: #ffd700; } /* Extension */
+    code span.fl { color: #f5ab35; } /* Float */
+    code span.fu { color: #ffd700; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #d4d0ab; } /* Information */
+    code span.kw { color: #ffa07a; } /* Keyword */
+    code span.op { color: #00e0e0; } /* Operator */
+    code span.ot { color: #ffa07a; } /* Other */
+    code span.pp { color: #dcc6e0; } /* Preprocessor */
+    code span.sc { color: #00e0e0; } /* SpecialChar */
+    code span.ss { color: #abe338; } /* SpecialString */
+    code span.st { color: #abe338; } /* String */
+    code span.va { color: #f5ab35; } /* Variable */
+    code span.vs { color: #abe338; } /* VerbatimString */
+    code span.wa { color: #d4d0ab; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto-30a2a0ed8b387a71ee81c4eb70847720.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+  <script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+  <link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+</head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Git and GitHub for Collaborative Development</h1>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="outline" class="slide level2">
+<h2>Outline</h2>
+<ol type="1">
+<li>Git workflow review</li>
+<li>Pull request workflows with <code>usethis</code></li>
+<li>Continuous integration with GitHub Actions</li>
+<li>Code formatting with Air</li>
+<li>Adding a function via PR</li>
+</ol>
+</section>
+<section>
+<section id="git-workflow-review" class="title-slide slide level1 center">
+<h1>Git Workflow Review</h1>
+
+</section>
+<section id="where-we-left-off" class="slide level2">
+<h2>Where we left off</h2>
+<p>Make sure all changes from the fundamentals session are committed and pushed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="fu">git</span> pull</span>
+<span id="cb1-2"><a></a><span class="fu">git</span> push</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<aside class="notes">
+<p>Quick check - everyone should have a fishr package with <code>cpue()</code> and basic documentation, all pushed to GitHub. If anyone is behind, now is the time to catch up before we add CI.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-core-loop" class="slide level2">
+<h2>The core loop</h2>
+<p>Every day of package development follows the same loop:</p>
+<ol type="1">
+<li class="fragment">Pull latest changes</li>
+<li class="fragment">Make a small, focused change</li>
+<li class="fragment">Test that it works</li>
+<li class="fragment">Commit with a clear message</li>
+<li class="fragment">Push</li>
+</ol>
+<div class="fragment">
+<p>Pull requests add a <strong>review step</strong> between commit and merge to <code>main</code>.</p>
+</div>
+</section></section>
+<section>
+<section id="pull-request-workflows" class="title-slide slide level1 center">
+<h1>Pull Request Workflows</h1>
+
+</section>
+<section id="collaborating" class="slide level2">
+<h2>Collaborating</h2>
+<ul>
+<li>Git is a <em>distributed</em> version control system</li>
+<li>Each collaborator has a full copy of the repository, including its history</li>
+<li>All collaborators can push changes to the remote repository (given they have permission)</li>
+<li>Changes made by collaborators can be pulled into your local repository</li>
+</ul>
+</section>
+<section id="why-pull-requests" class="slide level2">
+<h2>Why pull requests?</h2>
+<div class="cell" data-reveal="true" data-eval="true" data-fig-width="14" data-file="pull-request.mmd" data-layout-align="default">
+<div class="cell-output-display">
+<div id="pull-request">
+<div>
+<pre class="mermaid mermaid-js" data-label="pull-request">%%{
+    init: {
+        'theme':'base', 
+        'showCommitLabel': false, 
+        'themeVariables': { 
+            'git0':'#6cc644', 
+            'git1':'#f39c12', 
+            'commitLabelColor': '#325c65', 
+            'commitLabelBackground':'#325c65'
+        }
+    }
+}%%
+
+gitGraph
+    commit id: " "
+    commit id: "  "
+    commit id: "   "
+    commit id: "    "
+    branch "branch"
+    commit id: "     "
+    commit id: "      "
+    commit id: "       "
+    commit id: "        "
+    checkout main
+    merge "branch" tag: "PR review &amp; merge"
+    commit id: "         "
+    commit id: "          "
+</pre>
+</div>
+</div>
+</div>
+</div>
+<p>Even when working alone, PRs are valuable:</p>
+<ul>
+<li class="fragment">Check code runs before it reaches <code>main</code></li>
+<li class="fragment">You get a diff to review your own/others’ work</li>
+<li class="fragment">Allows efficient code review and discussion</li>
+<li class="fragment">Allows fearless experimentation</li>
+</ul>
+<div class="fragment">
+<p>With collaborators, PRs also enable <strong>code review</strong>.</p>
+</div>
+</section>
+<section id="steps" class="slide level2">
+<h2>Steps</h2>
+<ol type="1">
+<li>Create a new branch</li>
+<li>Make changes, commit, and push the branch to GitHub</li>
+<li>Open a Pull Request (PR) on GitHub</li>
+<li>Discuss and review the PR</li>
+<li>Merge the PR into the main branch</li>
+<li>Pull the latest changes to your local main branch</li>
+</ol>
+</section>
+<section id="the-usethis-pr-helpers" class="slide level2">
+<h2>The <code>usethis</code> PR helpers</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pr_init("name")</code></td>
+<td>Create and switch to a new branch</td>
+</tr>
+<tr class="even">
+<td><code>pr_push()</code></td>
+<td>Push branch, open PR on GitHub</td>
+</tr>
+<tr class="odd">
+<td><code>pr_pull()</code></td>
+<td>Pull latest changes on that branch from GitHub</td>
+</tr>
+<tr class="even">
+<td><code>pr_merge_main()</code></td>
+<td>Merge latest changes from <code>main</code> into your branch</td>
+</tr>
+<tr class="odd">
+<td><code>pr_finish()</code></td>
+<td>Clean up after merge</td>
+</tr>
+</tbody>
+</table>
+<p><br>
+</p>
+<div class="fragment">
+<h3 id="other-useful-ones">Other useful ones</h3>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pr_pause()</code></td>
+<td>Stash work, return to <code>main</code></td>
+</tr>
+<tr class="even">
+<td><code>pr_resume("name")</code></td>
+<td>Return to a branch</td>
+</tr>
+<tr class="odd">
+<td><code>pr_fetch(123)</code></td>
+<td>Check out someone else’s PR</td>
+</tr>
+</tbody>
+</table>
+</div>
+<aside class="notes">
+<p>These also help us avoid merge conflicts by doing a lot of “pull before you work” and “pull before you push” automatically.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="basic-pr-workflow-with-usethis-pr-helpers" class="slide level2">
+<h2>Basic PR workflow with <code>usethis</code> PR helpers</h2>
+<div class="cell" data-reveal="true" data-eval="true" data-fig-width="16" data-fig-height="8" data-layout-align="default">
+<div class="cell-output-display">
+<div id="pr-helpers">
+<div>
+<pre class="mermaid mermaid-js" data-label="pr-helpers">---
+config:
+  theme: base
+  themeVariables:
+    fontSize: 30px
+---
+
+flowchart LR
+    A([main]) --&gt; PI["pr_init()"] --&gt; B([Branch])
+    B --&gt; C[Write &amp; test]
+    C --&gt; PP["pr_push()"] --&gt; D([GitHub PR])
+    D --&gt; E{Review}
+    E --&gt; C
+    E --&gt;|Merged| F([main updated])
+    F --&gt; PF["pr_finish()"] --&gt; G([Clean state])
+
+    style A fill:#2d6a4f,color:#fff,stroke:none
+    style F fill:#2d6a4f,color:#fff,stroke:none
+    style G fill:#2d6a4f,color:#fff,stroke:none
+    style B fill:#1d3557,color:#fff,stroke:none
+    style D fill:#457b9d,color:#fff,stroke:none
+    style E fill:#e63946,color:#fff,stroke:none
+    style C fill:#333,color:#fff,stroke:#666
+    style PI fill:#f4a261,color:#000,stroke:none
+    style PP fill:#f4a261,color:#000,stroke:none
+    style PF fill:#f4a261,color:#000,stroke:none
+</pre>
+</div>
+</div>
+</div>
+</div>
+<p>Demonstrates the full workflow: <a href="https://usethis.r-lib.org/articles/pr-functions.html" class="uri">https://usethis.r-lib.org/articles/pr-functions.html</a></p>
+</section>
+<section id="starting-a-branch" class="slide level2">
+<h2>Starting a branch</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_init</span>(<span class="st">"my-branch-name"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<ul>
+<li>Creates and checks out the branch immediately</li>
+<li>You are now isolated from <code>main</code></li>
+<li>Branch names: short, descriptive, hyphenated</li>
+</ul>
+</div>
+<aside class="notes">
+<p>A reader should be able to guess what the PR does from the branch name alone.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="pushing-and-opening-a-pr" class="slide level2">
+<h2>Pushing and opening a PR</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<ul>
+<li>Pushes your branch to GitHub</li>
+<li>Opens your browser to the “Create pull request” page</li>
+</ul>
+</div>
+</section>
+<section id="writing-a-good-pr-description" class="slide level2">
+<h2>Writing a good PR description</h2>
+<p><strong>Title:</strong> Short, imperative - “Add foofy function”</p>
+<p><strong>Body:</strong></p>
+<ul>
+<li>What problem does this solve?</li>
+<li>Any design decisions worth explaining?</li>
+<li>Anything reviewers should pay attention to?</li>
+</ul>
+</section>
+<section id="after-review-and-merge" class="slide level2">
+<h2>After review and merge</h2>
+<p>Once the PR is approved and merged on GitHub:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<ul>
+<li>Switches back to <code>main</code></li>
+<li>Pulls the latest changes (including your merged work)</li>
+<li>Deletes the local feature branch</li>
+<li>Deletes the remote feature branch</li>
+</ul>
+</div>
+</section>
+<section id="pausing-and-resuming" class="slide level2">
+<h2>Pausing and resuming</h2>
+<p>If you need to switch context mid-PR:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_pause</span>()                          <span class="co"># return to main</span></span>
+<span id="cb5-2"><a></a>usethis<span class="sc">::</span><span class="fu">pr_resume</span>(<span class="st">"my-branch-name"</span>)         <span class="co"># pick up where you left off</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<aside class="notes">
+<p>This is useful when someone asks you to review their PR while you’re mid-work, or when you need to make a quick fix to main.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="reviewing-someone-elses-pr-locally" class="slide level2">
+<h2>Reviewing someone else’s PR locally</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_fetch</span>(<span class="dv">1</span>)    <span class="co"># check out PR #1 locally</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Run their code, run their tests, leave an informed review on GitHub.</p>
+<p>Once the PR is merged, clean up your local branch and delete the PR branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section>
+<section id="the-full-picture" class="slide level2">
+<h2>The full picture</h2>
+<div class="cell" data-reveal="true" data-eval="true" data-fig-width="16" data-fig-height="8" data-layout-align="default">
+<div class="cell-output-display">
+<div id="pr-helpers-full">
+<div>
+<pre class="mermaid mermaid-js" data-label="pr-helpers-full">---
+config:
+  theme: base
+  themeVariables:
+    fontSize: 20px
+---
+
+flowchart LR
+    A([main]) --&gt; PI["pr_init()"] --&gt; B([your branch])
+    B --&gt; C[Write &amp; test]
+    C --&gt; PP["pr_push()"] --&gt; D([GitHub PR])
+    D --&gt; E{Review}
+    E --&gt;|Changes needed| C
+    E --&gt;|Approved &amp; merged| F([main updated])
+    F --&gt; PF["pr_finish()"] --&gt; A
+
+    D --&gt; PFetch["pr_fetch()"] --&gt; G([reviewer's local])
+    G --&gt;|review &amp; comment| D
+
+    B --&gt; PA["pr_pause()"] --&gt; A
+    A --&gt; PRe["pr_resume()"] --&gt; B
+
+    style A fill:#2d6a4f,color:#fff,stroke:none
+    style F fill:#2d6a4f,color:#fff,stroke:none
+    style B fill:#1d3557,color:#fff,stroke:none
+    style G fill:#1d3557,color:#fff,stroke:none
+    style D fill:#457b9d,color:#fff,stroke:none
+    style E fill:#e63946,color:#fff,stroke:none
+    style C fill:#333,color:#fff,stroke:#666
+    style PI fill:#f4a261,color:#000,stroke:none
+    style PP fill:#f4a261,color:#000,stroke:none
+    style PF fill:#f4a261,color:#000,stroke:none
+    style PFetch fill:#f4a261,color:#000,stroke:none
+    style PA fill:#f4a261,color:#000,stroke:none
+    style PRe fill:#f4a261,color:#000,stroke:none
+</pre>
+</div>
+</div>
+</div>
+</div>
+<p>Demonstrates the full workflow: <a href="https://usethis.r-lib.org/articles/pr-functions.html" class="uri">https://usethis.r-lib.org/articles/pr-functions.html</a></p>
+</section></section>
+<section>
+<section id="continuous-integration" class="title-slide slide level1 center">
+<h1>Continuous Integration</h1>
+
+</section>
+<section id="why-ci" class="slide level2">
+<h2>Why CI?</h2>
+<p>Your package works on your machine. But does it work on:</p>
+<ul>
+<li class="fragment">Windows? macOS? Linux?</li>
+<li class="fragment">R 4.4? R-devel?</li>
+</ul>
+<div class="fragment">
+<p><strong>Continuous Integration</strong> automatically runs checks on every push</p>
+<ul>
+<li>In practice, we’re going to use GitHub Actions, a free workflow automation service included with your GitHub account</li>
+</ul>
+</div>
+</section>
+<section id="we-will-add-ci-via-a-pull-request" class="slide level2">
+<h2>We will add CI via a Pull Request</h2>
+<p>Create a new branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_init</span>(<span class="st">"add-ci"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="add-r-cmd-check-via-github-actions" class="slide level2">
+<h2>Add R CMD check via GitHub Actions</h2>
+<h3 id="httpsgithub.comr-libactions"><a href="https://github.com/r-lib/actions" class="uri">https://github.com/r-lib/actions</a></h3>
+<p><br>
+</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>usethis<span class="sc">::</span><span class="fu">use_github_action</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li><code>"check-standard"</code>: Runs <code>R CMD check</code> on several platforms when you push</li>
+<li><code>"test-coverage"</code>: Compute test coverage and report at codecov.io</li>
+<li>And more… (<a href="https://github.com/r-lib/actions/tree/v2/examples" class="uri">https://github.com/r-lib/actions/tree/v2/examples</a>)</li>
+</ul>
+<div class="fragment">
+<p>Creates <code>.github/workflows/R-CMD-check.yaml</code> which runs <code>R CMD check</code> on:</p>
+<ul>
+<li>macOS (release R)</li>
+<li>Windows (release R)</li>
+<li>Ubuntu (release, devel, and oldrel R)</li>
+</ul>
+</div>
+</section>
+<section id="add-a-status-badge" class="slide level2">
+<h2>Add a status badge</h2>
+<p>The action also adds a badge to your <code>README.Rmd</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>devtools<span class="sc">::</span><span class="fu">build_readme</span>()</span>
+<span id="cb10-2"><a></a>devtools<span class="sc">::</span><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Then push and open the PR:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Write a good PR title and description, then submit the PR.</p>
+<p>Watch the Actions tab - CI runs on the PR branch before we merge to <code>main</code>.</p>
+</div>
+</section>
+<section id="viewing-ci-results" class="slide level2">
+<h2>Viewing CI results</h2>
+<p>Go to the <strong>Actions</strong> tab on your repo.</p>
+<p>Each push triggers a workflow run.</p>
+<ul>
+<li>✅ Green checkmark = passing.</li>
+<li>❌ Red X = something to fix.</li>
+</ul>
+<aside class="notes">
+<p>Show this live - click into a run and show the output from R CMD check. The output is identical to what you see locally with check(). Getting comfortable reading CI output is a key skill.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+<p>Merge the PR on GitHub once CI is passing.</p>
+<p>Run <code>pr_finish()</code> to clean up your branch after merging.</p>
+</section></section>
+<section>
+<section id="code-formatting-with-air" class="title-slide slide level1 center">
+<h1>Code Formatting with Air</h1>
+
+</section>
+<section id="what-is-air" class="slide level2">
+<h2>What is Air?</h2>
+<p><a href="https://posit-dev.github.io/air/">Air</a> is a fast R code formatter - it automatically reformats your code on save.</p>
+<p><strong>Why it matters for collaboration:</strong></p>
+<ul>
+<li class="fragment">Eliminates style debates in code review</li>
+<li class="fragment">Reduces noisy diffs (no more whitespace-only changes)</li>
+<li class="fragment">Keeps everyone’s code consistent without thinking about it</li>
+</ul>
+</section>
+<section id="start-a-branch" class="slide level2">
+<h2>Start a branch</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_init</span>(<span class="st">"use-air"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="set-up-air-in-your-project" class="slide level2">
+<h2>Set up Air in your project</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">use_air</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In RStudio, change these settings:</p>
+<p><img data-src="img/rstudio-options-air-formatter.png" height="250"></p>
+<p><img data-src="img/rstudio-options-format-on-save.png" height="250"></p>
+<p>Install the Air command line utility: <a href="https://posit-dev.github.io/air/cli.html" class="uri">https://posit-dev.github.io/air/cli.html</a></p>
+<aside class="notes">
+<p>Air will be downloaded automatically on first save if you haven’t installed the CLI.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="format-your-whole-project" class="slide level2">
+<h2>Format your whole project</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb14-1"><a></a>air format .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="push-and-merge" class="slide level2">
+<h2>Push and merge</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Review the diff on GitHub - you should see only formatting changes, no functional changes.</p>
+</section>
+<section id="while-we-wait-for-ci" class="slide level2">
+<h2>While we wait for CI…</h2>
+<p>Let’s leave this PR and start a new one…</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">pr_pause</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now we’re back on <code>main</code> and can start a new branch for the next feature.</p>
+</section></section>
+<section>
+<section id="adding-a-function-via-pr" class="title-slide slide level1 center">
+<h1>Adding a Function via PR</h1>
+
+</section>
+<section id="start-a-branch-1" class="slide level2">
+<h2>Start a branch</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>usethis<span class="sc">::</span><span class="fu">pr_init</span>(<span class="st">"add-biomass-function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="write-the-function" class="slide level2">
+<h2>Write the function</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>usethis<span class="sc">::</span><span class="fu">use_r</span>(<span class="st">"biomass"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="co">#' Calculate Biomass Index</span></span>
+<span id="cb19-2"><a></a><span class="co">#'</span></span>
+<span id="cb19-3"><a></a><span class="co">#' Calculates biomass index from CPUE and area swept.</span></span>
+<span id="cb19-4"><a></a><span class="co">#'</span></span>
+<span id="cb19-5"><a></a><span class="co">#' @param cpue Numeric vector of CPUE values</span></span>
+<span id="cb19-6"><a></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km²)</span></span>
+<span id="cb19-7"><a></a><span class="co">#'</span></span>
+<span id="cb19-8"><a></a><span class="co">#' @return A numeric vector of biomass index values</span></span>
+<span id="cb19-9"><a></a><span class="co">#' @export</span></span>
+<span id="cb19-10"><a></a><span class="co">#'</span></span>
+<span id="cb19-11"><a></a><span class="co">#' @examples</span></span>
+<span id="cb19-12"><a></a><span class="co">#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)</span></span>
+<span id="cb19-13"><a></a><span class="co">#' biomass_index(cpue = salmon_cpue, area_swept = 5)</span></span>
+<span id="cb19-14"><a></a>biomass_index <span class="ot">&lt;-</span> <span class="cf">function</span>(cpue, area_swept) {</span>
+<span id="cb19-15"><a></a>  cpue <span class="sc">*</span> area_swept</span>
+<span id="cb19-16"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="document-and-check" class="slide level2">
+<h2>Document and check</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>devtools<span class="sc">::</span><span class="fu">document</span>()</span>
+<span id="cb20-2"><a></a>devtools<span class="sc">::</span><span class="fu">load_all</span>()</span>
+<span id="cb20-3"><a></a></span>
+<span id="cb20-4"><a></a><span class="fu">biomass_index</span>(<span class="dv">10</span>, <span class="dv">5</span>)</span>
+<span id="cb20-5"><a></a></span>
+<span id="cb20-6"><a></a>devtools<span class="sc">::</span><span class="fu">check</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Commit when <code>check()</code> passes cleanly.</p>
+</section>
+<section id="push-and-open-a-pr" class="slide level2">
+<h2>Push and open a PR</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="go-back-to-the-air-pr" class="slide level2">
+<h2>Go back to the Air PR</h2>
+<p>Pause the biomass PR and return to main:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">pr_pause</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><br>
+Now resume the Air PR:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">pr_resume</span>() <span class="co"># Choose the Air PR from the menu</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="fragment">
+<p><br>
+On Github, Merge the Air PR, then back in RStudio clean up the branch.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section>
+<section id="now-resume-the-biomass-pr" class="slide level2">
+<h2>Now resume the biomass PR</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">pr_resume</span>(<span class="st">"add-biomass-function"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p><br>
+Get the latest changes from <code>main</code> (including the now-merged Air PR):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">pr_merge_main</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="fragment">
+<p><br>
+Then push the updated branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">pr_push</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="fragment">
+<p><br>
+On GitHub, review the biomass PR and merge once CI is passing.</p>
+</div>
+<div class="fragment">
+<p><br>
+Finally, clean up the branch:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">pr_finish</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</section>
+<section id="resources" class="slide level2">
+<h2>Resources</h2>
+<ul>
+<li>Happy Git and GitHub for the useR: <a href="https://happygitwithr.com/" class="uri">https://happygitwithr.com/</a></li>
+<li><code>usethis::pr_*</code> helpers: <a href="https://usethis.r-lib.org/articles/pr-functions.html" class="uri">https://usethis.r-lib.org/articles/pr-functions.html</a></li>
+<li>GitHub Actions for R: <a href="https://github.com/r-lib/actions" class="uri">https://github.com/r-lib/actions</a></li>
+<li>Air code formatter: <a href="https://posit-dev.github.io/air/" class="uri">https://posit-dev.github.io/air/</a></li>
+</ul>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p><a href="../index.html"><i class="fa-solid fa-house" aria-label="house"></i></a></p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1600,
+
+        height: 900,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp("http:\/\/andyteucher\.ca\/dfo-advanced-r-pkgs-2026\/");
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
