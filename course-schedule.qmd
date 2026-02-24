@@ -27,7 +27,7 @@ format: html
 
 ### 09:20 - 09:35 | Break (15 min)
 
-### 09:35 - 10:55 | Review of Package Development Fundamentals + Git/GitHub for Collaborative Development (80 min) (Andy)
+### 09:35 - 10:55 | Git/GitHub for Collaborative Development (80 min) (Andy)
 - Git workflow review + continuous integration
 - GitHub setup
 - Additional package review
