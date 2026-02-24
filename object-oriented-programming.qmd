@@ -157,6 +157,7 @@ Without a custom print method, R falls back to `print.default`, which is why our
 tagged vector currently displays as raw numbers.
 
 ```{r}
+#' @export
 print.cpue_result <- function(x, ...) {
   cat("CPUE Results for", length(x), "records\n")
   cat("Values:", round(x, 2), "\n")
@@ -170,6 +171,7 @@ Important details:
 - Always include `...` in the signature (required by the `print` generic)
 - Return `invisible(x)` so assignment still works: `y <- print(x)`
 - Use `cat()` rather than `print()` inside print methods to avoid recursion
+- Use `@export` to register the method in the NAMESPACE file
 
 ```{r}
 document()
@@ -620,7 +622,7 @@ cpue.default <- function(x, ...) {
 
 Converting `cpue` into a generic changed its signature from `cpue(catch, effort, ...)` to `cpue(x, ...)`. The `@inheritParams cpue` tag on `biomass_index` was inheriting `catch` and `effort` docs from the old function - those params no longer exist on the generic.
 
-Update `biomass_index` to inherit from `cpue.numeric` instead, since that is the method it actually calls. Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
+Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is the method it actually calls. Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
 
 ```{r}
 #' Calculate Biomass Index

@@ -1,0 +1,171 @@
+---
+title: "Advanced R Package Development"
+subtitle: "DFO - February 2026"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Welcome!
+
+**Instructors:**
+
+- Andy Teucher
+  - [andyteucher.ca](https://andyteucher.ca)
+  - GitHub: [ateucher](https://github.com/ateucher)
+- Sam Albers
+  - [samalbers.science](https://samalbers.science)
+  - GitHub: [boshek](https://github.com/boshek)
+
+## Welcome!
+
+This is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.
+
+**Code of Conduct:**
+
+- Treat everyone with respect
+- Everyone should feel welcome
+- Full text: <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html>
+
+::: {.notes}
+Cameras. Remind everyone about the code of conduct briefly - it's about creating a safe learning environment.
+:::
+
+
+## Sticky Notes (online)
+
+::: columns
+::: {.column width="50%"}
+
+**I'm stuck** [✋]{style="font-size:2em;"}       
+
+Use the Zoom Raise Hand reaction
+:::
+
+::: {.column width="50%"}
+
+**I'm good** [👍]{style="font-size:2em;"}       
+
+Use the Thumbs Up reaction
+:::
+:::
+
+::: {.notes}
+We'll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room.
+:::
+
+## Discussions / Q & A
+
+- GitHub Discussions: <https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions>
+
+Open the welcome discussion and introduce yourself:
+
+- Office/department, city/town
+- Why you're here
+- Something you've built or are trying to build
+
+::: {.notes}
+Paste link in chat. Open GitHub discussions, ask people to introduce themselves. Share screen doing it.
+:::
+
+## Resources
+
+- **Workshop website:** <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/>
+- **Setup instructions:** <https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html>
+- **Cheatsheet:** <https://rstudio.github.io/cheatsheets/html/package-development.html>
+
+::: {.notes}
+Remind people about setup - which they should have done before today.
+:::
+
+## Check your setup
+
+Run these two commands and make sure they succeed before we begin:
+
+```{r}
+devtools::has_devel()
+```
+
+Look for 
+`Your system is ready to build packages!`
+
+
+
+::: {.fragment}
+```{r}
+usethis::git_sitrep()
+```
+
+Look for 
+`Personal access token for 'https://github.com': '<discovered>'`
+:::
+
+::: {.notes}
+Give people 2-3 minutes to run these. has_devel() should print "Your system is ready to build packages!". For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content.
+:::
+
+# Day 1
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 8:20 | Introduction |
+| 8:20 - 9:20 | Package Development Fundamentals |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:55 | Git/GitHub for Collaborative Development |
+| 10:55 - 11:10 | Break |
+| 11:10 - 12:30 | Testing with testthat - Part 1 |
+
+# Day 2
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 9:20 | Function Design Best Practices |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:55 | Testing with testthat - Part 2 |
+| 10:55 - 11:10 | Break |
+| 11:10 - 11:30 | Advanced Documentation |
+| 11:30 - 12:30 | Debugging Techniques |
+
+# Day 3
+
+## Schedule
+
+| Time | Session |
+|------|---------|
+| 8:00 - 9:20 | Object-Oriented Programming |
+| 9:20 - 9:35 | Break |
+| 9:35 - 10:35 | Data Packages |
+| 10:35 - 10:55 | Releasing Your R Package |
+| 10:55 - 11:10 | Break |
+| 11:10 - 12:30 | BYOP + Open Topics |
+
+## BYOP + Open Topics
+
+**Open Q&A**
+
+- Specific challenges you've encountered during the workshop
+- Applying workshop concepts to your own package
+
+::: {.fragment}
+**Bring Your Own Package**
+
+- Dedicated time to work on your package
+- Instructors available for individual consultation
+:::
+
+## Let's go!
+
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzcyZW11M3h2NDkxczh4a3pwbjhpOW1lMjQ0dnE2NTg5Z2toY2FodyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BpGWitbFZflfSUYuZ9/giphy.gif){fig-align="center"}
