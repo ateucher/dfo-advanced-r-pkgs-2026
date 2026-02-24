@@ -134,10 +134,6 @@ check()
 use_mit_license()
 ```
 
-::: {.callout-tip}
-## Make a commit
-:::
-
 ### DESCRIPTION file:
 
 ```default
@@ -164,9 +160,6 @@ RoxygenNote: 7.3.2
 check()
 ```
 
-::: {.callout-tip}
-## Make a commit
-:::
 
 ## Documentation Basics
 
