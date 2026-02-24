@@ -14,7 +14,7 @@ website:
     background: secondary
     right:
       - icon: github
-        href: https://github.com/boshek/2026-feb-course-planning
+        href: https://github.com/ateucher/dfo-advanced-r-pkgs-2026
         aria-label: GitHub
     left:
       - href: index.qmd
@@ -34,7 +34,7 @@ website:
             href: slides/documentation-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
             href: slides/releasing-slides.html
-  repo-url: https://github.com/boshek/2026-feb-course-planning
+  repo-url: https://github.com/ateucher/dfo-advanced-r-pkgs-2026
   repo-actions: [edit, issue]
   sidebar:
     search: true
