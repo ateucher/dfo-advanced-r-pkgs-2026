@@ -391,7 +391,7 @@ check()
 ## Pitfalls of ...
 
 - Arguments passed through `...` must be named - positional matching doesn't work through the ellipsis
-- Misspelled arguments are silently absorbed: `cpue(100, 10, mthod = "log")` won't error
+- Misspelled arguments are silently absorbed: `biomass_index(area_swept = 5, catch = 100, effort = 10, mthod = "log")` won't error
 - Errors from inner functions can be hard to trace
 
 ::: {.fragment}
@@ -578,7 +578,6 @@ load_all()
 
 cpue(100, 10) # Good input
 cpue("high", 10) # 'catch' must be numeric, got character.
-biomass_index(cpue = "ten", area_swept = 5) # 'cpue' must be numeric...
 ```
 
 ## Where to put helpers
