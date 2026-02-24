@@ -72,7 +72,7 @@ calculateArea <- function(Length, Width) {}
 
 ```{r}
 # Good - functions do things
-calculate_cpue()
+calculate_metric()
 filter_by_year()
 plot_abundance()
 
@@ -82,7 +82,7 @@ fish_data() # Is this a function or an object?
 ```
 
 ::: {.fragment}
-Note: Sometimes you have exceptions. `cpue` us a well-established domain abbreviation. The next slide covers this.
+Note: Sometimes you have exceptions. `cpue` is a well-established domain abbreviation.
 :::
 
 ## Objects as nouns
@@ -116,7 +116,7 @@ The `air` formatter (hopefully already configured in this project) handles this 
 
 ## Naming in fishr
 
-Our functions follow these conventions:
+Our functions (mostly) follow these conventions:
 
 - `cpue()` - short, but a domain-standard abbreviation well understood by fisheries scientists
 - `biomass_index()` - descriptive, easy to predict
@@ -165,6 +165,12 @@ load_data <- function(path) {
 
 ::: {.fragment}
 Side effects are sometimes necessary, but prefer pure functions when possible. Easier to test and reason about.
+:::
+
+::: {.fragment}
+::: {.question}
+What is an example of a commonly used function that uses a side effect?
+:::
 :::
 
 ## cpue annotated
@@ -313,6 +319,8 @@ testthat::snapshot_accept()
 
 :::
 
+## Make a commit
+
 # The Ellipsis (...)
 
 ## Passing arguments through with ...
@@ -339,7 +347,7 @@ biomass_index <- function(
 }
 ```
 
-## Demo
+## Example usage
 
 ```{r}
 load_all()
@@ -391,31 +399,9 @@ use_package("rlang")
 ::: {.fragment}
 Adds `rlang` to `Imports` in `DESCRIPTION`. Call functions using `::`:
 
-```{r}
-format_catch <- function(catch) {
-  if (!is.numeric(catch)) {
-    rlang::abort("`catch` must be a numeric vector.")
-  }
-  round(catch, 2)
-}
-```
-
 `::` is explicit, avoids namespace conflicts, and makes clear which package each function comes from.
 :::
 
-## Importing frequently-used functions
-
-For functions called throughout a package, `::` on every call is verbose:
-
-```{r}
-use_import_from("rlang", "abort")
-```
-
-::: {.fragment}
-Inserts `@importFrom rlang abort` into your package roxygen block and updates `NAMESPACE` after `document()`.
-
-`abort()` is then available across your package without the `rlang::` prefix.
-:::
 
 ## Catching unused dots
 
@@ -616,4 +602,47 @@ Add `verbose` support to `biomass_index()` using the same options pattern as `cp
 
 ::: {.fragment}
 **Bonus:** write a test that confirms the message appears when `verbose = TRUE` and is silent by default.
+:::
+
+## Solution
+
+Add the `@param` and argument to `R/biomass.R`:
+
+```{r}
+#' @param verbose Logical; print processing info? Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+biomass_index <- function(
+  cpue = NULL,
+  area_swept,
+  catch = NULL,
+  effort = NULL,
+  verbose = getOption("fishr.verbose", default = FALSE),
+  ...
+) {
+  rlang::check_dots_used()
+
+  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {
+    cpue <- cpue(catch, effort, verbose = verbose, ...)
+  }
+
+  if (is.null(cpue)) {
+    stop("Must provide either 'cpue' or both 'catch' and 'effort'.")
+  }
+
+  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)
+
+  if (verbose) {
+    message("calculating biomass index for ", length(area_swept), " records")
+  }
+
+  cpue * area_swept
+}
+```
+
+::: {.fragment}
+Run `document()` and `check()`. Accept any updated snapshots:
+
+```{r}
+testthat::snapshot_accept()
+```
 :::
