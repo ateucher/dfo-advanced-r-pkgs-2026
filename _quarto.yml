@@ -8,6 +8,7 @@ project:
 
 website:
   title: "📦 Advanced R Package Development"
+  favicon: favicon.svg
   site-url: http://andyteucher.ca/dfo-advanced-r-pkgs-2026/
   navbar:
     background: secondary
