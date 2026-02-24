@@ -383,8 +383,6 @@ test_that("cpue warns when catch and effort lengths differ", {
 })
 ```
 
-:::
-
 ## When snapshots change
 
 After modifying output, tests fail. Review and accept:
