@@ -107,7 +107,6 @@ test()
 pr_push()
 ```
 
-
 ## Test Helpers and Fixtures
 
 ### Create a test helper file
@@ -143,7 +142,6 @@ test_that("cpue works with generated data", {
   expect_equal(
     result,
     c(34.053, 9.065, 19.239, 135.640, 6.372),
-    ignore_attr = TRUE,
     tolerance = 1e-3
   )
 })
@@ -178,6 +176,14 @@ test_that("cpue matches reference data", {
   expect_equal(result, reference_data$expected_cpue)
 })
 ```
+
+```{r}
+test()
+```
+
+::: {.callout-tip}
+## Make a commit
+:::
 
 ## Testing Different Function Types
 
@@ -287,13 +293,6 @@ and you will get a warning that a new snapshot was added.
 test()
 ```
 
-### Reviewing snapshot changes
-
-```{r}
-# After modifying output, review changes
-snapshot_review()
-```
-
 ### Snapshot testing for warnings
 
 Let's update our warning test to use snapshots so we can review the full warning
@@ -323,6 +322,10 @@ test_that("cpue provides informative message when verbose", {
 ```
 
 ***We'll dive deeper into snapshot testing in Part 2***
+
+::: {.callout-tip}
+## Make a commit
+:::
 
 ## Run All Tests and Check
 
@@ -371,7 +374,13 @@ test_that("biomass_index throws error on invalid input", {
 })
 ```
 
-## Navigating tests - interactive testing, testing single files, testing the whole package
+::: {.callout-tip}
+## Make a commit
+:::
+
+## Navigating tests
+
+#### Interactive testing, testing single files, testing the whole package
 
 You will often want to:
 
@@ -401,3 +410,17 @@ devtools::test()
 ```
 
 Map a keyboard shortcut to this: `Shift+Ctrl/Cmd+T`
+
+## Wrap Up
+
+Once everything is passing, push any remaining commits and open the PR for review:
+
+```{r}
+pr_push()
+```
+
+Merge the PR on GitHub once CI passes, then clean up your branch:
+
+```{r}
+pr_finish()
+```

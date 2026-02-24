@@ -5,26 +5,40 @@ format: html
 
 ## Git Workflow Review
 
-***back to slides - git workflow overview***
-
-### Check your git status
-
-```{r}
-git_sitrep()
-```
-
 Make sure we have pushed all of our changes up to this point.
 
 ```{bash}
-git push origin main
+git pull
+git push
 ```
 
+## Pull Request Workflows
+
+***back to slides - PR workflow overview***
+
+The `usethis` PR helpers manage the full lifecycle of a pull request from your R console. We'll use them for everything from here on - including setting up CI and Air.
+
+The helpers you'll use most:
+
+- `pr_init("branch-name")` - create and switch to a new branch
+- `pr_push()` - push your branch and open a PR on GitHub
+- `pr_pause()` - stash work and return to `main`
+- `pr_resume("branch-name")` - return to a branch
+- `pr_fetch(123)` - check out someone else's PR locally
+- `pr_finish()` - clean up after a PR is merged
+
 ## Continuous Integration
+
+### Start a branch
+
+```{r}
+pr_init("add-ci")
+```
 
 ### Add GitHub Actions for R CMD check
 
 ```{r}
-use_github_action("check-standard")
+use_github_action()
 ```
 
 This creates `.github/workflows/R-CMD-check.yaml` that runs `R CMD check` on multiple platforms whenever you push.
@@ -39,22 +53,43 @@ check()
 
 ::: {.callout-tip}
 ## Make a commit
-Commit your changes, and push.
 :::
+
+### Push and open a PR
+
+```{r}
+pr_push()
+```
+
+This pushes your branch and opens a browser to create the PR. After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to `main`.
+
+### Merge and clean up
+
+Once CI passes and the PR is merged on GitHub:
+
+```{r}
+pr_finish()
+```
 
 ### View your check results
 
-After pushing, go to your repo's "Actions" tab to see the workflow run.
+After merging, go to your repo's "Actions" tab to see the workflow run on `main`.
 
 ## Setting Up Air
 
-[Air](https://posit-dev.github.io/air/) is a fast R formatter that automatically formats your code every time you save a `.R` file. 
+[Air](https://posit-dev.github.io/air/) is a fast R formatter that automatically formats your code every time you save a `.R` file.
 It helps you keep your mind focused on the code, and most importantly eases collaboration because it forces a consistent style among you and your collaborators.
+
+### Start a branch
+
+```{r}
+pr_init("use-air")
+```
 
 ### Install Air in your project
 
 ```{r}
-use_air(vscode = FALSE)
+use_air()
 ```
 
 In RStudio, change these settings:
@@ -63,21 +98,44 @@ In RStudio, change these settings:
 
 ![](img/rstudio-options-format-on-save.png)
 
-[Install the Air command line utility](https://posit-dev.github.io/air/cli.html). 
-Otherwise, the first time Air is run (i.e., the first time you save a file), 
+[Install the Air command line utility](https://posit-dev.github.io/air/cli.html).
+Otherwise, the first time Air is run (i.e., the first time you save a file),
 it will be downloaded and installed automatically.
 
-## Pull Request Workflows
+### Format your whole project
 
-***back to slides - PR workflow overview***
+In the terminal, run:
+
+```default
+air format .
+```
+
+### Push and open a PR
+
+```{r}
+pr_push()
+```
+
+This pushes your branch and opens a browser to create the PR. 
+After the PR is opened, watch the Actions tab - CI will run on the PR branch before anything merges to `main`.
+
+While we wait for CI...Let's leave this PR and start a new one!
+
+```{r}
+pr_pause()
+```
+
+Now we're back on `main` and can start a new branch for the next feature.
+
+## Adding a New Function via PR
+
+Now we'll go through the full PR workflow for a real feature: adding a `biomass_index()` function to `fishr`.
 
 ### Start a new feature branch
 
 ```{r}
 pr_init("add-biomass-function")
 ```
-
-This creates and checks out a new branch.
 
 ### Write a new function
 
@@ -117,6 +175,10 @@ biomass_index(10, 5)
 check()
 ```
 
+::: {.callout-tip}
+## Make a commit
+:::
+
 ### Push your branch and create a PR
 
 ```{r}
@@ -125,30 +187,54 @@ pr_push()
 
 This pushes your branch and opens a browser to create the PR.
 
-### Working with PRs
+## Go back to the Air PR
+
+Pause the biomass PR and return to main:
+```{r}
+pr_pause()
+```
+
+. . .
+
+\
+Now resume the Air PR:
 
 ```{r}
-# Pause work on current PR (switch back to main)
-pr_pause()
+pr_resume() # Choose the Air PR from the menu
+```
 
-# Resume work on a PR
+. . .
+
+\
+On Github, Merge the Air PR, then back in RStudio clean up the branch.
+```{r}
+usethis::pr_finish()
+```
+
+## Now resume the biomass PR
+
+```{r}
 pr_resume("add-biomass-function")
+```
 
-# After PR is merged, clean up
+Get the latest changes from `main` (including the now-merged Air PR):
+
+```{r}
+pr_merge_main()
+```
+
+Then push the updated branch:
+
+```{r}
+pr_push()
+```
+
+On GitHub, review the biomass PR and merge once CI is passing.
+
+Finally, clean up the branch:
+
+### After PR is merged
+
+```{r}
 pr_finish()
 ```
-
-### Fetch and review someone else's PR
-
-```{r}
-pr_fetch(123) # PR number
-```
-
-
-### Run a final check
-
-```{r}
-check()
-```
-
-<!-- TODO: Decide if we want to add Air CI -->

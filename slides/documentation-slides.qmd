@@ -1,0 +1,293 @@
+---
+title: "Advanced Documentation"
+subtitle: "Day 2, Session 3 - Advanced R Package Development"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. The duplication problem
+2. `@inheritParams`
+3. `@inheritDotParams`
+4. Markdown formatting
+5. Cross-references
+
+# The Duplication Problem
+
+## Two functions, overlapping parameters
+
+`cpue()` and `biomass_index()` share `catch`, `effort`, and `verbose`.
+
+::: columns
+::: {.column width="50%"}
+**`cpue()`**
+
+```{r}
+#| code-line-numbers: "|1-4,9-10"
+#' @param catch Numeric vector of
+#'   catch (e.g., kg).
+#' @param effort Numeric vector of
+#'   effort (e.g., hours).
+#' @param gear_factor Numeric scalar for gear 
+#'   standardization (default 1)
+#' @param method Character; 
+#'   one of `"ratio"` (default) or `"log"`.
+#' @param verbose Logical; Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+```
+:::
+
+::: {.column width="50%"}
+**`biomass_index()`**
+
+```{r}
+#| code-line-numbers: "|4-9|10-11|4-11"
+#' @param cpue Numeric vector of CPUE values. 
+#' @param area_swept Numeric vector of area 
+#'   swept (e.g., km^2^)
+#' @param catch Numeric vector of
+#'   catch (e.g., kg).
+#' @param effort Numeric vector of
+#'   effort (e.g., hours).
+#' @param verbose Logical; Default from
+#'   `getOption("fishr.verbose", FALSE)`.
+#' @param ... Additional arguments 
+#'   passed to `cpue()`.
+```
+:::
+:::
+
+::: {.fragment}
+**Two problems:**
+
+1. If the descriptions ever change, you have two places to update
+2. `@param ...` is vague - users cannot tell which arguments are accepted and passed to `cpue()`
+:::
+
+# `@inheritParams`
+
+## Copy parameter docs from another function
+
+`@inheritParams` pulls `@param` entries from a source function into the current one.
+
+```{r}
+#| code-line-numbers: "|6"
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km^2^).
+#' @inheritParams cpue
+#' @param ... Additional arguments passed to `cpue()`.
+#' @export
+```
+
+::: {.fragment}
+
+Render documentation and open the help page:
+
+```{r}
+document()
+?biomass_index
+```
+:::
+
+## What gets inherited?
+
+roxygen2 copies `@param` entries from `cpue()` where the parameter:
+
+::: {.incremental}
+- appears in `biomass_index()`'s signature, **and**
+- is not already documented in `biomass_index()`
+:::
+
+::: {.fragment}
+- `catch`, `effort`, and `verbose` are inherited. 
+- `gear_factor` and `method` are skipped - they are not explicit parameters of `biomass_index()`.
+:::
+
+::: {.fragment}
+`@inheritParams` also works across packages: `@inheritParams pkg::function`
+:::
+
+::: {.notes}
+Point out that @inheritParams can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.
+:::
+
+# `@inheritDotParams`
+
+## Make `...` informative
+
+`@param ...` tells users nothing. 
+
+```{r}
+#' @param ... Additional arguments passed to `cpue()`.
+```
+
+::: {.fragment}
+What are the additional arguments? What do they do? \
+The user has to  go to the `?cpue()` help and figure it out for themselves.
+:::
+
+## `@inheritDotParams` {auto-animate="true"}
+
+generates a formatted description that names the forwarded arguments and links their documentation.
+
+```{r}
+#| code-line-numbers: "7"
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km^2^).
+#' @inheritParams cpue
+#' ... Additional arguments passed to `cpue()`.
+```
+
+## `@inheritDotParams` {auto-animate="true"}
+
+generates a formatted description that names the forwarded arguments and links their documentation.
+
+```{r}
+#| code-line-numbers: "7"
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km^2^).
+#' @inheritParams cpue
+#' @inheritDotParams cpue -catch -effort
+```
+
+::: {.fragment}
+The `-catch -effort` syntax **excludes** those parameters - they are already documented explicitly above.
+
+What remains (`gear_factor`, `method`) is rendered as a formatted list linking back to `?cpue`.
+:::
+
+## `@inheritDotParams`
+
+The `...` entry in the help page now reads something like:
+
+\
+
+**`...`** Arguments passed to `cpue()`:\
+&emsp;`gear_factor` Numeric adjustment for gear standardisation...\
+&emsp;`method` One of "ratio" or "log"...
+
+
+::: {.notes}
+Before @inheritDotParams, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.
+:::
+
+# Markdown Formatting
+
+## Inline formatting
+
+Standard Markdown works in all roxygen2 text fields: `@param`, `@return`, `@description`, `@details`.
+
+```{r}
+#' @param area_swept Numeric vector of area swept in **km^2^**.
+#' @return A numeric vector the same length as `cpue`. Returns `NA` for any
+#'   row where either input is `NA`.
+```
+
+::: {.fragment}
+- Backticks (\`\`) render as inline code: `cpue`, `NA`, `TRUE`
+- `**text**` renders as **bold**
+- `*text*` renders as *italic*
+- `^text^` renders as superscript: km^2^
+:::
+
+## Lists
+
+```{r}
+#' @details
+#' Two modes of use:
+#'
+#' - Provide `cpue` directly for a simple calculation.
+#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.
+```
+
+::: {.fragment}
+::: {.notebox}
+The blank line between the tag and the list is required. Without it, roxygen2 treats the hyphens as literal text.
+:::
+:::
+
+# Cross-References
+
+## Linking to functions
+
+The most common form: function name followed by `()` in square brackets `[]`.
+
+```{r}
+#| code-line-numbers: "2"
+#' Calculates biomass index from CPUE and area swept.
+#' See [cpue()] for computing CPUE values from raw catch and effort.
+```
+
+::: {.fragment}
+The `()` suffix tells roxygen2 this is a function link. It generates a code-formatted hyperlink to `?cpue`.
+:::
+
+## Linking across packages
+
+Use the `::` operator inside the brackets:
+
+```{r}
+#' @param data A data frame. See [dplyr::filter()] for subsetting rows.
+```
+
+::: {.fragment}
+This creates a link that opens `?dplyr::filter`.
+
+R CMD check may produce a NOTE: "Undeclared package 'dplyr' in Rd xrefs". Adding the package to `Suggests` in your DESCRIPTION silences it - you do not need `Imports`.
+:::
+
+## Custom link text and `@seealso`
+
+To display different text than the function name:
+
+```{r}
+#' Returns the same structure as [the CPUE function][cpue()].
+```
+
+::: {.fragment}
+Use this sparingly - the function name itself is usually the most informative link text.
+:::
+
+::: {.fragment}
+`@seealso` renders in its own section at the bottom of the help page:
+
+```{r}
+#' @seealso [cpue()] to compute CPUE values from raw catch and effort.
+```
+
+Use it for functions that are related but not directly referenced in the body of the docs.
+:::
+
+## Summary
+
+| Syntax | Result |
+|--------|--------|
+| `[cpue()]` | Link to `?cpue` in this package |
+| `[pkg::cpue()]` | Link to `?pkg::cpue` in another package |
+| `[some text][cpue()]` | "some text" linking to `?cpue` |
+| `@inheritParams cpue` | Copy matching `@param` entries from `cpue()` |
+| `@inheritDotParams cpue -x` | Document `...` as forwarded args, excluding `x` |
+
+::: {.fragment}
+Use links freely in `@description`, `@details`, `@param`, `@return`, and `@seealso`. A well-linked help page lets users navigate the package without leaving the help system.
+:::

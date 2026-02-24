@@ -1,7 +1,15 @@
 ---
 title: "Testing with testthat"
 subtitle: "Part 1 - Advanced R Package Development"
-format: revealjs
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
 execute:
   eval: false
   echo: true
@@ -169,7 +177,7 @@ test()
 ```
 
 ::: {.fragment}
-Then make a commit:
+Commit your initial tests, then push to open the PR:
 
 ```{r}
 pr_push()
@@ -337,8 +345,9 @@ expect_snapshot(
 )
 ```
 
-\
+. . .
 
+\
 ```{r}
 test_that("cpue error message is informative", {
   expect_snapshot(
@@ -348,8 +357,9 @@ test_that("cpue error message is informative", {
 })
 ```
 
+
 ::: {.fragment}
-First run creates `tests/testthat/_snaps/cpue.md` - review it!
+First run throws a warning and creates `tests/testthat/_snaps/cpue.md` - review it!
 :::
 
 ## First run
@@ -385,6 +395,10 @@ snapshot_accept() # accept all changes
 ::: {.fragment}
 We'll dive deeper into snapshot workflows in **Part 2**.
 :::
+
+## Make a commit
+
+Commit your snapshot tests - including the `_snaps/` files testthat created.
 
 # Running Your Tests
 
@@ -457,3 +471,33 @@ test_that("biomass_index throws error on invalid input", {
   expect_snapshot(biomass_index(10, "five"), error = TRUE)
 })
 ```
+
+## Make a commit
+
+Commit your `biomass_index()` tests and any new snapshot files.
+
+## Merge PR and clean up
+
+Once all tests pass and `check()` is clean:
+
+```{r}
+check()
+```
+
+::: {.fragment}
+Push any remaining commits, then merge the PR on GitHub:
+
+```{r}
+pr_push()
+```
+
+:::
+
+::: {.fragment}
+Clean up your branch:
+
+```{r}
+pr_finish()
+```
+
+:::

@@ -98,7 +98,6 @@ use_r("cpue")
 `cpue` calculates catch per unit effort by dividing total catch by fishing effort. The function optionally applies a gear-specific correction factor to standardize CPUE across different fishing gear types. The function returns the adjusted CPUE value.
 
 ```{r}
-#| eval: true
 cpue <- function(catch, effort, gear_factor = 1) {
   raw_cpue <- catch / effort
 
@@ -115,7 +114,6 @@ load_all()
 And test out our new function:
 
 ```{r}
-#| eval: true
 cpue(10, 5)
 ```
 
@@ -373,4 +371,3 @@ Some typical pain points when developing packages:
 - **Package state confusion**
   - Why isn't my change showing up?
   - Do I need to restart R?
-
