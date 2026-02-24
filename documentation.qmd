@@ -210,7 +210,7 @@ To display different text than the function name, use the `[text][target()]` for
 
 This renders as "the CPUE function" with a link to `?cpue`. Use this sparingly - the function name itself is usually the most informative link text.
 
-### The @seealso tag
+### The `@seealso` tag
 
 ```{r}
 #' @seealso [cpue()] to compute CPUE values from raw catch and effort.
