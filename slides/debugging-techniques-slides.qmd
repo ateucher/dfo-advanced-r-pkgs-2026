@@ -1,0 +1,420 @@
+---
+title: "Debugging Techniques"
+subtitle: "Advanced R Package Development"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Reading error messages and `traceback()`
+2. Print debugging
+3. `browser()`: interactive debugging
+4. Breakpoints, `debug()`, and `debugonce()`
+5. Debugging failing tests
+6. `rlang::last_trace()`
+7. Strategy summary
+
+# Reading Error Messages
+
+## Read the message first
+
+When something goes wrong, R prints an error. The first step is always to **read it carefully**.
+
+```{r}
+load_all()
+
+biomass_index(cpue = "ten", area_swept = 5)
+```
+
+::: {.fragment}
+The error tells you *what* went wrong, but not *where* in the call chain.
+:::
+
+::: {.fragment}
+`traceback()` shows the sequence of function calls that led to the error:
+
+```{r}
+traceback()
+```
+
+Read it **bottom to top**: your entry point is at the bottom, the error location is at the top.
+:::
+
+## Deeper call chains
+
+```{r}
+biomass_index(area_swept = 5, catch = "bad", effort = 10)
+```
+
+::: {.fragment}
+```{r}
+traceback()
+```
+
+```
+3: validate_numeric_inputs(catch = catch, effort = effort) at cpue.R#5
+2: cpue(catch, effort, ...) at biomass.R#6
+1: biomass_index(area_swept = 5, catch = "bad", effort = 10)
+```
+:::
+
+::: {.fragment}
+
+- Frame 1: your call. 
+- Frame 2: `cpue()`. 
+- Frame 3: `validate_numeric_inputs()` — where the error was raised.
+:::
+
+# Print Debugging
+
+## Quick variable inspection
+
+The quick-and-dirty approach: add a `print()` or `message()` to see what is happening at a given point.
+
+```{r}
+biomass_index <- function(cpue = NULL, area_swept, catch = NULL, effort = NULL, ...) {
+  rlang::check_dots_used()
+
+  if (is.null(cpue) && (!is.null(catch) && !is.null(effort))) {
+    cpue <- cpue(catch, effort, ...)
+  }
+
+  validate_numeric_inputs(cpue = cpue, area_swept = area_swept)
+
+  print(paste("cpue value:", cpue)) # <-- temporary debugging output
+
+  cpue * area_swept
+}
+```
+
+::: {.fragment}
+```{r}
+load_all()
+
+biomass_index(area_swept = 5, catch = 100, effort = 10)
+```
+:::
+
+::: {.fragment}
+Once you have found the problem, delete the `print()` statement.
+:::
+
+## When print debugging is enough
+
+::: {.incremental}
+- Quick checks of variable values
+- Confirming which branch of an `if` statement runs
+- Simple, localised problems
+:::
+
+::: {.fragment}
+When you need more — complex logic, many intermediate values, full environment inspection — reach for `browser()`.
+:::
+
+# browser()
+
+## Basic usage
+
+`browser()` pauses execution and drops you into an interactive debugger:
+
+```{r}
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE)
+) {
+  method <- match.arg(method)
+  validate_numeric_inputs(catch = catch, effort = effort)
+
+  browser() # <-- execution pauses here
+
+  raw_cpue <- switch(method, ratio = catch / effort, log = log(catch / effort))
+  raw_cpue * gear_factor
+}
+```
+
+```{r}
+load_all()
+
+cpue(c(100, 200, 300), c(10, 20, 30))
+```
+
+## Browser commands
+
+Once inside the browser you have a mini command language:
+
+| Command | Action |
+|---------|--------|
+| `n` | **Next**: execute the current line and step to the next |
+| `s` | **Step into**: if the current line calls a function, enter it |
+| `c` | **Continue**: resume until the next `browser()` or end |
+| `Q` | **Quit**: stop execution immediately |
+| `where` | Show the call stack (like `traceback()` while paused) |
+
+::: {.fragment}
+You can also run any R expression: `ls()`, `str(raw_cpue)`, etc.
+:::
+
+## RStudio debug toolbar
+
+![](../img/debug-buttons.png)
+
+The same commands appear as buttons in RStudio when you enter debugging mode.
+
+## Conditional browser
+
+You don't always want to pause on every call. Stop only when something is wrong:
+
+```{r}
+cpue <- function(catch, effort, gear_factor = 1, ...) {
+  if (any(effort == 0)) browser() # only pause when there is a problem
+
+  # ... rest of function
+}
+```
+
+::: {.fragment}
+Run the function as many times as needed — it only stops when the suspicious condition is met.
+:::
+
+## Remove before committing
+
+::: {.callout-warning}
+`browser()` calls should never be committed to your package.
+
+`R CMD check` (via `check()`) will warn about leftover `browser()` calls, but build the habit of removing them immediately after debugging.
+:::
+
+# Breakpoints, debug(), debugonce()
+
+## Visual breakpoints in RStudio
+
+Click in the editor gutter (the grey margin to the left of line numbers) to set a **breakpoint** (red dot).
+
+::: {.fragment}
+Same effect as `browser()` — but does not modify your source file.
+
+After setting a breakpoint, run `load_all()` to activate it.
+:::
+
+## debug() and debugonce()
+
+For functions you can't easily edit (other packages, or when you don't want to touch source):
+
+```{r}
+# Enter browser on EVERY call to cpue
+debug(cpue)
+cpue(100, 10)  # pauses
+cpue(200, 20)  # pauses again
+
+undebug(cpue)  # turn it off
+```
+
+::: {.fragment}
+```{r}
+# Enter browser on the NEXT call only
+debugonce(cpue)
+cpue(100, 10)  # pauses
+cpue(200, 20)  # runs normally, auto-cleared
+```
+:::
+
+::: {.fragment}
+**Breakpoints**: your own package code during development
+**`debugonce()`**: quick one-off inspection of any function
+**`debug()`**: step through a function repeatedly (remember `undebug()`)
+:::
+
+## options(error = recover)
+
+Post-mortem debugging — inspect state *after* an error:
+
+```{r}
+options(error = recover)
+
+biomass_index(cpue = "ten", area_swept = 5)
+```
+
+::: {.fragment}
+R prints the call stack as a numbered list and prompts you to pick a frame:
+
+```
+Enter a frame number, or 0 to exit
+
+1: biomass_index(cpue = "ten", area_swept = 5)
+2: validate_numeric_inputs(cpue = cpue, area_swept = area_swept)
+
+Selection:
+```
+:::
+
+::: {.fragment}
+Type a frame number to browse into it, inspect variables, then `0` to exit.
+
+```{r}
+options(error = NULL)  # reset to default when done
+```
+:::
+
+# Debugging Failing Tests
+
+## browser() inside test_that()
+
+```{r}
+test_that("cpue calculates correctly", {
+  browser()
+  result <- cpue(catch = 100, effort = 10)
+  expect_equal(result, 10)
+})
+```
+
+::: {.fragment}
+Run this interactively with `Ctrl+Enter` — **not** with `test()`.
+
+The test runner captures output differently; interactive execution gives the full browser experience.
+:::
+
+## Narrow down with test_active_file()
+
+When a test fails, don't run the full suite repeatedly. Focus on the failing file:
+
+```{r}
+devtools::test_active_file()
+```
+
+## "Passes alone, fails with test()"
+
+A test passes when you run it by itself but fails when running the full suite.
+
+::: {.fragment}
+This is almost always **leftover state**: a previous test changed something and didn't clean up.
+
+(Options, global variables, files, random seed — exactly what `withr` guards against.)
+:::
+
+::: {.fragment}
+**Debugging strategy:**
+
+1. Binary search: run half the suite to find which prior test causes the problem
+2. Look for side effects: `options()`, `Sys.setenv()`, file creation, `set.seed()`
+3. Fix with `withr::local_*` in the offending test
+:::
+
+## Snapshot mismatches
+
+When a snapshot test fails, don't guess what changed:
+
+```{r}
+snapshot_review()
+```
+
+::: {.fragment}
+Opens a side-by-side diff of the old snapshot and the new output.
+
+Accept if the change is intentional, fix the code if it is not.
+:::
+
+# rlang::last_trace()
+
+## Cleaner backtraces with rlang
+
+When working with tidyverse or rlang-based packages, `rlang::last_trace()` gives a cleaner backtrace than `traceback()`:
+
+```{r}
+# Standard R: flat list, can be noisy
+traceback()
+
+# rlang: tree-structured, hides internal frames
+rlang::last_trace()
+```
+
+::: {.fragment}
+`rlang::last_trace()` organises the call stack as a tree and collapses internal package machinery, making it easier to see the path through *your* code.
+:::
+
+## Inspecting the error object
+
+```{r}
+rlang::last_error()
+```
+
+::: {.fragment}
+Returns the error object itself — message, call, and (for rlang errors) the backtrace attached to the error.
+
+Useful when working with tidyverse internals or rlang-style errors. Not essential for everyday debugging.
+:::
+
+# Debugging Strategy
+
+## A practical order of operations
+
+::: {.incremental}
+1. **Read the error message** — often sufficient on its own
+2. **`traceback()`** — find where in the call chain the error occurred
+3. **Print debugging** — quick variable inspection for simple problems
+4. **`browser()`** — interactive inspection for complex logic
+5. **`debugonce()` / `debug()`** — step through functions from other packages
+6. **`options(error = recover)`** — post-mortem exploration of the full call stack
+:::
+
+# Your Turn
+
+## Exercise
+
+There is a bug in this `standardize_effort()` function. It is supposed to convert effort from hours to days (dividing by 24), then calculate CPUE.
+
+Add this to `R/utils.R`:
+
+```{r}
+standardize_effort <- function(catch, effort_hours) {
+  validate_numeric_inputs(catch = catch, effort_hours = effort_hours)
+
+  effort_days <- effort_hours * 24
+
+  cpue(catch = catch, effort = effort_days)
+}
+```
+
+```{r}
+load_all()
+
+# Effort is 48 hours = 2 days, so CPUE should be 100/2 = 50
+standardize_effort(catch = 100, effort_hours = 48)
+```
+
+::: {.fragment}
+The result should be 50 but returns something much smaller. Use the debugging tools you just learned to find and fix it.
+:::
+
+## Solution
+
+The bug is on the conversion line — it multiplies by 24 instead of dividing:
+
+```{r}
+# Bug
+effort_days <- effort_hours * 24
+
+# Fix
+effort_days <- effort_hours / 24
+```
+
+::: {.fragment}
+You could find this by:
+
+- Adding `browser()` before the `cpue()` call and checking `effort_days`
+- Adding `message("effort_days: ", effort_days)` to see the intermediate value
+- Stepping through with `debugonce(standardize_effort)` and inspecting each line
+:::
