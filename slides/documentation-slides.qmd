@@ -122,7 +122,7 @@ roxygen2 copies `@param` entries from `cpue()` where the parameter:
 :::
 
 ::: {.notes}
-Point out that @inheritParams can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.
+Point out that `@inheritParams` can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.
 :::
 
 # `@inheritDotParams`
@@ -188,7 +188,7 @@ The `...` entry in the help page now reads something like:
 
 
 ::: {.notes}
-Before @inheritDotParams, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.
+Before `@inherit`DotParams`, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.
 :::
 
 # Markdown Formatting
