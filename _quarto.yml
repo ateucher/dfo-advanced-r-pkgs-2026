@@ -88,3 +88,4 @@ format:
         - darkly
         - style-dark.scss
     toc: true
+    link-external-newwindow: true
