@@ -1,0 +1,341 @@
+---
+title: "Data in Packages"
+subtitle: "Advanced R Package Development"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. Why include data in packages?
+2. Static exported data
+3. Fetching live data with httr2
+4. Internal data
+
+# Why Include Data in Packages?
+
+## Data is already everywhere in R
+
+`iris`, `mtcars`, `airquality` - you have been using package data all along.
+
+Beyond bundling examples, packages can:
+
+- Ship **reference tables** that functions need internally
+- Bundle **example datasets** that make documentation self-contained
+- Act as **data packages** whose sole purpose is distributing data
+- Provide **API functions** that fetch live data on demand
+
+::: {.fragment}
+Today we cover the first, second, and fourth of these in `fishr`.
+:::
+
+## Types of package data
+
+| Location | Created by | Exported? | Use when |
+|---|---|---|---|
+| `data/*.rda` | `use_data()` | Yes | Example data, datasets users work with directly |
+| `R/sysdata.rda` | `use_data(..., internal = TRUE)` | No | Lookup tables, constants used by functions |
+| `inst/extdata/` | Manual copy | No | Non-R formats (CSV, GeoJSON, shapefiles) |
+| API function | `httr2` | Yes | Live data that changes over time |
+
+# Static Exported Data
+
+## The workflow
+
+Keep reproducible scripts in `data-raw/` that generate your data objects. This script is the ground truth for how your data was created.
+
+```{r}
+usethis::use_data_raw("horsefly_sample")
+```
+
+::: {.fragment}
+Creates `data-raw/horsefly_sample.R` and adds `data-raw/` to `.Rbuildignore` - the directory is excluded from the installed package, but commit the scripts inside it.
+:::
+
+## Build and save the dataset
+
+```{r}
+# data-raw/horsefly_sample.R
+
+horsefly_sample <- data.frame(
+  set_number = c(1L, 2L, 3L, 4L, 5L),
+  catch      = c(3L, 0L, 5L, 2L, 4L),
+  effort     = c(1L, 1L, 1L, 1L, 1L),
+  stringsAsFactors = FALSE
+)
+
+usethis::use_data(horsefly_sample, overwrite = TRUE)
+```
+
+::: {.fragment}
+Run the script once to create `data/horsefly_sample.rda`:
+
+```{r}
+source("data-raw/horsefly_sample.R")
+```
+:::
+
+## Document exported data
+
+Exported datasets need documentation just like functions. Create `R/data.R`:
+
+```{r}
+use_r("data")
+```
+
+```r
+#' Rainbow Trout gill net survey data from Horsefly Lake
+#'
+#' Catch and effort from a fictional gill net survey of Rainbow Trout
+#' (*Oncorhynchus mykiss*) at Horsefly Lake, British Columbia.
+#'
+#' @format A data frame with columns:
+#' - `set_number` Integer. Net set identifier.
+#' - `catch` Integer. Number of fish caught per set.
+#' - `effort` Integer. Number of net-nights per set.
+#' @source Fictional data for illustration purposes.
+#' @examples
+#' cpue(horsefly_sample)
+"horsefly_sample"
+```
+
+## Try it out
+
+```{r}
+document()
+load_all()
+```
+
+::: {.fragment}
+The dataset appears in `data(package = "fishr")`.
+
+```{r}
+horsefly_sample
+
+?horsefly_sample
+
+cpue(horsefly_sample)
+```
+
+Because `horsefly_sample` already has `catch` and `effort` columns, it passes directly to `cpue()`.
+:::
+
+# Fetching Live Data with httr2
+
+## Package data vs package functionality
+
+`fetch_kluane_data()` is not a dataset - it is a function that returns data.
+
+- Lives in `R/`, documented with roxygen2, tested like any other function
+- The Kluane Lake Trout data is updated regularly, so a function that fetches the current snapshot is more useful than a static copy bundled at build time
+
+## Add httr2 as a dependency
+
+```{r}
+usethis::use_package("httr2")
+```
+
+Adds `httr2` to `Imports` in `DESCRIPTION`.
+
+## The Government of Canada Open Data API
+
+The Kluane Lake Trout dataset is published via CKAN:
+
+- **Dataset page:** [open.canada.ca](https://open.canada.ca/data/en/dataset/307fce02-71cf-4902-b485-57a70cfafe2b)
+- **API endpoint:** `https://open.canada.ca/data/en/api/3/action/datastore_search`
+- **Resource ID:** `af1e5730-34bd-4314-831c-1d940d99e1a7`
+
+The response is JSON with a `result.records` array where each element is one row.
+
+## Building fetch_kluane_data()
+
+```{r}
+fetch_kluane_data <- function(limit = 2000) {
+  req <- httr2::request(
+    "https://open.canada.ca/data/en/api/3/action/datastore_search"
+  )
+  req <- httr2::req_url_query(
+    req,
+    resource_id = "af1e5730-34bd-4314-831c-1d940d99e1a7",
+    limit = limit
+  )
+  resp <- httr2::req_perform(req)
+  httr2::resp_check_status(resp)
+
+  records <- httr2::resp_body_json(resp, simplifyVector = TRUE)$result$records
+  records <- records[-1, ] # first row is a bilingual EN/FR header, not data
+
+  data.frame(
+    lake           = records$Lake,
+    year           = as.integer(records$Year),
+    set_number     = as.integer(records[["Set Number"]]),
+    species        = records$Species,
+    fork_length_mm = as.numeric(records[["Fork Length (millimetres)"]]),
+    weight_g       = as.numeric(records[["Weight (grams)"]]),
+    stringsAsFactors = FALSE
+  )
+}
+```
+
+## httr2 step by step
+
+- `request()` - create a request object pointing at the base URL
+- `req_url_query()` - append query parameters (`?resource_id=...&limit=...`)
+- `req_perform()` - execute the HTTP GET and return a response object
+- `resp_check_status()` - raise an informative error on 4xx/5xx responses
+- `resp_body_json(..., simplifyVector = TRUE)` - parse JSON and coerce the array of records directly to a data frame
+
+## Try it out
+
+```{r}
+load_all()
+
+kluane <- fetch_kluane_data()
+head(kluane)
+nrow(kluane)
+```
+
+## Connecting to cpue()
+
+```{r}
+fish <- kluane[kluane$species != "no fish", ]
+
+survey_df <- data.frame(
+  catch  = as.integer(table(fish$set_number)),
+  effort = 1L
+)
+
+lt_cpue <- cpue(survey_df)
+summary(lt_cpue)
+```
+
+::: {.fragment}
+`cpue()` is a generic with a `data.frame` method - passing a data frame with `catch` and `effort` columns dispatches automatically. Real-world data flows through the same function without any changes to it.
+:::
+
+## Testing functions that call HTTP APIs
+
+Testing functions that make real HTTP requests requires care - tests should not depend on an external server being available.
+
+The [vcr](https://docs.ropensci.org/vcr/) and [httptest2](https://enpiar.com/httptest2/) packages solve this by recording real HTTP interactions and replaying them during tests, keeping your test suite fast and self-contained.
+
+# Internal Data
+
+## What is internal data for?
+
+Some data belongs to the package but should not be visible to users.
+
+Good candidates: lookup tables, constants, calibration coefficients.
+
+::: {.fragment}
+Internal data powers package behaviour without appearing in the user's namespace.
+
+It lives in `R/sysdata.rda`, not `data/`.
+:::
+
+## Creating internal data
+
+```{r}
+use_data_raw("gear-types")
+```
+
+```{r}
+# data-raw/gear_types.R
+gear_types <- data.frame(
+  gear_type   = c("nordic_gillnet", "sinking_longline", "fyke_net", "electrofishing"),
+  gear_factor = c(1.0, 0.72, 1.35, 0.45),
+  description = c(
+    "Nordic multi-mesh gillnet (standard reference gear)",
+    "Sinking baited longline",
+    "Passive fyke net trap",
+    "Electrofishing unit"
+  ),
+  stringsAsFactors = FALSE
+)
+
+usethis::use_data(gear_types, internal = TRUE, overwrite = TRUE)
+```
+
+::: {.fragment}
+```{r}
+source("data-raw/gear_types.R")
+```
+
+Every function in the package can access `gear_types` directly, but it does not appear in `ls()` for users.
+:::
+
+## Using internal data in a function
+
+Replace the numeric `gear_factor` argument with a named `gear_type`:
+
+```{r}
+cpue.numeric <- function(
+  x,
+  effort,
+  gear_type = "nordic_gillnet",
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  if (!gear_type %in% gear_types$gear_type) {
+    stop(
+      "`gear_type` must be one of: ",
+      paste(gear_types$gear_type, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  gear_factor <- gear_types$gear_factor[gear_types$gear_type == gear_type]
+  # ...
+}
+```
+
+## Dynamic error messages
+
+The error message is generated from the table at runtime:
+
+```{r}
+load_all()
+
+cpue(100, 10)                          # nordic_gillnet -> 10
+cpue(100, 10, gear_type = "fyke_net")  # factor 1.35 -> 13.5
+cpue(100, 10, gear_type = "trapnet")   # error: lists all valid types
+```
+
+::: {.fragment}
+Add a gear type to the table, re-run the script, and it appears in the error automatically - no manual string editing required.
+:::
+
+# Your Turn
+
+## Exercise
+
+**Goal:** extend the gear type table, verify the error updates automatically, fix the tests.
+
+1. Open `data-raw/gear_types.R` and add a row for `"trap_net"` with a gear factor of `1.1`
+
+2. Re-run the script and reload:
+
+```{r}
+source("data-raw/gear_types.R")
+load_all()
+```
+
+3. Confirm the new gear type works and the error now lists `"trap_net"`:
+
+```{r}
+cpue(100, 10, gear_type = "trap_net") # should return 110
+cpue(100, 10, gear_type = "unknown")  # error should list trap_net
+```
+
+4. Run `check()` - changing `gear_factor` to `gear_type` broke existing tests. Fix them.
