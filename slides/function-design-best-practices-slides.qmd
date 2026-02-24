@@ -378,6 +378,16 @@ Note: we write area_swept = 5 even though it's the second argument. Because we'r
 - `is.null()` is a reliable check for "argument not given"
 - If we used `cpue = 0`, there's no way to tell whether the user passed zero intentionally or just didn't provide a value
 
+## Document and check
+```{r}
+document()
+
+check()
+```
+
+
+## Make a commit
+
 ## Pitfalls of ...
 
 - Arguments passed through `...` must be named - positional matching doesn't work through the ellipsis
@@ -426,6 +436,28 @@ biomass_index <- function(
   cpue * area_swept
 }
 ```
+
+## Example
+
+```{r}
+load_all()
+
+# Valid: method is passed through to cpue()
+biomass_index(area_swept = 5, catch = 100, effort = 10, method = "log")
+
+# Typo: now caught immediately instead of silently ignored
+biomass_index(area_swept = 5, catch = 100, effort = 10, mthod = "log")
+#> Error: In `biomass_index()`, argument `mthod` is not used.
+```
+
+## Document and check
+
+```{r}
+document()
+check()
+```
+
+## Make a commit
 
 # DRY: Don't Repeat Yourself
 
@@ -558,6 +590,15 @@ biomass_index(cpue = "ten", area_swept = 5) # 'cpue' must be numeric...
 Good rule of thumb: start with the helper in the same file. Move it to `utils.R` only when a second function needs it.
 :::
 
+## Document and check
+
+```{r}
+document()
+check()
+```
+
+## Make a commit
+
 # Function Composition
 
 ## Composed workflow
@@ -645,4 +686,8 @@ Run `document()` and `check()`. Accept any updated snapshots:
 ```{r}
 testthat::snapshot_accept()
 ```
+:::
+
+::: {.fragment}
+### Make a commit
 :::
