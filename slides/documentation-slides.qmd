@@ -1,6 +1,5 @@
 ---
 title: "Advanced Documentation"
-subtitle: "Day 2, Session 3 - Advanced R Package Development"
 format:
   revealjs:
     height: 900
