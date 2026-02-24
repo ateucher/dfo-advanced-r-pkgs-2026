@@ -306,235 +306,179 @@
     "text": "If your submission is rejected\nDo not despair - it happens to everyone, including R-core and tidyverse developers.\n\nFrom the CRAN robot: fix the problem and resubmit\nFrom a human reviewer: do not reply to the email and do not argue - update cran-comments.md to explain how you addressed the issues, then resubmit"
   },
   {
-    "objectID": "slides/git-github-slides.html#outline",
-    "href": "slides/git-github-slides.html#outline",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Outline",
-    "text": "Outline\n\nGit workflow review\nPull request workflows with usethis\nContinuous integration with GitHub Actions\nCode formatting with Air\nAdding a function via PR"
+    "objectID": "slides/intro-slides.html#welcome",
+    "href": "slides/intro-slides.html#welcome",
+    "title": "Advanced R Package Development",
+    "section": "Welcome!",
+    "text": "Welcome!\nInstructors:\n\nAndy Teucher\n\nandyteucher.ca\nGitHub: ateucher\n\nSam Albers\n\nsamalbers.science\nGitHub: boshek"
   },
   {
-    "objectID": "slides/git-github-slides.html#where-we-left-off",
-    "href": "slides/git-github-slides.html#where-we-left-off",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Where we left off",
-    "text": "Where we left off\nMake sure all changes from the fundamentals session are committed and pushed:\n\ngit pull\ngit push\n\n\nQuick check - everyone should have a fishr package with cpue() and basic documentation, all pushed to GitHub. If anyone is behind, now is the time to catch up before we add CI."
+    "objectID": "slides/intro-slides.html#welcome-1",
+    "href": "slides/intro-slides.html#welcome-1",
+    "title": "Advanced R Package Development",
+    "section": "Welcome!",
+    "text": "Welcome!\nThis is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.\nCode of Conduct:\n\nTreat everyone with respect\nEveryone should feel welcome\nFull text: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html\n\n\nCameras. Remind everyone about the code of conduct briefly - it’s about creating a safe learning environment."
   },
   {
-    "objectID": "slides/git-github-slides.html#the-core-loop",
-    "href": "slides/git-github-slides.html#the-core-loop",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "The core loop",
-    "text": "The core loop\nEvery day of package development follows the same loop:\n\nPull latest changes\nMake a small, focused change\nTest that it works\nCommit with a clear message\nPush\n\n\nPull requests add a review step between commit and merge to main."
+    "objectID": "slides/intro-slides.html#sticky-notes-online",
+    "href": "slides/intro-slides.html#sticky-notes-online",
+    "title": "Advanced R Package Development",
+    "section": "Sticky Notes (online)",
+    "text": "Sticky Notes (online)\n\n\nI’m stuck ✋\nUse the Zoom Raise Hand reaction\n\nI’m good 👍\nUse the Thumbs Up reaction\n\n\nWe’ll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room."
   },
   {
-    "objectID": "slides/git-github-slides.html#collaborating",
-    "href": "slides/git-github-slides.html#collaborating",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Collaborating",
-    "text": "Collaborating\n\nGit is a distributed version control system\nEach collaborator has a full copy of the repository, including its history\nAll collaborators can push changes to the remote repository (given they have permission)\nChanges made by collaborators can be pulled into your local repository"
+    "objectID": "slides/intro-slides.html#discussions-q-a",
+    "href": "slides/intro-slides.html#discussions-q-a",
+    "title": "Advanced R Package Development",
+    "section": "Discussions / Q & A",
+    "text": "Discussions / Q & A\n\nGitHub Discussions: https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions\n\nOpen the welcome discussion and introduce yourself:\n\nOffice/department, city/town\nWhy you’re here\nSomething you’ve built or are trying to build\n\n\nPaste link in chat. Open GitHub discussions, ask people to introduce themselves. Share screen doing it."
   },
   {
-    "objectID": "slides/git-github-slides.html#why-pull-requests",
-    "href": "slides/git-github-slides.html#why-pull-requests",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Why pull requests?",
-    "text": "Why pull requests?\n\n\n\n\n%%{\n    init: {\n        'theme':'base', \n        'showCommitLabel': false, \n        'themeVariables': { \n            'git0':'#6cc644', \n            'git1':'#f39c12', \n            'commitLabelColor': '#325c65', \n            'commitLabelBackground':'#325c65'\n        }\n    }\n}%%\n\ngitGraph\n    commit id: \" \"\n    commit id: \"  \"\n    commit id: \"   \"\n    commit id: \"    \"\n    branch \"branch\"\n    commit id: \"     \"\n    commit id: \"      \"\n    commit id: \"       \"\n    commit id: \"        \"\n    checkout main\n    merge \"branch\" tag: \"PR review & merge\"\n    commit id: \"         \"\n    commit id: \"          \"\n\n\n\n\n\nEven when working alone, PRs are valuable:\n\nCheck code runs before it reaches main\nYou get a diff to review your own/others’ work\nAllows efficient code review and discussion\nAllows fearless experimentation\n\n\nWith collaborators, PRs also enable code review."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#steps",
-    "href": "slides/git-github-slides.html#steps",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Steps",
-    "text": "Steps\n\nCreate a new branch\nMake changes, commit, and push the branch to GitHub\nOpen a Pull Request (PR) on GitHub\nDiscuss and review the PR\nMerge the PR into the main branch\nPull the latest changes to your local main branch"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#the-usethis-pr-helpers",
-    "href": "slides/git-github-slides.html#the-usethis-pr-helpers",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "The usethis PR helpers",
-    "text": "The usethis PR helpers\n\n\n\n\n\n\n\nFunction\nWhat it does\n\n\n\n\npr_init(\"name\")\nCreate and switch to a new branch\n\n\npr_push()\nPush branch, open PR on GitHub\n\n\npr_pull()\nPull latest changes on that branch from GitHub\n\n\npr_merge_main()\nMerge latest changes from main into your branch\n\n\npr_finish()\nClean up after merge\n\n\n\n\n\n\nOther useful ones\n\n\n\nFunction\nWhat it does\n\n\n\n\npr_pause()\nStash work, return to main\n\n\npr_resume(\"name\")\nReturn to a branch\n\n\npr_fetch(123)\nCheck out someone else’s PR\n\n\n\n\n\nThese also help us avoid merge conflicts by doing a lot of “pull before you work” and “pull before you push” automatically."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#basic-pr-workflow-with-usethis-pr-helpers",
-    "href": "slides/git-github-slides.html#basic-pr-workflow-with-usethis-pr-helpers",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Basic PR workflow with usethis PR helpers",
-    "text": "Basic PR workflow with usethis PR helpers\n\n\n\n\n---\nconfig:\n  theme: base\n  themeVariables:\n    fontSize: 30px\n---\n\nflowchart LR\n    A([main]) --&gt; PI[\"pr_init()\"] --&gt; B([Branch])\n    B --&gt; C[Write & test]\n    C --&gt; PP[\"pr_push()\"] --&gt; D([GitHub PR])\n    D --&gt; E{Review}\n    E --&gt; C\n    E --&gt;|Merged| F([main updated])\n    F --&gt; PF[\"pr_finish()\"] --&gt; G([Clean state])\n\n    style A fill:#2d6a4f,color:#fff,stroke:none\n    style F fill:#2d6a4f,color:#fff,stroke:none\n    style G fill:#2d6a4f,color:#fff,stroke:none\n    style B fill:#1d3557,color:#fff,stroke:none\n    style D fill:#457b9d,color:#fff,stroke:none\n    style E fill:#e63946,color:#fff,stroke:none\n    style C fill:#333,color:#fff,stroke:#666\n    style PI fill:#f4a261,color:#000,stroke:none\n    style PP fill:#f4a261,color:#000,stroke:none\n    style PF fill:#f4a261,color:#000,stroke:none\n\n\n\n\n\nDemonstrates the full workflow: https://usethis.r-lib.org/articles/pr-functions.html"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#starting-a-branch",
-    "href": "slides/git-github-slides.html#starting-a-branch",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Starting a branch",
-    "text": "Starting a branch\n\nusethis::pr_init(\"my-branch-name\")\n\n\n\nCreates and checks out the branch immediately\nYou are now isolated from main\nBranch names: short, descriptive, hyphenated\n\n\n\nA reader should be able to guess what the PR does from the branch name alone."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#pushing-and-opening-a-pr",
-    "href": "slides/git-github-slides.html#pushing-and-opening-a-pr",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Pushing and opening a PR",
-    "text": "Pushing and opening a PR\n\nusethis::pr_push()\n\n\n\nPushes your branch to GitHub\nOpens your browser to the “Create pull request” page"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#writing-a-good-pr-description",
-    "href": "slides/git-github-slides.html#writing-a-good-pr-description",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Writing a good PR description",
-    "text": "Writing a good PR description\nTitle: Short, imperative - “Add foofy function”\nBody:\n\nWhat problem does this solve?\nAny design decisions worth explaining?\nAnything reviewers should pay attention to?"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#after-review-and-merge",
-    "href": "slides/git-github-slides.html#after-review-and-merge",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "After review and merge",
-    "text": "After review and merge\nOnce the PR is approved and merged on GitHub:\n\nusethis::pr_finish()\n\n\n\nSwitches back to main\nPulls the latest changes (including your merged work)\nDeletes the local feature branch\nDeletes the remote feature branch"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#pausing-and-resuming",
-    "href": "slides/git-github-slides.html#pausing-and-resuming",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Pausing and resuming",
-    "text": "Pausing and resuming\nIf you need to switch context mid-PR:\n\nusethis::pr_pause()                          # return to main\nusethis::pr_resume(\"my-branch-name\")         # pick up where you left off\n\n\nThis is useful when someone asks you to review their PR while you’re mid-work, or when you need to make a quick fix to main."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#reviewing-someone-elses-pr-locally",
-    "href": "slides/git-github-slides.html#reviewing-someone-elses-pr-locally",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Reviewing someone else’s PR locally",
-    "text": "Reviewing someone else’s PR locally\n\nusethis::pr_fetch(1)    # check out PR #1 locally\n\n\nRun their code, run their tests, leave an informed review on GitHub.\nOnce the PR is merged, clean up your local branch and delete the PR branch:\n\nusethis::pr_finish()"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#the-full-picture",
-    "href": "slides/git-github-slides.html#the-full-picture",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "The full picture",
-    "text": "The full picture\n\n\n\n\n---\nconfig:\n  theme: base\n  themeVariables:\n    fontSize: 20px\n---\n\nflowchart LR\n    A([main]) --&gt; PI[\"pr_init()\"] --&gt; B([your branch])\n    B --&gt; C[Write & test]\n    C --&gt; PP[\"pr_push()\"] --&gt; D([GitHub PR])\n    D --&gt; E{Review}\n    E --&gt;|Changes needed| C\n    E --&gt;|Approved & merged| F([main updated])\n    F --&gt; PF[\"pr_finish()\"] --&gt; A\n\n    D --&gt; PFetch[\"pr_fetch()\"] --&gt; G([reviewer's local])\n    G --&gt;|review & comment| D\n\n    B --&gt; PA[\"pr_pause()\"] --&gt; A\n    A --&gt; PRe[\"pr_resume()\"] --&gt; B\n\n    style A fill:#2d6a4f,color:#fff,stroke:none\n    style F fill:#2d6a4f,color:#fff,stroke:none\n    style B fill:#1d3557,color:#fff,stroke:none\n    style G fill:#1d3557,color:#fff,stroke:none\n    style D fill:#457b9d,color:#fff,stroke:none\n    style E fill:#e63946,color:#fff,stroke:none\n    style C fill:#333,color:#fff,stroke:#666\n    style PI fill:#f4a261,color:#000,stroke:none\n    style PP fill:#f4a261,color:#000,stroke:none\n    style PF fill:#f4a261,color:#000,stroke:none\n    style PFetch fill:#f4a261,color:#000,stroke:none\n    style PA fill:#f4a261,color:#000,stroke:none\n    style PRe fill:#f4a261,color:#000,stroke:none\n\n\n\n\n\nDemonstrates the full workflow: https://usethis.r-lib.org/articles/pr-functions.html"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#why-ci",
-    "href": "slides/git-github-slides.html#why-ci",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Why CI?",
-    "text": "Why CI?\nYour package works on your machine. But does it work on:\n\nWindows? macOS? Linux?\nR 4.4? R-devel?\n\n\nContinuous Integration automatically runs checks on every push\n\nIn practice, we’re going to use GitHub Actions, a free workflow automation service included with your GitHub account"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#we-will-add-ci-via-a-pull-request",
-    "href": "slides/git-github-slides.html#we-will-add-ci-via-a-pull-request",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "We will add CI via a Pull Request",
-    "text": "We will add CI via a Pull Request\nCreate a new branch:\n\nusethis::pr_init(\"add-ci\")"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#add-r-cmd-check-via-github-actions",
-    "href": "slides/git-github-slides.html#add-r-cmd-check-via-github-actions",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Add R CMD check via GitHub Actions",
-    "text": "Add R CMD check via GitHub Actions\nhttps://github.com/r-lib/actions\n\n\n\nusethis::use_github_action()\n\n\n\"check-standard\": Runs R CMD check on several platforms when you push\n\"test-coverage\": Compute test coverage and report at codecov.io\nAnd more… (https://github.com/r-lib/actions/tree/v2/examples)\n\n\nCreates .github/workflows/R-CMD-check.yaml which runs R CMD check on:\n\nmacOS (release R)\nWindows (release R)\nUbuntu (release, devel, and oldrel R)"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#add-a-status-badge",
-    "href": "slides/git-github-slides.html#add-a-status-badge",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Add a status badge",
-    "text": "Add a status badge\nThe action also adds a badge to your README.Rmd:\n\ndevtools::build_readme()\ndevtools::check()\n\n\nThen push and open the PR:\n\nusethis::pr_push()\n\nWrite a good PR title and description, then submit the PR.\nWatch the Actions tab - CI runs on the PR branch before we merge to main."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#viewing-ci-results",
-    "href": "slides/git-github-slides.html#viewing-ci-results",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Viewing CI results",
-    "text": "Viewing CI results\nGo to the Actions tab on your repo.\nEach push triggers a workflow run.\n\n✅ Green checkmark = passing.\n❌ Red X = something to fix.\n\n\nShow this live - click into a run and show the output from R CMD check. The output is identical to what you see locally with check(). Getting comfortable reading CI output is a key skill.\n\nMerge the PR on GitHub once CI is passing.\nRun pr_finish() to clean up your branch after merging."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#what-is-air",
-    "href": "slides/git-github-slides.html#what-is-air",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "What is Air?",
-    "text": "What is Air?\nAir is a fast R code formatter - it automatically reformats your code on save.\nWhy it matters for collaboration:\n\nEliminates style debates in code review\nReduces noisy diffs (no more whitespace-only changes)\nKeeps everyone’s code consistent without thinking about it"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#start-a-branch",
-    "href": "slides/git-github-slides.html#start-a-branch",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Start a branch",
-    "text": "Start a branch\n\nusethis::pr_init(\"use-air\")"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#set-up-air-in-your-project",
-    "href": "slides/git-github-slides.html#set-up-air-in-your-project",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Set up Air in your project",
-    "text": "Set up Air in your project\n\nuse_air()\n\nIn RStudio, change these settings:\n\n\nInstall the Air command line utility: https://posit-dev.github.io/air/cli.html\n\nAir will be downloaded automatically on first save if you haven’t installed the CLI."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#format-your-whole-project",
-    "href": "slides/git-github-slides.html#format-your-whole-project",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Format your whole project",
-    "text": "Format your whole project\nair format ."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#push-and-merge",
-    "href": "slides/git-github-slides.html#push-and-merge",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Push and merge",
-    "text": "Push and merge\n\nusethis::pr_push()\n\nReview the diff on GitHub - you should see only formatting changes, no functional changes."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#while-we-wait-for-ci",
-    "href": "slides/git-github-slides.html#while-we-wait-for-ci",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "While we wait for CI…",
-    "text": "While we wait for CI…\nLet’s leave this PR and start a new one…\n\npr_pause()\n\nNow we’re back on main and can start a new branch for the next feature."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#start-a-branch-1",
-    "href": "slides/git-github-slides.html#start-a-branch-1",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Start a branch",
-    "text": "Start a branch\n\nusethis::pr_init(\"add-biomass-function\")"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#write-the-function",
-    "href": "slides/git-github-slides.html#write-the-function",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Write the function",
-    "text": "Write the function\n\nusethis::use_r(\"biomass\")\n\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept.\n#'\n#' @param cpue Numeric vector of CPUE values\n#' @param area_swept Numeric vector of area swept (e.g., km²)\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)\n#' biomass_index(cpue = salmon_cpue, area_swept = 5)\nbiomass_index &lt;- function(cpue, area_swept) {\n  cpue * area_swept\n}"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#document-and-check",
-    "href": "slides/git-github-slides.html#document-and-check",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Document and check",
-    "text": "Document and check\n\ndevtools::document()\ndevtools::load_all()\n\nbiomass_index(10, 5)\n\ndevtools::check()\n\nCommit when check() passes cleanly."
-  },
-  {
-    "objectID": "slides/git-github-slides.html#push-and-open-a-pr",
-    "href": "slides/git-github-slides.html#push-and-open-a-pr",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Push and open a PR",
-    "text": "Push and open a PR\n\npr_push()"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#go-back-to-the-air-pr",
-    "href": "slides/git-github-slides.html#go-back-to-the-air-pr",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Go back to the Air PR",
-    "text": "Go back to the Air PR\nPause the biomass PR and return to main:\n\npr_pause()\n\n\n\nNow resume the Air PR:\n\npr_resume() # Choose the Air PR from the menu\n\n\n\n\nOn Github, Merge the Air PR, then back in RStudio clean up the branch.\n\npr_finish()"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#now-resume-the-biomass-pr",
-    "href": "slides/git-github-slides.html#now-resume-the-biomass-pr",
-    "title": "Git and GitHub for Collaborative Development",
-    "section": "Now resume the biomass PR",
-    "text": "Now resume the biomass PR\n\npr_resume(\"add-biomass-function\")\n\n\n\nGet the latest changes from main (including the now-merged Air PR):\n\npr_merge_main()\n\n\n\n\nThen push the updated branch:\n\npr_push()\n\n\n\n\nOn GitHub, review the biomass PR and merge once CI is passing.\n\n\n\nFinally, clean up the branch:\n\npr_finish()"
-  },
-  {
-    "objectID": "slides/git-github-slides.html#resources",
-    "href": "slides/git-github-slides.html#resources",
-    "title": "Git and GitHub for Collaborative Development",
+    "objectID": "slides/intro-slides.html#resources",
+    "href": "slides/intro-slides.html#resources",
+    "title": "Advanced R Package Development",
     "section": "Resources",
-    "text": "Resources\n\nHappy Git and GitHub for the useR: https://happygitwithr.com/\nusethis::pr_* helpers: https://usethis.r-lib.org/articles/pr-functions.html\nGitHub Actions for R: https://github.com/r-lib/actions\nAir code formatter: https://posit-dev.github.io/air/"
+    "text": "Resources\n\nWorkshop website: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/\nSetup instructions: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html\nCheatsheet: https://rstudio.github.io/cheatsheets/html/package-development.html\n\n\nRemind people about setup - which they should have done before today."
+  },
+  {
+    "objectID": "slides/intro-slides.html#check-your-setup",
+    "href": "slides/intro-slides.html#check-your-setup",
+    "title": "Advanced R Package Development",
+    "section": "Check your setup",
+    "text": "Check your setup\nRun these two commands and make sure they succeed before we begin:\n\ndevtools::has_devel()\n\nLook for Your system is ready to build packages!\n\n\nusethis::git_sitrep()\n\nLook for Personal access token for 'https://github.com': '&lt;discovered&gt;'\n\n\nGive people 2-3 minutes to run these. has_devel() should print “Your system is ready to build packages!”. For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content."
+  },
+  {
+    "objectID": "slides/intro-slides.html#schedule",
+    "href": "slides/intro-slides.html#schedule",
+    "title": "Advanced R Package Development",
+    "section": "Schedule",
+    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 8:20\nIntroduction\n\n\n8:20 - 9:20\nPackage Development Fundamentals\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:55\nGit/GitHub for Collaborative Development\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 12:30\nTesting with testthat - Part 1"
+  },
+  {
+    "objectID": "slides/intro-slides.html#schedule-1",
+    "href": "slides/intro-slides.html#schedule-1",
+    "title": "Advanced R Package Development",
+    "section": "Schedule",
+    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 9:20\nFunction Design Best Practices\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:55\nTesting with testthat - Part 2\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 11:30\nAdvanced Documentation\n\n\n11:30 - 12:30\nDebugging Techniques"
+  },
+  {
+    "objectID": "slides/intro-slides.html#schedule-2",
+    "href": "slides/intro-slides.html#schedule-2",
+    "title": "Advanced R Package Development",
+    "section": "Schedule",
+    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 9:20\nObject-Oriented Programming\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:35\nData Packages\n\n\n10:35 - 10:55\nReleasing Your R Package\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 12:30\nBYOP + Open Topics"
+  },
+  {
+    "objectID": "slides/intro-slides.html#byop-open-topics",
+    "href": "slides/intro-slides.html#byop-open-topics",
+    "title": "Advanced R Package Development",
+    "section": "BYOP + Open Topics",
+    "text": "BYOP + Open Topics\nOpen Q&A\n\nSpecific challenges you’ve encountered during the workshop\nApplying workshop concepts to your own package\n\n\nBring Your Own Package\n\nDedicated time to work on your package\nInstructors available for individual consultation"
+  },
+  {
+    "objectID": "slides/intro-slides.html#lets-go",
+    "href": "slides/intro-slides.html#lets-go",
+    "title": "Advanced R Package Development",
+    "section": "Let’s go!",
+    "text": "Let’s go!"
+  },
+  {
+    "objectID": "slides/documentation-slides.html#outline",
+    "href": "slides/documentation-slides.html#outline",
+    "title": "Advanced Documentation",
+    "section": "Outline",
+    "text": "Outline\n\nThe duplication problem\n@inheritParams\n@inheritDotParams\nMarkdown formatting\nCross-references"
+  },
+  {
+    "objectID": "slides/documentation-slides.html#two-functions-overlapping-parameters",
+    "href": "slides/documentation-slides.html#two-functions-overlapping-parameters",
+    "title": "Advanced Documentation",
+    "section": "Two functions, overlapping parameters",
+    "text": "Two functions, overlapping parameters\ncpue() and biomass_index() share catch, effort, and verbose.\n\n\ncpue()\n\n#' @param catch Numeric vector of\n#'   catch (e.g., kg).\n#' @param effort Numeric vector of\n#'   effort (e.g., hours).\n#' @param gear_factor Numeric scalar for gear \n#'   standardization (default 1)\n#' @param method Character; \n#'   one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n\n\nbiomass_index()\n\n#' @param cpue Numeric vector of CPUE values. \n#' @param area_swept Numeric vector of area \n#'   swept (e.g., km^2^)\n#' @param catch Numeric vector of\n#'   catch (e.g., kg).\n#' @param effort Numeric vector of\n#'   effort (e.g., hours).\n#' @param verbose Logical; Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#' @param ... Additional arguments \n#'   passed to `cpue()`.\n\n\n\nTwo problems:\n\nIf the descriptions ever change, you have two places to update\n@param ... is vague - users cannot tell which arguments are accepted and passed to cpue()"
+  },
+  {
+    "objectID": "slides/documentation-slides.html#copy-parameter-docs-from-another-function",
+    "href": "slides/documentation-slides.html#copy-parameter-docs-from-another-function",
+    "title": "Advanced Documentation",
+    "section": "Copy parameter docs from another function",
+    "text": "Copy parameter docs from another function\n@inheritParams pulls @param entries from a source function into the current one.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^).\n#' @inheritParams cpue\n#' @param ... Additional arguments passed to `cpue()`.\n#' @export\n\n\nRender documentation and open the help page:\n\ndocument()\n?biomass_index"
+  },
+  {
+    "objectID": "slides/documentation-slides.html#what-gets-inherited",
+    "href": "slides/documentation-slides.html#what-gets-inherited",
+    "title": "Advanced Documentation",
+    "section": "What gets inherited?",
+    "text": "What gets inherited?\nroxygen2 copies @param entries from cpue() where the parameter:\n\nappears in biomass_index()’s signature, and\nis not already documented in biomass_index()\n\n\n\ncatch, effort, and verbose are inherited.\ngear_factor and method are skipped - they are not explicit parameters of biomass_index().\n\n\n\n@inheritParams also works across packages: @inheritParams pkg::function\n\n\nPoint out that @inheritParams can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#make-...-informative",
+    "href": "slides/documentation-slides.html#make-...-informative",
+    "title": "Advanced Documentation",
+    "section": "Make ... informative",
+    "text": "Make ... informative\n@param ... tells users nothing.\n\n#' @param ... Additional arguments passed to `cpue()`.\n\n\nWhat are the additional arguments? What do they do?\nThe user has to go to the ?cpue() help and figure it out for themselves."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#inheritdotparams-1",
+    "href": "slides/documentation-slides.html#inheritdotparams-1",
+    "title": "Advanced Documentation",
+    "section": "@inheritDotParams",
+    "text": "@inheritDotParams\ngenerates a formatted description that names the forwarded arguments and links their documentation.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^).\n#' @inheritParams cpue\n#' ... Additional arguments passed to `cpue()`."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#inheritdotparams-2",
+    "href": "slides/documentation-slides.html#inheritdotparams-2",
+    "title": "Advanced Documentation",
+    "section": "@inheritDotParams",
+    "text": "@inheritDotParams\ngenerates a formatted description that names the forwarded arguments and links their documentation.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^).\n#' @inheritParams cpue\n#' @inheritDotParams cpue -catch -effort\n\n\nThe -catch -effort syntax excludes those parameters - they are already documented explicitly above.\nWhat remains (gear_factor, method) is rendered as a formatted list linking back to ?cpue."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#inheritdotparams-3",
+    "href": "slides/documentation-slides.html#inheritdotparams-3",
+    "title": "Advanced Documentation",
+    "section": "@inheritDotParams",
+    "text": "@inheritDotParams\nThe ... entry in the help page now reads something like:\n\n\n... Arguments passed to cpue():\n gear_factor Numeric adjustment for gear standardisation…\n method One of “ratio” or “log”…\n\nBefore @inheritDotParams`, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#inline-formatting",
+    "href": "slides/documentation-slides.html#inline-formatting",
+    "title": "Advanced Documentation",
+    "section": "Inline formatting",
+    "text": "Inline formatting\nStandard Markdown works in all roxygen2 text fields: @param, @return, @description, @details.\n\n#' @param area_swept Numeric vector of area swept in **km^2^**.\n#' @return A numeric vector the same length as `cpue`. Returns `NA` for any\n#'   row where either input is `NA`.\n\n\n\nBackticks (``) render as inline code: cpue, NA, TRUE\n**text** renders as bold\n*text* renders as italic\n^text^ renders as superscript: km2"
+  },
+  {
+    "objectID": "slides/documentation-slides.html#lists",
+    "href": "slides/documentation-slides.html#lists",
+    "title": "Advanced Documentation",
+    "section": "Lists",
+    "text": "Lists\n\n#' @details\n#' Two modes of use:\n#'\n#' - Provide `cpue` directly for a simple calculation.\n#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.\n\n\n\nThe blank line between the tag and the list is required. Without it, roxygen2 treats the hyphens as literal text."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#linking-to-functions",
+    "href": "slides/documentation-slides.html#linking-to-functions",
+    "title": "Advanced Documentation",
+    "section": "Linking to functions",
+    "text": "Linking to functions\nThe most common form: function name followed by () in square brackets [].\n\n#' Calculates biomass index from CPUE and area swept.\n#' See [cpue()] for computing CPUE values from raw catch and effort.\n\n\nThe () suffix tells roxygen2 this is a function link. It generates a code-formatted hyperlink to ?cpue."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#linking-across-packages",
+    "href": "slides/documentation-slides.html#linking-across-packages",
+    "title": "Advanced Documentation",
+    "section": "Linking across packages",
+    "text": "Linking across packages\nUse the :: operator inside the brackets:\n\n#' @param data A data frame. See [dplyr::filter()] for subsetting rows.\n\n\nThis creates a link that opens ?dplyr::filter.\nR CMD check may produce a NOTE: “Undeclared package ‘dplyr’ in Rd xrefs”. Adding the package to Suggests in your DESCRIPTION silences it - you do not need Imports."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#custom-link-text-and-seealso",
+    "href": "slides/documentation-slides.html#custom-link-text-and-seealso",
+    "title": "Advanced Documentation",
+    "section": "Custom link text and @seealso",
+    "text": "Custom link text and @seealso\nTo display different text than the function name:\n\n#' Returns the same structure as [the CPUE function][cpue()].\n\n\nUse this sparingly - the function name itself is usually the most informative link text.\n\n\n@seealso renders in its own section at the bottom of the help page:\n\n#' @seealso [cpue()] to compute CPUE values from raw catch and effort.\n\nUse it for functions that are related but not directly referenced in the body of the docs."
+  },
+  {
+    "objectID": "slides/documentation-slides.html#summary",
+    "href": "slides/documentation-slides.html#summary",
+    "title": "Advanced Documentation",
+    "section": "Summary",
+    "text": "Summary\n\n\n\n\n\n\n\nSyntax\nResult\n\n\n\n\n[cpue()]\nLink to ?cpue in this package\n\n\n[pkg::cpue()]\nLink to ?pkg::cpue in another package\n\n\n[some text][cpue()]\n“some text” linking to ?cpue\n\n\n@inheritParams cpue\nCopy matching @param entries from cpue()\n\n\n@inheritDotParams cpue -x\nDocument ... as forwarded args, excluding x\n\n\n\n\nUse links freely in @description, @details, @param, @return, and @seealso. A well-linked help page lets users navigate the package without leaving the help system."
   },
   {
     "objectID": "releasing-your-r-package.html",
@@ -603,7 +547,7 @@
     "href": "object-oriented-programming.html#writing-methods",
     "title": "Object-Oriented Programming in R",
     "section": "Writing Methods",
-    "text": "Writing Methods\n\nprint method\nThe print method controls what users see when they type an object name at the console. When you type result and hit Enter, R calls print(result) behind the scenes - this is called autoprinting. R looks at the class of the object, finds print.cpue_result, and calls that. Without a custom print method, R falls back to print.default, which is why our tagged vector currently displays as raw numbers.\n\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"CPUE Results for\", length(x), \"records\\n\")\n  cat(\"Values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nImportant details:\n\nThe function name must be print.&lt;classname&gt;\nAlways include ... in the signature (required by the print generic)\nReturn invisible(x) so assignment still works: y &lt;- print(x)\nUse cat() rather than print() inside print methods to avoid recursion\n\n\ndocument()\nload_all()\n\nresult\n\nThat is the entire mechanism behind S3 dispatch: set a class, write a function.classname method, and R connects the two automatically.\nNote that although result looks different when we print it, it is still a numeric vector under the hood:\n\nis.numeric(result)\nunclass(result)\n\n\n\nAdding metadata with attributes\nA bare numeric vector with a class label has no context. What gear factor was used? What method was used? R objects can carry arbitrary attributes - named metadata attached to the object. Let’s update the function body again:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  result &lt;- raw_cpue * gear_factor\n  attr(result, \"gear_factor\") &lt;- gear_factor\n  attr(result, \"n_records\") &lt;- length(catch)\n  attr(result, \"method\") &lt;- method\n  class(result) &lt;- \"cpue_result\"\n  result\n}\n\n\nload_all()\n\nresult &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\nattr(result, \"gear_factor\")\nattr(result, \"n_records\")\nattr(result, \"method\")\n\nNow our print method can be more informative:\n\n#' @export\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result\\n\")\n  cat(\"Records:\", attr(x, \"n_records\"), \"\\n\")\n  cat(\"Gear factor:\", attr(x, \"gear_factor\"), \"\\n\")\n  cat(\"Method:\", attr(x, \"method\"), \"\\n\")\n  cat(\"CPUE values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nAs a class accumulates more fields, setting attributes one by one gets unwieldy. There is a better pattern.\n\n\nCreate a constructor function\nFor anything beyond a very basic class, the standard practice is to create a constructor function that builds the object in one place. A common naming convention, recommended in Advanced R, is new_&lt;classname&gt;.\n\n#' Create a cpue result object\n#'\n#' @param cpue_values Numeric vector of CPUE values.\n#' @param method Character string indicating the calculation method.\n#' @param gear_factor Numeric gear correction factor used.\n#' @param n_records Integer number of records processed.\n#'\n#' @return A `cpue_result` object.\n#' @noRd\nnew_cpue_result &lt;- function(cpue_values, method, gear_factor, n_records) {\n  structure(\n    cpue_values, # The data\n    method = method, # Attributes specifying metadata\n    gear_factor = gear_factor,\n    n_records = n_records,\n    class = \"cpue_result\" # class is a special attribute\n  )\n}\n\nA few things changed:\n\nstructure() sets multiple attributes at once - including class - instead of separate attr() and class() &lt;- calls\nAll object creation is centralised\n\n\n#' Summarize a CPUE survey\n#'\n#' Calculates CPUE from catch and effort data and returns a structured\n#' `cpue_result` object with metadata about the calculation.\n#'\n#' @param catch Numeric vector of catch values.\n#' @param effort Numeric vector of effort values.\n#' @param gear_factor Numeric gear correction factor (default 1).\n#' @param method Calculation method: \"ratio\" or \"log\".\n#'\n#' @return A `cpue_result` object.\n#' @export\n#'\n#' @examples\n#' cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  # ...cpue body here\n\n  new_cpue_result(\n    cpue_values = result,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(catch)\n  )\n}\n\n\nload_all()\n\nresult &lt;- cpue(\n  catch = c(100, 200, 300, 150),\n  effort = c(10, 20, 15, 30)\n)\n\nresult\n\n\n\nsummary method\nsummary should compute and return a useful statistical summary:\n\n#' @export\nsummary.cpue_result &lt;- function(object, ...) {\n  stats &lt;- list(\n    method = attr(object, \"method\"),\n    n_records = attr(object, \"n_records\"),\n    gear_factor = attr(object, \"gear_factor\"),\n    mean_cpue = mean(object),\n    median_cpue = stats::median(object),\n    sd_cpue = stats::sd(object),\n    range_cpue = range(object)\n  )\n\n  structure(stats, class = \"summary.cpue_result\")\n}\n\n#' @export\nprint.summary.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result Summary\\n\")\n  cat(\"---------------------\\n\")\n  cat(\"Method:      \", x$method, \"\\n\")\n  cat(\"Records:     \", x$n_records, \"\\n\")\n  cat(\"Gear factor: \", x$gear_factor, \"\\n\")\n  cat(\"Mean CPUE:   \", round(x$mean_cpue, 2), \"\\n\")\n  cat(\"Median CPUE: \", round(x$median_cpue, 2), \"\\n\")\n  cat(\"SD CPUE:     \", round(x$sd_cpue, 2), \"\\n\")\n  cat(\n    \"CPUE Range:    \",\n    round(x$range_cpue[1], 2),\n    \"-\",\n    round(x$range_cpue[2], 2),\n    \"\\n\"\n  )\n  invisible(x)\n}\n\nNote that summary returns an object of class summary.cpue_result, which has its own print method. This is the standard pattern in base R (see summary.lm).\n\ndocument()\nload_all()\n\nsummary(result)\n\n\n\nYour turn: Make a plot() method\nPlot methods must be named plot.&lt;classname&gt;, take x as the first argument, and include ... in the signature.\nNote that you don’t need to use base plot() in a plot method - you can use ggplot2 or any other plotting system.\n\n#' @export\nplot.cpue_result &lt;- function(x, ...) {\n  plot(\n    seq_along(x),\n    x,\n    type = \"b\",\n    xlab = \"Record\",\n    ylab = \"CPUE\",\n    main = paste(\"CPUE -\", attr(x, \"method\"), \"method\"),\n    ...\n  )\n}\n\nThe ... passes through to plot.default, allowing users to customize (colours, line types, etc.) without us having to anticipate every option.\n\ndocument()\nload_all()\n\nplot(result)\nplot(result, col = \"steelblue\", pch = 19)\n\n\n\nRegistering S3 methods\nFor your methods to work when the package is installed (not just with load_all()), they need to appear in the NAMESPACE file. The @export tag on each method handles this via roxygen2.\n\ndocument()\n\nLook at the NAMESPACE file. What do you see different about S3 methods compared to regular functions?\nS3method(print,cpue_result)\nS3method(summary,cpue_result)\nS3method(plot,cpue_result)\n\n\nTesting the class\nWe should update our tests to verify that cpue() returns the right class. testthat provides expect_s3_class() for exactly this:\n\ntest_that(\"cpue() returns a cpue_result object\", {\n  result &lt;- cpue(c(100, 200), c(10, 20))\n  expect_s3_class(result, \"cpue_result\")\n})\n\nWe can also test that the metadata attributes are set correctly:\n\ntest_that(\"cpue_result carries calculation metadata\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15), method = \"log\")\n  expect_equal(attr(result, \"method\"), \"log\")\n  expect_equal(attr(result, \"gear_factor\"), 1)\n  expect_equal(attr(result, \"n_records\"), 3)\n})\n\nAnd snapshot tests are a natural fit for print methods, since they capture the exact console output:\n\ntest_that(\"print.cpue_result displays expected output\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\n  expect_snapshot(print(result))\n})\n\n\n\n\n\n\n\nTipMake a commit",
+    "text": "Writing Methods\n\nprint method\nThe print method controls what users see when they type an object name at the console. When you type result and hit Enter, R calls print(result) behind the scenes - this is called autoprinting. R looks at the class of the object, finds print.cpue_result, and calls that. Without a custom print method, R falls back to print.default, which is why our tagged vector currently displays as raw numbers.\n\n#' @export\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"CPUE Results for\", length(x), \"records\\n\")\n  cat(\"Values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nImportant details:\n\nThe function name must be print.&lt;classname&gt;\nAlways include ... in the signature (required by the print generic)\nReturn invisible(x) so assignment still works: y &lt;- print(x)\nUse cat() rather than print() inside print methods to avoid recursion\nUse @export to register the method in the NAMESPACE file\n\n\ndocument()\nload_all()\n\nresult\n\nThat is the entire mechanism behind S3 dispatch: set a class, write a function.classname method, and R connects the two automatically.\nNote that although result looks different when we print it, it is still a numeric vector under the hood:\n\nis.numeric(result)\nunclass(result)\n\n\n\nAdding metadata with attributes\nA bare numeric vector with a class label has no context. What gear factor was used? What method was used? R objects can carry arbitrary attributes - named metadata attached to the object. Let’s update the function body again:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(catch = catch, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = catch / effort,\n    log = log(catch / effort)\n  )\n\n  result &lt;- raw_cpue * gear_factor\n  attr(result, \"gear_factor\") &lt;- gear_factor\n  attr(result, \"n_records\") &lt;- length(catch)\n  attr(result, \"method\") &lt;- method\n  class(result) &lt;- \"cpue_result\"\n  result\n}\n\n\nload_all()\n\nresult &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\nattr(result, \"gear_factor\")\nattr(result, \"n_records\")\nattr(result, \"method\")\n\nNow our print method can be more informative:\n\n#' @export\nprint.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result\\n\")\n  cat(\"Records:\", attr(x, \"n_records\"), \"\\n\")\n  cat(\"Gear factor:\", attr(x, \"gear_factor\"), \"\\n\")\n  cat(\"Method:\", attr(x, \"method\"), \"\\n\")\n  cat(\"CPUE values:\", round(x, 2), \"\\n\")\n  invisible(x)\n}\n\nAs a class accumulates more fields, setting attributes one by one gets unwieldy. There is a better pattern.\n\n\nCreate a constructor function\nFor anything beyond a very basic class, the standard practice is to create a constructor function that builds the object in one place. A common naming convention, recommended in Advanced R, is new_&lt;classname&gt;.\n\n#' Create a cpue result object\n#'\n#' @param cpue_values Numeric vector of CPUE values.\n#' @param method Character string indicating the calculation method.\n#' @param gear_factor Numeric gear correction factor used.\n#' @param n_records Integer number of records processed.\n#'\n#' @return A `cpue_result` object.\n#' @noRd\nnew_cpue_result &lt;- function(cpue_values, method, gear_factor, n_records) {\n  structure(\n    cpue_values, # The data\n    method = method, # Attributes specifying metadata\n    gear_factor = gear_factor,\n    n_records = n_records,\n    class = \"cpue_result\" # class is a special attribute\n  )\n}\n\nA few things changed:\n\nstructure() sets multiple attributes at once - including class - instead of separate attr() and class() &lt;- calls\nAll object creation is centralised\n\n\n#' Summarize a CPUE survey\n#'\n#' Calculates CPUE from catch and effort data and returns a structured\n#' `cpue_result` object with metadata about the calculation.\n#'\n#' @param catch Numeric vector of catch values.\n#' @param effort Numeric vector of effort values.\n#' @param gear_factor Numeric gear correction factor (default 1).\n#' @param method Calculation method: \"ratio\" or \"log\".\n#'\n#' @return A `cpue_result` object.\n#' @export\n#'\n#' @examples\n#' cpue(catch = c(100, 200, 300), effort = c(10, 20, 30))\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) {\n  # ...cpue body here\n\n  new_cpue_result(\n    cpue_values = result,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(catch)\n  )\n}\n\n\nload_all()\n\nresult &lt;- cpue(\n  catch = c(100, 200, 300, 150),\n  effort = c(10, 20, 15, 30)\n)\n\nresult\n\n\n\nsummary method\nsummary should compute and return a useful statistical summary:\n\n#' @export\nsummary.cpue_result &lt;- function(object, ...) {\n  stats &lt;- list(\n    method = attr(object, \"method\"),\n    n_records = attr(object, \"n_records\"),\n    gear_factor = attr(object, \"gear_factor\"),\n    mean_cpue = mean(object),\n    median_cpue = stats::median(object),\n    sd_cpue = stats::sd(object),\n    range_cpue = range(object)\n  )\n\n  structure(stats, class = \"summary.cpue_result\")\n}\n\n#' @export\nprint.summary.cpue_result &lt;- function(x, ...) {\n  cat(\"Survey Result Summary\\n\")\n  cat(\"---------------------\\n\")\n  cat(\"Method:      \", x$method, \"\\n\")\n  cat(\"Records:     \", x$n_records, \"\\n\")\n  cat(\"Gear factor: \", x$gear_factor, \"\\n\")\n  cat(\"Mean CPUE:   \", round(x$mean_cpue, 2), \"\\n\")\n  cat(\"Median CPUE: \", round(x$median_cpue, 2), \"\\n\")\n  cat(\"SD CPUE:     \", round(x$sd_cpue, 2), \"\\n\")\n  cat(\n    \"CPUE Range:    \",\n    round(x$range_cpue[1], 2),\n    \"-\",\n    round(x$range_cpue[2], 2),\n    \"\\n\"\n  )\n  invisible(x)\n}\n\nNote that summary returns an object of class summary.cpue_result, which has its own print method. This is the standard pattern in base R (see summary.lm).\n\ndocument()\nload_all()\n\nsummary(result)\n\n\n\nYour turn: Make a plot() method\nPlot methods must be named plot.&lt;classname&gt;, take x as the first argument, and include ... in the signature.\nNote that you don’t need to use base plot() in a plot method - you can use ggplot2 or any other plotting system.\n\n#' @export\nplot.cpue_result &lt;- function(x, ...) {\n  plot(\n    seq_along(x),\n    x,\n    type = \"b\",\n    xlab = \"Record\",\n    ylab = \"CPUE\",\n    main = paste(\"CPUE -\", attr(x, \"method\"), \"method\"),\n    ...\n  )\n}\n\nThe ... passes through to plot.default, allowing users to customize (colours, line types, etc.) without us having to anticipate every option.\n\ndocument()\nload_all()\n\nplot(result)\nplot(result, col = \"steelblue\", pch = 19)\n\n\n\nRegistering S3 methods\nFor your methods to work when the package is installed (not just with load_all()), they need to appear in the NAMESPACE file. The @export tag on each method handles this via roxygen2.\n\ndocument()\n\nLook at the NAMESPACE file. What do you see different about S3 methods compared to regular functions?\nS3method(print,cpue_result)\nS3method(summary,cpue_result)\nS3method(plot,cpue_result)\n\n\nTesting the class\nWe should update our tests to verify that cpue() returns the right class. testthat provides expect_s3_class() for exactly this:\n\ntest_that(\"cpue() returns a cpue_result object\", {\n  result &lt;- cpue(c(100, 200), c(10, 20))\n  expect_s3_class(result, \"cpue_result\")\n})\n\nWe can also test that the metadata attributes are set correctly:\n\ntest_that(\"cpue_result carries calculation metadata\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15), method = \"log\")\n  expect_equal(attr(result, \"method\"), \"log\")\n  expect_equal(attr(result, \"gear_factor\"), 1)\n  expect_equal(attr(result, \"n_records\"), 3)\n})\n\nAnd snapshot tests are a natural fit for print methods, since they capture the exact console output:\n\ntest_that(\"print.cpue_result displays expected output\", {\n  result &lt;- cpue(c(100, 200, 300), c(10, 20, 15))\n  expect_snapshot(print(result))\n})\n\n\n\n\n\n\n\nTipMake a commit",
     "crumbs": [
       "Day 3: Advanced Topics and Application",
       "Object-Oriented Programming"
@@ -614,7 +558,7 @@
     "href": "object-oriented-programming.html#creating-your-own-generics-and-methods",
     "title": "Object-Oriented Programming in R",
     "section": "Creating your own generics and methods",
-    "text": "Creating your own generics and methods\nSo far we have built new classes and created methods for existing generics. But one of the most practical uses of S3 is creating your own generics, so the same function name works on different types of input.\nOur cpue() function currently takes numeric vectors:\n\ncpue(catch = c(100, 200), effort = c(10, 20))\n\nBut users often have their data in a data frame. Instead of making them extract columns every time, we can make cpue() work directly on data frames too. The same function call adapts its behaviour depending on what the user passes in - just like summary() does in base R.\n\nStep 1: Make cpue a generic\nWe replace the function body with UseMethod(\"cpue\"). The first argument becomes x by convention, since it could be either a numeric vector or a data frame:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param x Input data: a numeric vector of catch values, or a data frame\n#'   containing catch and effort columns.\n#' @param ... Additional arguments passed to methods.\n#'\n#' @export\ncpue &lt;- function(x, ...) {\n  UseMethod(\"cpue\")\n}\n\n\n\nStep 2: Move the existing implementation into cpue.numeric\nThe existing code becomes the numeric method. The first argument changes from catch to x to match the generic’s signature, but the logic is identical:\n\n#' @rdname cpue\n#'\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(c(100, 200), c(10, 20), method = \"log\")\ncpue.numeric &lt;- function(\n  x,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(x = x, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(x), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = x / effort,\n    log = log(x / effort)\n  )\n\n  new_cpue_result(\n    cpue_values = raw_cpue * gear_factor,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(x)\n  )\n}\n\nAll existing code that calls cpue() with positional arguments continues to work - R dispatches to cpue.numeric because the first argument is numeric.\n\n\n\n\n\n\nWarningNamed argument change\n\n\n\nThe first argument was renamed from catch to x to match the generic’s signature. Any call using named arguments - cpue(catch = 100, effort = 10) - will now fail because catch is no longer a parameter. Update these to use positional arguments: cpue(100, 10).\n\n\n\n\nStep 3: Add a data frame method\n\n#' @rdname cpue\n#' @param catch_col Name of the catch column (default `\"catch\"`).\n#' @param effort_col Name of the effort column (default `\"effort\"`).\n#' @export\ncpue.data.frame &lt;- function(\n  x,\n  catch_col = \"catch\",\n  effort_col = \"effort\",\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  if (!catch_col %in% names(x)) {\n    stop(\"Column '\", catch_col, \"' not found in data frame.\", call. = FALSE)\n  }\n  if (!effort_col %in% names(x)) {\n    stop(\"Column '\", effort_col, \"' not found in data frame.\", call. = FALSE)\n  }\n\n  # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.\n  # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.\n  cpue(\n    x = x[[catch_col]],\n    effort = x[[effort_col]],\n    gear_factor = gear_factor,\n    method = method,\n    verbose = verbose,\n    ...\n  )\n}\n\nThe data frame method extracts the right columns and calls cpue() again with numeric vectors, which dispatches to cpue.numeric. This layering - where one method calls the generic again with different input - is a common and effective pattern.\n\n\nStep 4: Add a .default method\nIt’s good practice to add a default method that throws an informative error if the user passes in an unsupported type. If the generic can’t find a method for the class of x, it will fall back to cpue.default:\n\n#' @rdname cpue\n#' @export\ncpue.default &lt;- function(x, ...) {\n  stop(\"Unsupported input type for cpue(): \", class(x), call. = FALSE)\n}\n\n\n\nUpdate biomass_index documentation\nConverting cpue into a generic changed its signature from cpue(catch, effort, ...) to cpue(x, ...). The @inheritParams cpue tag on biomass_index was inheriting catch and effort docs from the old function - those params no longer exist on the generic.\nUpdate biomass_index to inherit from cpue.numeric instead, since that is the method it actually calls. Because cpue.numeric names its first argument x rather than catch, add @param catch back explicitly:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @inheritParams cpue.numeric\n#' @inheritDotParams cpue.numeric -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\n\ndocument()\nload_all()\n\n# Still works with vectors\ncpue(c(100, 200), c(10, 20))\n\n# Now also works with data frames\nfishing_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 20, 15)\n)\n\ncpue(fishing_data)\n\n# Custom column names\ntrawl_data &lt;- data.frame(\n  kg = c(50, 100, 150),\n  hours = c(5, 10, 8)\n)\n\ncpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n\n\n\nUpdating and adding tests\nTwo things have changed that may break existing tests:\n\nNamed argument calls: tests using cpue(catch = ..., effort = ...) will fail now that the argument is named x. Change these to positional calls.\nReturn type: cpue() now returns a cpue_result object, not a plain numeric. expect_equal() compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in as.numeric() for numeric comparisons: expect_equal(as.numeric(cpue(100, 10)), 10).\n\nSome existing snapshots will also be stale since the print format changed. Run snapshot_accept() after check() to accept the updated snapshots.\nNow add tests for the data frame method and the default error:\n\ntest_that(\"cpue.data.frame dispatches correctly\", {\n  fishing_data &lt;- data.frame(\n    catch = c(100, 200, 300),\n    effort = c(10, 20, 15)\n  )\n  result &lt;- cpue(fishing_data)\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10, 20))\n})\n\ntest_that(\"cpue.data.frame works with custom column names\", {\n  trawl_data &lt;- data.frame(\n    kg = c(50, 100),\n    hours = c(5, 10)\n  )\n  result &lt;- cpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10))\n})\n\ntest_that(\"cpue.data.frame errors on missing columns\", {\n  df &lt;- data.frame(x = 1, y = 2)\n  expect_snapshot(cpue(df), error = TRUE)\n})\n\ntest_that(\"cpue.default gives informative error\", {\n  expect_snapshot(cpue(\"not valid\"), error = TRUE)\n})\n\n\n\n\n\n\n\nTipMake a commit",
+    "text": "Creating your own generics and methods\nSo far we have built new classes and created methods for existing generics. But one of the most practical uses of S3 is creating your own generics, so the same function name works on different types of input.\nOur cpue() function currently takes numeric vectors:\n\ncpue(catch = c(100, 200), effort = c(10, 20))\n\nBut users often have their data in a data frame. Instead of making them extract columns every time, we can make cpue() work directly on data frames too. The same function call adapts its behaviour depending on what the user passes in - just like summary() does in base R.\n\nStep 1: Make cpue a generic\nWe replace the function body with UseMethod(\"cpue\"). The first argument becomes x by convention, since it could be either a numeric vector or a data frame:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param x Input data: a numeric vector of catch values, or a data frame\n#'   containing catch and effort columns.\n#' @param ... Additional arguments passed to methods.\n#'\n#' @export\ncpue &lt;- function(x, ...) {\n  UseMethod(\"cpue\")\n}\n\n\n\nStep 2: Move the existing implementation into cpue.numeric\nThe existing code becomes the numeric method. The first argument changes from catch to x to match the generic’s signature, but the logic is identical:\n\n#' @rdname cpue\n#'\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(c(100, 200), c(10, 20), method = \"log\")\ncpue.numeric &lt;- function(\n  x,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  method &lt;- match.arg(method)\n\n  validate_numeric_inputs(x = x, effort = effort)\n\n  if (verbose) {\n    message(\"Processing \", length(x), \" records using \", method, \" method\")\n  }\n\n  raw_cpue &lt;- switch(\n    method,\n    ratio = x / effort,\n    log = log(x / effort)\n  )\n\n  new_cpue_result(\n    cpue_values = raw_cpue * gear_factor,\n    method = method,\n    gear_factor = gear_factor,\n    n_records = length(x)\n  )\n}\n\nAll existing code that calls cpue() with positional arguments continues to work - R dispatches to cpue.numeric because the first argument is numeric.\n\n\n\n\n\n\nWarningNamed argument change\n\n\n\nThe first argument was renamed from catch to x to match the generic’s signature. Any call using named arguments - cpue(catch = 100, effort = 10) - will now fail because catch is no longer a parameter. Update these to use positional arguments: cpue(100, 10).\n\n\n\n\nStep 3: Add a data frame method\n\n#' @rdname cpue\n#' @param catch_col Name of the catch column (default `\"catch\"`).\n#' @param effort_col Name of the effort column (default `\"effort\"`).\n#' @export\ncpue.data.frame &lt;- function(\n  x,\n  catch_col = \"catch\",\n  effort_col = \"effort\",\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  if (!catch_col %in% names(x)) {\n    stop(\"Column '\", catch_col, \"' not found in data frame.\", call. = FALSE)\n  }\n  if (!effort_col %in% names(x)) {\n    stop(\"Column '\", effort_col, \"' not found in data frame.\", call. = FALSE)\n  }\n\n  # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.\n  # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.\n  cpue(\n    x = x[[catch_col]],\n    effort = x[[effort_col]],\n    gear_factor = gear_factor,\n    method = method,\n    verbose = verbose,\n    ...\n  )\n}\n\nThe data frame method extracts the right columns and calls cpue() again with numeric vectors, which dispatches to cpue.numeric. This layering - where one method calls the generic again with different input - is a common and effective pattern.\n\n\nStep 4: Add a .default method\nIt’s good practice to add a default method that throws an informative error if the user passes in an unsupported type. If the generic can’t find a method for the class of x, it will fall back to cpue.default:\n\n#' @rdname cpue\n#' @export\ncpue.default &lt;- function(x, ...) {\n  stop(\"Unsupported input type for cpue(): \", class(x), call. = FALSE)\n}\n\n\n\nUpdate biomass_index documentation\nConverting cpue into a generic changed its signature from cpue(catch, effort, ...) to cpue(x, ...). The @inheritParams cpue tag on biomass_index was inheriting catch and effort docs from the old function - those params no longer exist on the generic.\nUpdate biomass_index to inherit parameters from cpue.numeric instead, since that is the method it actually calls. Because cpue.numeric names its first argument x rather than catch, add @param catch back explicitly:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @inheritParams cpue.numeric\n#' @inheritDotParams cpue.numeric -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\n\ndocument()\nload_all()\n\n# Still works with vectors\ncpue(c(100, 200), c(10, 20))\n\n# Now also works with data frames\nfishing_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 20, 15)\n)\n\ncpue(fishing_data)\n\n# Custom column names\ntrawl_data &lt;- data.frame(\n  kg = c(50, 100, 150),\n  hours = c(5, 10, 8)\n)\n\ncpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n\n\n\nUpdating and adding tests\nTwo things have changed that may break existing tests:\n\nNamed argument calls: tests using cpue(catch = ..., effort = ...) will fail now that the argument is named x. Change these to positional calls.\nReturn type: cpue() now returns a cpue_result object, not a plain numeric. expect_equal() compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in as.numeric() for numeric comparisons: expect_equal(as.numeric(cpue(100, 10)), 10).\n\nSome existing snapshots will also be stale since the print format changed. Run snapshot_accept() after check() to accept the updated snapshots.\nNow add tests for the data frame method and the default error:\n\ntest_that(\"cpue.data.frame dispatches correctly\", {\n  fishing_data &lt;- data.frame(\n    catch = c(100, 200, 300),\n    effort = c(10, 20, 15)\n  )\n  result &lt;- cpue(fishing_data)\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10, 20))\n})\n\ntest_that(\"cpue.data.frame works with custom column names\", {\n  trawl_data &lt;- data.frame(\n    kg = c(50, 100),\n    hours = c(5, 10)\n  )\n  result &lt;- cpue(trawl_data, catch_col = \"kg\", effort_col = \"hours\")\n  expect_s3_class(result, \"cpue_result\")\n  expect_equal(as.numeric(result), c(10, 10))\n})\n\ntest_that(\"cpue.data.frame errors on missing columns\", {\n  df &lt;- data.frame(x = 1, y = 2)\n  expect_snapshot(cpue(df), error = TRUE)\n})\n\ntest_that(\"cpue.default gives informative error\", {\n  expect_snapshot(cpue(\"not valid\"), error = TRUE)\n})\n\n\n\n\n\n\n\nTipMake a commit",
     "crumbs": [
       "Day 3: Advanced Topics and Application",
       "Object-Oriented Programming"
@@ -735,7 +679,7 @@
     "href": "documentation.html",
     "title": "Advanced Documentation",
     "section": "",
-    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @param effort Numeric vector of effort (e.g., hours).\n#' @param ... Additional arguments passed to [cpue()].\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nAnd here is the documentation for cpue():\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
+    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept. Can optionally\n#' compute CPUE from catch and effort data.\n#'\n#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are\n#'   provided, this is computed automatically.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^)\n#' @param catch Optional numeric vector of catch. If provided with `effort`,\n#'   CPUE is computed via `cpue()`.\n#' @param effort Optional numeric vector of effort. Required if `catch` is\n#'   provided.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#' @param ... Additional arguments passed to `cpue()` when computing from\n#'   catch and effort (e.g., `method`, `gear_factor`).\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n\nAnd here is the documentation for cpue():\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
     "crumbs": [
       "Day 2: Advanced Testing and Debugging",
       "Advanced Documentation"
@@ -746,7 +690,7 @@
     "href": "documentation.html#the-problem-with-duplicated-documentation",
     "title": "Advanced Documentation",
     "section": "",
-    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @param catch Numeric vector of catch (e.g., kg).\n#' @param effort Numeric vector of effort (e.g., hours).\n#' @param ... Additional arguments passed to [cpue()].\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nAnd here is the documentation for cpue():\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
+    "text": "Our biomass_index() function is in good shape after our testing sessions. Here is where we left it:\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept. Can optionally\n#' compute CPUE from catch and effort data.\n#'\n#' @param cpue Numeric vector of CPUE values. If `catch` and `effort` are\n#'   provided, this is computed automatically.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^)\n#' @param catch Optional numeric vector of catch. If provided with `effort`,\n#'   CPUE is computed via `cpue()`.\n#' @param effort Optional numeric vector of effort. Required if `catch` is\n#'   provided.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#' @param ... Additional arguments passed to `cpue()` when computing from\n#'   catch and effort (e.g., `method`, `gear_factor`).\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n\nAnd here is the documentation for cpue():\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear\n#' standardization. Supports ratio and log-transformed methods.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric scalar for gear standardization (default 1)\n#' @param method Character; one of `\"ratio\"` (default) or `\"log\"`.\n#' @param verbose Logical; print processing info? Default from\n#'   `getOption(\"fishr.verbose\", FALSE)`.\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n\nThere are two documentation problems here:\n\ncatch and effort are already documented in cpue(). If the description of those parameters ever changes, we have two places to update.\nThe @param ... says “Additional arguments passed to cpue()” but gives the user no information about which arguments are accepted or what they do.",
     "crumbs": [
       "Day 2: Advanced Testing and Debugging",
       "Advanced Documentation"
@@ -756,8 +700,8 @@
     "objectID": "documentation.html#inheritparams",
     "href": "documentation.html#inheritparams",
     "title": "Advanced Documentation",
-    "section": "(inheritParams?)",
-    "text": "(inheritParams?)\n@inheritParams copies parameter documentation from another function into the current one. You specify the source function, and roxygen2 copies the @param entries for any parameter whose name matches.\nReplace the hand-written @param catch and @param effort with:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @inheritParams cpue\n#' @param ... Additional arguments passed to `cpue()`.\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nroxygen2 looks at the @param tags in cpue() and copies documentation for any parameter that:\n\nappears in the current function’s signature, and\nis not already documented in the current function\n\nSo catch and effort get pulled in from cpue(). gear_factor, method, and verbose are skipped because they are not explicit parameters of biomass_index().\n\ndocument()\n\nOpen the help page to confirm:\n\n?biomass_index\n\nThe catch and effort parameter descriptions now match cpue() exactly - and they will stay in sync automatically whenever cpue() docs change.\n\n\n\n\n\n\nTip\n\n\n\n@inheritParams can chain across functions. If function C inherits from B which inherits from A, roxygen2 resolves the full chain. It also works across packages: @inheritParams pkg::function.",
+    "section": "@inheritParams",
+    "text": "@inheritParams\n@inheritParams copies parameter documentation from another function into the current one. You specify the source function, and roxygen2 copies the @param entries for any parameter whose name matches.\nReplace the duplicated parameters with:\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^).\n#' @inheritParams cpue\n#' @param ... Additional arguments passed to `cpue()`.\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  verbose = getOption(\"fishr.verbose\", FALSE),\n  ...\n) {\n  # ...\n}\n\nroxygen2 looks at the @param tags in cpue() and copies documentation for any parameter that:\n\nappears in the current function’s signature, and\nis not already documented in the current function\n\n\ndocument()\n\nOpen the help page to confirm:\n\n?biomass_index\n\nThe duplicated parameter descriptions now match cpue() exactly - and they will stay in sync automatically whenever cpue() docs change.\n\n\n\n\n\n\nTip\n\n\n\n@inheritParams can chain across functions. If function C inherits from B which inherits from A, roxygen2 resolves the full chain. It also works across packages: @inheritParams pkg::function.",
     "crumbs": [
       "Day 2: Advanced Testing and Debugging",
       "Advanced Documentation"
@@ -767,8 +711,8 @@
     "objectID": "documentation.html#inheritdotparams",
     "href": "documentation.html#inheritdotparams",
     "title": "Advanced Documentation",
-    "section": "(inheritDotParams?)",
-    "text": "(inheritDotParams?)\n@param ... is vague. The user has to follow the cross-reference to cpue() and work out which arguments apply. @inheritDotParams generates a proper description that names the forwarded arguments and links their documentation automatically.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km²).\n#' @inheritParams cpue\n#' @inheritDotParams cpue -catch -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nThe -catch -effort syntax excludes those parameters from the generated ... description, since they are already documented explicitly above. What remains - gear_factor, method, verbose - gets rendered as a formatted list linking back to ?cpue.\n\ndocument()\n?biomass_index\n\nThe ... entry now reads something like:\n\n… Arguments passed to cpue(): gear_factor Numeric adjustment for gear standardisation… method One of “ratio” or “log”… verbose Logical; if TRUE, prints processing information…\n\nUsers can see exactly what they can pass through without leaving the help page.",
+    "section": "@inheritDotParams",
+    "text": "@inheritDotParams\n@param ... is vague. The user has to follow the cross-reference to cpue() and work out which arguments apply. @inheritDotParams generates a proper description that names the forwarded arguments and links their documentation automatically.\n\n#' Calculate Biomass Index\n#'\n#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`\n#'   and `effort`.\n#' @param area_swept Numeric vector of area swept (e.g., km^2^).\n#' @inheritParams cpue\n#' @inheritDotParams cpue -catch -effort\n#' @export\nbiomass_index &lt;- function(\n  cpue = NULL,\n  area_swept,\n  catch = NULL,\n  effort = NULL,\n  ...\n) {\n  # ...\n}\n\nThe -catch -effort syntax excludes those parameters from the generated ... description, since they are already documented explicitly above. What remains - gear_factor, method, verbose - gets rendered as a formatted list linking back to ?cpue.\n\ndocument()\n?biomass_index\n\nUsers can see exactly what they can pass through without leaving the help page.",
     "crumbs": [
       "Day 2: Advanced Testing and Debugging",
       "Advanced Documentation"
@@ -779,7 +723,7 @@
     "href": "documentation.html#markdown-and-cross-references",
     "title": "Advanced Documentation",
     "section": "Markdown and cross-references",
-    "text": "Markdown and cross-references\nroxygen2 supports standard Markdown formatting in all text fields: @description, @details, @param, @return, @seealso, and others.\n\nInline formatting\nThe basics work as expected:\n\n#' Calculate Biomass Index\n#'\n#' Calculates a biomass index by multiplying CPUE by area swept. Returns\n#' `NA` for any row where either input is `NA`.\n#'\n#' @param cpue Numeric vector of CPUE values (units: kg/hr).\n#' @param area_swept Numeric vector of area swept in **km²**.\n#' @return A numeric vector the same length as `cpue`.\n\n\nBackticks render as inline code: cpue, NA, TRUE\n**text** renders as bold\n*text* renders as italic\n\n\n\nLists\nUse standard Markdown lists in @details or @description:\n\n#' @details\n#' Two modes of use:\n#'\n#' - Provide `cpue` directly for a simple calculation.\n#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.\n#'\n#' Any additional arguments in `...` are forwarded to [cpue()].\n\nBlank lines between the tag and the list content are required - without them roxygen2 treats the hyphens as literal text.\n\n\nLinking to functions\nThe most common form is the function name followed by () in square brackets:\n\n#' Calculates biomass index from CPUE and area swept.\n#' See [cpue()] for computing CPUE values from raw catch and effort.\n\nThe () suffix tells roxygen2 this is a function link. This generates a code-formatted link that takes the user directly to ?cpue when they click it in the help document or a pkgdown site.\n\n\nLinking across packages\nTo link to a function in another package, use the :: operator inside the brackets:\n\n#' @param data A data frame. See [dplyr::filter()] for subsetting rows.\n\nThis creates a link that opens ?dplyr::filter. R CMD check may produce a NOTE - “Undeclared package ‘dplyr’ in Rd xrefs”. Adding the package to Suggests in your DESCRIPTION silences it; you do not need Imports.\n\n\nCustom link text\nTo display different text than the function name, use the [text][target()] form:\n\n#' Returns the same structure as [the CPUE function][cpue()].\n\nThis renders as “the CPUE function” with a link to ?cpue. Use this sparingly - the function name itself is usually the most informative link text.\n\n\nThe (seealso?) tag\n\n#' @seealso [cpue()] to compute CPUE values from raw catch and effort.\n#' @seealso [validate_numeric_inputs()] for the shared input validation logic.\n\n@seealso renders in its own section at the bottom of the help page. Use it for functions that are related but not directly referenced in the body of the docs.\n\n\nSummary\n\n\n\nSyntax\nResult\n\n\n\n\n[cpue()]\nLink to ?cpue in this package\n\n\n[fishr::cpue()]\nLink to ?fishr::cpue in another package\n\n\n[some text][cpue()]\n“some text” linking to ?cpue\n\n\n\nUse links freely in @description, @details, @param, @return, and @seealso. A well-linked help page lets users navigate the package without leaving the help system.",
+    "text": "Markdown and cross-references\nroxygen2 supports standard Markdown formatting in all text fields: @description, @details, @param, @return, @seealso, and others.\n\nInline formatting\nThe basics work as expected:\n\n#' Calculate Biomass Index\n#'\n#' Calculates a biomass index by multiplying CPUE by area swept. Returns\n#' `NA` for any row where either input is `NA`.\n#'\n#' @param cpue Numeric vector of CPUE values (units: kg/hr).\n#' @param area_swept Numeric vector of area swept in **km^2^**.\n#' @return A numeric vector the same length as `cpue`.\n\n\nBackticks render as inline code: cpue, NA, TRUE\n**text** renders as bold\n*text* renders as italic\n\n\n\nLists\nUse standard Markdown lists in @details or @description:\n\n#' @details\n#' Two modes of use:\n#'\n#' - Provide `cpue` directly for a simple calculation.\n#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.\n#'\n#' Any additional arguments in `...` are forwarded to [cpue()].\n\nBlank lines between the tag and the list content are required - without them roxygen2 treats the hyphens as literal text.\n\n\nLinking to functions\nThe most common form is the function name followed by () in square brackets:\n\n#' Calculates biomass index from CPUE and area swept.\n#' See [cpue()] for computing CPUE values from raw catch and effort.\n\nThe () suffix tells roxygen2 this is a function link. This generates a code-formatted link that takes the user directly to ?cpue when they click it in the help document or a pkgdown site.\n\n\nLinking across packages\nTo link to a function in another package, use the :: operator inside the brackets:\n\n#' @param data A data frame. See [dplyr::filter()] for subsetting rows.\n\nThis creates a link that opens ?dplyr::filter. R CMD check may produce a NOTE - “Undeclared package ‘dplyr’ in Rd xrefs”. Adding the package to Suggests in your DESCRIPTION silences it; you do not need Imports.\n\n\nCustom link text\nTo display different text than the function name, use the [text][target()] form:\n\n#' Returns the same structure as [the CPUE function][cpue()].\n\nThis renders as “the CPUE function” with a link to ?cpue. Use this sparingly - the function name itself is usually the most informative link text.\n\n\nThe @seealso tag\n\n#' @seealso [cpue()] to compute CPUE values from raw catch and effort.\n#' @seealso [validate_numeric_inputs()] for the shared input validation logic.\n\n@seealso renders in its own section at the bottom of the help page. Use it for functions that are related but not directly referenced in the body of the docs.\n\n\nSummary\n\n\n\nSyntax\nResult\n\n\n\n\n[cpue()]\nLink to ?cpue in this package\n\n\n[fishr::cpue()]\nLink to ?fishr::cpue in another package\n\n\n[some text][cpue()]\n“some text” linking to ?cpue\n\n\n\nUse links freely in @description, @details, @param, @return, and @seealso. A well-linked help page lets users navigate the package without leaving the help system.",
     "crumbs": [
       "Day 2: Advanced Testing and Debugging",
       "Advanced Documentation"
@@ -1193,7 +1137,7 @@
     "href": "package-fundamentals.html#write-your-first-function",
     "title": "Package Creation and Metadata",
     "section": "Write your first function",
-    "text": "Write your first function\n\nOpen a new file in R/ to hold your code\n\nuse_r(\"cpue\")\n\n\n\nWrite your function definition in this file\ncpue calculates catch per unit effort by dividing total catch by fishing effort. The function optionally applies a gear-specific correction factor to standardize CPUE across different fishing gear types. The function returns the adjusted CPUE value.\n\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\n\n\nLoad your package with load_all()\n\nload_all()\n\nAnd test out our new function:\n\ncpue(10, 5)\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\nNow that we have a basic working function, commit your changes.\n\n\n\n\nCheck your package\n\ncheck()\n\n\n\nSet a license\n\nuse_mit_license()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nDESCRIPTION file:\nPackage: fishr\nTitle: Calculate standard catch metrics for fisheries\nVersion: 0.0.0.9000\nAuthors@R:\n    person(\"Jane\", \"Doe\",\n           email = \"jane.doe@something.com\",\n           role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"XXXX-XXXX-XXXX-XXXX\"))\nDescription: Provides functions for calculating and analyzing fisheries\n    catch data, such as Catch Per Unit Effort (CPUE), a fundamental metric in\n    fisheries science.\nLicense: MIT + file LICENSE\nEncoding: UTF-8\nRoxygen: list(markdown = TRUE)\nRoxygenNote: 7.3.2\n\n\nCheck again\n\ncheck()\n\n\n\n\n\n\n\nTipMake a commit",
+    "text": "Write your first function\n\nOpen a new file in R/ to hold your code\n\nuse_r(\"cpue\")\n\n\n\nWrite your function definition in this file\ncpue calculates catch per unit effort by dividing total catch by fishing effort. The function optionally applies a gear-specific correction factor to standardize CPUE across different fishing gear types. The function returns the adjusted CPUE value.\n\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\n\n\nLoad your package with load_all()\n\nload_all()\n\nAnd test out our new function:\n\ncpue(10, 5)\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\nNow that we have a basic working function, commit your changes.\n\n\n\n\nCheck your package\n\ncheck()\n\n\n\nSet a license\n\nuse_mit_license()\n\n\n\nDESCRIPTION file:\nPackage: fishr\nTitle: Calculate standard catch metrics for fisheries\nVersion: 0.0.0.9000\nAuthors@R:\n    person(\"Jane\", \"Doe\",\n           email = \"jane.doe@something.com\",\n           role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"XXXX-XXXX-XXXX-XXXX\"))\nDescription: Provides functions for calculating and analyzing fisheries\n    catch data, such as Catch Per Unit Effort (CPUE), a fundamental metric in\n    fisheries science.\nLicense: MIT + file LICENSE\nEncoding: UTF-8\nRoxygen: list(markdown = TRUE)\nRoxygenNote: 7.3.2\n\n\nCheck again\n\ncheck()",
     "crumbs": [
       "Day 1: Foundations",
       "Package Development Fundamentals"
@@ -1312,88 +1256,480 @@
     ]
   },
   {
-    "objectID": "slides/intro-slides.html#welcome",
-    "href": "slides/intro-slides.html#welcome",
-    "title": "Advanced R Package Development",
-    "section": "Welcome!",
-    "text": "Welcome!\nInstructors:\n\nAndy Teucher\n\nandyteucher.ca\nGitHub: ateucher\n\nSam Albers\n\nsamalbers.science\nGitHub: boshek"
+    "objectID": "slides/git-github-slides.html#outline",
+    "href": "slides/git-github-slides.html#outline",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Outline",
+    "text": "Outline\n\nGit workflow review\nPull request workflows with usethis\nContinuous integration with GitHub Actions\nCode formatting with Air\nAdding a function via PR"
   },
   {
-    "objectID": "slides/intro-slides.html#welcome-1",
-    "href": "slides/intro-slides.html#welcome-1",
-    "title": "Advanced R Package Development",
-    "section": "Welcome!",
-    "text": "Welcome!\nThis is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.\nCode of Conduct:\n\nTreat everyone with respect\nEveryone should feel welcome\nFull text: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html\n\n\nCameras. Remind everyone about the code of conduct briefly - it’s about creating a safe learning environment."
+    "objectID": "slides/git-github-slides.html#where-we-left-off",
+    "href": "slides/git-github-slides.html#where-we-left-off",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Where we left off",
+    "text": "Where we left off\nMake sure all changes from the fundamentals session are committed and pushed:\n\ngit pull\ngit push\n\n\nQuick check - everyone should have a fishr package with cpue() and basic documentation, all pushed to GitHub. If anyone is behind, now is the time to catch up before we add CI."
   },
   {
-    "objectID": "slides/intro-slides.html#sticky-notes",
-    "href": "slides/intro-slides.html#sticky-notes",
-    "title": "Advanced R Package Development",
-    "section": "Sticky Notes",
-    "text": "Sticky Notes\n\n\n\n\n\nPINK\nI’m stuck, please send help\n\n\n\n\nGREEN\nI’m good, let’s move on"
+    "objectID": "slides/git-github-slides.html#the-core-loop",
+    "href": "slides/git-github-slides.html#the-core-loop",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "The core loop",
+    "text": "The core loop\nEvery day of package development follows the same loop:\n\nPull latest changes\nMake a small, focused change\nTest that it works\nCommit with a clear message\nPush\n\n\nPull requests add a review step between commit and merge to main."
   },
   {
-    "objectID": "slides/intro-slides.html#sticky-notes-online",
-    "href": "slides/intro-slides.html#sticky-notes-online",
-    "title": "Advanced R Package Development",
-    "section": "Sticky Notes (online)",
-    "text": "Sticky Notes (online)\n\n\n\n\n\nPINK = I’m stuck ✋\nUse the Zoom Raise Hand reaction\n\n\n\n\nGREEN = I’m good 👍\nUse the Thumbs Up reaction\n\n\nWe’ll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room."
+    "objectID": "slides/git-github-slides.html#collaborating",
+    "href": "slides/git-github-slides.html#collaborating",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Collaborating",
+    "text": "Collaborating\n\nGit is a distributed version control system\nEach collaborator has a full copy of the repository, including its history\nAll collaborators can push changes to the remote repository (given they have permission)\nChanges made by collaborators can be pulled into your local repository"
   },
   {
-    "objectID": "slides/intro-slides.html#discussions-q-a",
-    "href": "slides/intro-slides.html#discussions-q-a",
-    "title": "Advanced R Package Development",
-    "section": "Discussions / Q & A",
-    "text": "Discussions / Q & A\n\nGitHub Discussions: https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions\n\nOpen the welcome discussion and introduce yourself:\n\nOffice/department, city/town\nWhy you’re here\nSomething you’ve built or are trying to build\n\n\nPaste link in chat. Open GitHub discussions, ask people to introduce themselves. Share screen doing it."
+    "objectID": "slides/git-github-slides.html#why-pull-requests",
+    "href": "slides/git-github-slides.html#why-pull-requests",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Why pull requests?",
+    "text": "Why pull requests?\n\n\n\n\n%%{\n    init: {\n        'theme':'base', \n        'showCommitLabel': false, \n        'themeVariables': { \n            'git0':'#6cc644', \n            'git1':'#f39c12', \n            'commitLabelColor': '#325c65', \n            'commitLabelBackground':'#325c65'\n        }\n    }\n}%%\n\ngitGraph\n    commit id: \" \"\n    commit id: \"  \"\n    commit id: \"   \"\n    commit id: \"    \"\n    branch \"branch\"\n    commit id: \"     \"\n    commit id: \"      \"\n    commit id: \"       \"\n    commit id: \"        \"\n    checkout main\n    merge \"branch\" tag: \"PR review & merge\"\n    commit id: \"         \"\n    commit id: \"          \"\n\n\n\n\n\nEven when working alone, PRs are valuable:\n\nCheck code runs before it reaches main\nYou get a diff to review your own/others’ work\nAllows efficient code review and discussion\nAllows fearless experimentation\n\n\nWith collaborators, PRs also enable code review."
   },
   {
-    "objectID": "slides/intro-slides.html#resources",
-    "href": "slides/intro-slides.html#resources",
-    "title": "Advanced R Package Development",
+    "objectID": "slides/git-github-slides.html#steps",
+    "href": "slides/git-github-slides.html#steps",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Steps",
+    "text": "Steps\n\nCreate a new branch\nMake changes, commit, and push the branch to GitHub\nOpen a Pull Request (PR) on GitHub\nDiscuss and review the PR\nMerge the PR into the main branch\nPull the latest changes to your local main branch"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#the-usethis-pr-helpers",
+    "href": "slides/git-github-slides.html#the-usethis-pr-helpers",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "The usethis PR helpers",
+    "text": "The usethis PR helpers\n\n\n\n\n\n\n\nFunction\nWhat it does\n\n\n\n\npr_init(\"name\")\nCreate and switch to a new branch\n\n\npr_push()\nPush branch, open PR on GitHub\n\n\npr_pull()\nPull latest changes on that branch from GitHub\n\n\npr_merge_main()\nMerge latest changes from main into your branch\n\n\npr_finish()\nClean up after merge\n\n\n\n\n\n\nOther useful ones\n\n\n\nFunction\nWhat it does\n\n\n\n\npr_pause()\nStash work, return to main\n\n\npr_resume(\"name\")\nReturn to a branch\n\n\npr_fetch(123)\nCheck out someone else’s PR\n\n\n\n\n\nThese also help us avoid merge conflicts by doing a lot of “pull before you work” and “pull before you push” automatically."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#basic-pr-workflow-with-usethis-pr-helpers",
+    "href": "slides/git-github-slides.html#basic-pr-workflow-with-usethis-pr-helpers",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Basic PR workflow with usethis PR helpers",
+    "text": "Basic PR workflow with usethis PR helpers\n\n\n\n\n---\nconfig:\n  theme: base\n  themeVariables:\n    fontSize: 30px\n---\n\nflowchart LR\n    A([main]) --&gt; PI[\"pr_init()\"] --&gt; B([Branch])\n    B --&gt; C[Write & test]\n    C --&gt; PP[\"pr_push()\"] --&gt; D([GitHub PR])\n    D --&gt; E{Review}\n    E --&gt; C\n    E --&gt;|Merged| F([main updated])\n    F --&gt; PF[\"pr_finish()\"] --&gt; G([Clean state])\n\n    style A fill:#2d6a4f,color:#fff,stroke:none\n    style F fill:#2d6a4f,color:#fff,stroke:none\n    style G fill:#2d6a4f,color:#fff,stroke:none\n    style B fill:#1d3557,color:#fff,stroke:none\n    style D fill:#457b9d,color:#fff,stroke:none\n    style E fill:#e63946,color:#fff,stroke:none\n    style C fill:#333,color:#fff,stroke:#666\n    style PI fill:#f4a261,color:#000,stroke:none\n    style PP fill:#f4a261,color:#000,stroke:none\n    style PF fill:#f4a261,color:#000,stroke:none\n\n\n\n\n\nDemonstrates the full workflow: https://usethis.r-lib.org/articles/pr-functions.html"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#starting-a-branch",
+    "href": "slides/git-github-slides.html#starting-a-branch",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Starting a branch",
+    "text": "Starting a branch\n\nusethis::pr_init(\"my-branch-name\")\n\n\n\nCreates and checks out the branch immediately\nYou are now isolated from main\nBranch names: short, descriptive, hyphenated\n\n\n\nA reader should be able to guess what the PR does from the branch name alone."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#pushing-and-opening-a-pr",
+    "href": "slides/git-github-slides.html#pushing-and-opening-a-pr",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Pushing and opening a PR",
+    "text": "Pushing and opening a PR\n\nusethis::pr_push()\n\n\n\nPushes your branch to GitHub\nOpens your browser to the “Create pull request” page"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#writing-a-good-pr-description",
+    "href": "slides/git-github-slides.html#writing-a-good-pr-description",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Writing a good PR description",
+    "text": "Writing a good PR description\nTitle: Short, imperative - “Add foofy function”\nBody:\n\nWhat problem does this solve?\nAny design decisions worth explaining?\nAnything reviewers should pay attention to?"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#after-review-and-merge",
+    "href": "slides/git-github-slides.html#after-review-and-merge",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "After review and merge",
+    "text": "After review and merge\nOnce the PR is approved and merged on GitHub:\n\nusethis::pr_finish()\n\n\n\nSwitches back to main\nPulls the latest changes (including your merged work)\nDeletes the local feature branch\nDeletes the remote feature branch"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#pausing-and-resuming",
+    "href": "slides/git-github-slides.html#pausing-and-resuming",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Pausing and resuming",
+    "text": "Pausing and resuming\nIf you need to switch context mid-PR:\n\nusethis::pr_pause()                          # return to main\nusethis::pr_resume(\"my-branch-name\")         # pick up where you left off\n\n\nThis is useful when someone asks you to review their PR while you’re mid-work, or when you need to make a quick fix to main."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#reviewing-someone-elses-pr-locally",
+    "href": "slides/git-github-slides.html#reviewing-someone-elses-pr-locally",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Reviewing someone else’s PR locally",
+    "text": "Reviewing someone else’s PR locally\n\nusethis::pr_fetch(1)    # check out PR #1 locally\n\n\nRun their code, run their tests, leave an informed review on GitHub.\nOnce the PR is merged, clean up your local branch and delete the PR branch:\n\nusethis::pr_finish()"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#the-full-picture",
+    "href": "slides/git-github-slides.html#the-full-picture",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "The full picture",
+    "text": "The full picture\n\n\n\n\n---\nconfig:\n  theme: base\n  themeVariables:\n    fontSize: 20px\n---\n\nflowchart LR\n    A([main]) --&gt; PI[\"pr_init()\"] --&gt; B([your branch])\n    B --&gt; C[Write & test]\n    C --&gt; PP[\"pr_push()\"] --&gt; D([GitHub PR])\n    D --&gt; E{Review}\n    E --&gt;|Changes needed| C\n    E --&gt;|Approved & merged| F([main updated])\n    F --&gt; PF[\"pr_finish()\"] --&gt; A\n\n    D --&gt; PFetch[\"pr_fetch()\"] --&gt; G([reviewer's local])\n    G --&gt;|review & comment| D\n\n    B --&gt; PA[\"pr_pause()\"] --&gt; A\n    A --&gt; PRe[\"pr_resume()\"] --&gt; B\n\n    style A fill:#2d6a4f,color:#fff,stroke:none\n    style F fill:#2d6a4f,color:#fff,stroke:none\n    style B fill:#1d3557,color:#fff,stroke:none\n    style G fill:#1d3557,color:#fff,stroke:none\n    style D fill:#457b9d,color:#fff,stroke:none\n    style E fill:#e63946,color:#fff,stroke:none\n    style C fill:#333,color:#fff,stroke:#666\n    style PI fill:#f4a261,color:#000,stroke:none\n    style PP fill:#f4a261,color:#000,stroke:none\n    style PF fill:#f4a261,color:#000,stroke:none\n    style PFetch fill:#f4a261,color:#000,stroke:none\n    style PA fill:#f4a261,color:#000,stroke:none\n    style PRe fill:#f4a261,color:#000,stroke:none\n\n\n\n\n\nDemonstrates the full workflow: https://usethis.r-lib.org/articles/pr-functions.html"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#why-ci",
+    "href": "slides/git-github-slides.html#why-ci",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Why CI?",
+    "text": "Why CI?\nYour package works on your machine. But does it work on:\n\nWindows? macOS? Linux?\nR 4.4? R-devel?\n\n\nContinuous Integration automatically runs checks on every push\n\nIn practice, we’re going to use GitHub Actions, a free workflow automation service included with your GitHub account"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#we-will-add-ci-via-a-pull-request",
+    "href": "slides/git-github-slides.html#we-will-add-ci-via-a-pull-request",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "We will add CI via a Pull Request",
+    "text": "We will add CI via a Pull Request\nCreate a new branch:\n\nusethis::pr_init(\"add-ci\")"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#add-r-cmd-check-via-github-actions",
+    "href": "slides/git-github-slides.html#add-r-cmd-check-via-github-actions",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Add R CMD check via GitHub Actions",
+    "text": "Add R CMD check via GitHub Actions\nhttps://github.com/r-lib/actions\n\n\n\nusethis::use_github_action()\n\n\n\"check-standard\": Runs R CMD check on several platforms when you push\n\"test-coverage\": Compute test coverage and report at codecov.io\nAnd more… (https://github.com/r-lib/actions/tree/v2/examples)\n\n\nCreates .github/workflows/R-CMD-check.yaml which runs R CMD check on:\n\nmacOS (release R)\nWindows (release R)\nUbuntu (release, devel, and oldrel R)"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#add-a-status-badge",
+    "href": "slides/git-github-slides.html#add-a-status-badge",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Add a status badge",
+    "text": "Add a status badge\nThe action also adds a badge to your README.Rmd:\n\ndevtools::build_readme()\ndevtools::check()\n\n\nThen push and open the PR:\n\nusethis::pr_push()\n\nWrite a good PR title and description, then submit the PR.\nWatch the Actions tab - CI runs on the PR branch before we merge to main."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#viewing-ci-results",
+    "href": "slides/git-github-slides.html#viewing-ci-results",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Viewing CI results",
+    "text": "Viewing CI results\nGo to the Actions tab on your repo.\nEach push triggers a workflow run.\n\n✅ Green checkmark = passing.\n❌ Red X = something to fix.\n\n\nShow this live - click into a run and show the output from R CMD check. The output is identical to what you see locally with check(). Getting comfortable reading CI output is a key skill.\n\nMerge the PR on GitHub once CI is passing.\nRun pr_finish() to clean up your branch after merging."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#what-is-air",
+    "href": "slides/git-github-slides.html#what-is-air",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "What is Air?",
+    "text": "What is Air?\nAir is a fast R code formatter - it automatically reformats your code on save.\nWhy it matters for collaboration:\n\nEliminates style debates in code review\nReduces noisy diffs (no more whitespace-only changes)\nKeeps everyone’s code consistent without thinking about it"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#start-a-branch",
+    "href": "slides/git-github-slides.html#start-a-branch",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Start a branch",
+    "text": "Start a branch\n\nusethis::pr_init(\"use-air\")"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#set-up-air-in-your-project",
+    "href": "slides/git-github-slides.html#set-up-air-in-your-project",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Set up Air in your project",
+    "text": "Set up Air in your project\n\nuse_air()\n\nIn RStudio, change these settings:\n\n\nInstall the Air command line utility: https://posit-dev.github.io/air/cli.html\n\nAir will be downloaded automatically on first save if you haven’t installed the CLI."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#format-your-whole-project",
+    "href": "slides/git-github-slides.html#format-your-whole-project",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Format your whole project",
+    "text": "Format your whole project\nair format ."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#push-and-merge",
+    "href": "slides/git-github-slides.html#push-and-merge",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Push and merge",
+    "text": "Push and merge\n\nusethis::pr_push()\n\nReview the diff on GitHub - you should see only formatting changes, no functional changes."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#while-we-wait-for-ci",
+    "href": "slides/git-github-slides.html#while-we-wait-for-ci",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "While we wait for CI…",
+    "text": "While we wait for CI…\nLet’s leave this PR and start a new one…\n\npr_pause()\n\nNow we’re back on main and can start a new branch for the next feature."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#start-a-branch-1",
+    "href": "slides/git-github-slides.html#start-a-branch-1",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Start a branch",
+    "text": "Start a branch\n\nusethis::pr_init(\"add-biomass-function\")"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#write-the-function",
+    "href": "slides/git-github-slides.html#write-the-function",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Write the function",
+    "text": "Write the function\n\nusethis::use_r(\"biomass\")\n\n\n#' Calculate Biomass Index\n#'\n#' Calculates biomass index from CPUE and area swept.\n#'\n#' @param cpue Numeric vector of CPUE values\n#' @param area_swept Numeric vector of area swept (e.g., km²)\n#'\n#' @return A numeric vector of biomass index values\n#' @export\n#'\n#' @examples\n#' salmon_cpue &lt;- cpue(catch = 2, effort = 2)\n#' biomass_index(cpue = salmon_cpue, area_swept = 5)\nbiomass_index &lt;- function(cpue, area_swept) {\n  cpue * area_swept\n}"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#document-and-check",
+    "href": "slides/git-github-slides.html#document-and-check",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Document and check",
+    "text": "Document and check\n\ndevtools::document()\ndevtools::load_all()\n\nbiomass_index(10, 5)\n\ndevtools::check()\n\nCommit when check() passes cleanly."
+  },
+  {
+    "objectID": "slides/git-github-slides.html#push-and-open-a-pr",
+    "href": "slides/git-github-slides.html#push-and-open-a-pr",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Push and open a PR",
+    "text": "Push and open a PR\n\npr_push()"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#go-back-to-the-air-pr",
+    "href": "slides/git-github-slides.html#go-back-to-the-air-pr",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Go back to the Air PR",
+    "text": "Go back to the Air PR\nPause the biomass PR and return to main:\n\npr_pause()\n\n\n\nNow resume the Air PR:\n\npr_resume() # Choose the Air PR from the menu\n\n\n\n\nOn Github, Merge the Air PR, then back in RStudio clean up the branch.\n\npr_finish()"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#now-resume-the-biomass-pr",
+    "href": "slides/git-github-slides.html#now-resume-the-biomass-pr",
+    "title": "Git and GitHub for Collaborative Development",
+    "section": "Now resume the biomass PR",
+    "text": "Now resume the biomass PR\n\npr_resume(\"add-biomass-function\")\n\n\n\nGet the latest changes from main (including the now-merged Air PR):\n\npr_merge_main()\n\n\n\n\nThen push the updated branch:\n\npr_push()\n\n\n\n\nOn GitHub, review the biomass PR and merge once CI is passing.\n\n\n\nFinally, clean up the branch:\n\npr_finish()"
+  },
+  {
+    "objectID": "slides/git-github-slides.html#resources",
+    "href": "slides/git-github-slides.html#resources",
+    "title": "Git and GitHub for Collaborative Development",
     "section": "Resources",
-    "text": "Resources\n\nWorkshop website: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/\nSetup instructions: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html\nCheatsheet: https://rstudio.github.io/cheatsheets/html/package-development.html\n\n\nRemind people about setup - which they should have done before today."
+    "text": "Resources\n\nHappy Git and GitHub for the useR: https://happygitwithr.com/\nusethis::pr_* helpers: https://usethis.r-lib.org/articles/pr-functions.html\nGitHub Actions for R: https://github.com/r-lib/actions\nAir code formatter: https://posit-dev.github.io/air/"
   },
   {
-    "objectID": "slides/intro-slides.html#check-your-setup",
-    "href": "slides/intro-slides.html#check-your-setup",
-    "title": "Advanced R Package Development",
-    "section": "Check your setup",
-    "text": "Check your setup\nRun these two commands and make sure they succeed before we begin:\n\ndevtools::has_devel()\n\nLook for “Your system is ready to build packages!”\n\n\nusethis::git_sitrep()\n\nLook for Personal access token for 'https://github.com': '&lt;discovered&gt;'\n\n\nGive people 2-3 minutes to run these. has_devel() should print “Your system is ready to build packages!”. For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content."
+    "objectID": "slides/package-fundamentals-slides.html#outline",
+    "href": "slides/package-fundamentals-slides.html#outline",
+    "title": "Package Development Fundamentals",
+    "section": "Outline",
+    "text": "Outline\n\nWhy make a package?\nLay the foundations\nWrite your first function\nDocumentation basics\nCommon pain points"
   },
   {
-    "objectID": "slides/intro-slides.html#schedule",
-    "href": "slides/intro-slides.html#schedule",
-    "title": "Advanced R Package Development",
-    "section": "Schedule",
-    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 8:20\nIntroduction\n\n\n8:20 - 9:20\nPackage Development Fundamentals\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:55\nGit/GitHub for Collaborative Development\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 12:30\nTesting with testthat - Part 1"
+    "objectID": "slides/package-fundamentals-slides.html#why-make-a-package",
+    "href": "slides/package-fundamentals-slides.html#why-make-a-package",
+    "title": "Package Development Fundamentals",
+    "section": "Why make a package?",
+    "text": "Why make a package?\n\nReuse your code across projects and share it with others\nEnforce a consistent interface around your work\nBundle code with documentation and tests\nDistribute software in a reproducible way to:\n\nyour team\nthe world"
   },
   {
-    "objectID": "slides/intro-slides.html#schedule-1",
-    "href": "slides/intro-slides.html#schedule-1",
-    "title": "Advanced R Package Development",
-    "section": "Schedule",
-    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 9:20\nFunction Design Best Practices\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:55\nTesting with testthat - Part 2\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 11:30\nAdvanced Documentation\n\n\n11:30 - 12:30\nDebugging Techniques"
+    "objectID": "slides/package-fundamentals-slides.html#script-vs-package",
+    "href": "slides/package-fundamentals-slides.html#script-vs-package",
+    "title": "Package Development Fundamentals",
+    "section": "Script vs Package",
+    "text": "Script vs Package\n\n\nScript\n\nCopy-paste to reuse across projects and run with source or select+run\nDocumentation in #comments\nTested less frequently\nFunctions mixed with analysis code\n\n\nPackage\n\ninstall once, library() anywhere\nDocument in Roxygen comments to enable ?function\ntestthat test suite\nFunctions only - clean separation\n\n\n\nA package is the fundamental unit of shareable R code. Even if you never share it publicly, packaging your own work enforces good habits."
   },
   {
-    "objectID": "slides/intro-slides.html#schedule-2",
-    "href": "slides/intro-slides.html#schedule-2",
-    "title": "Advanced R Package Development",
-    "section": "Schedule",
-    "text": "Schedule\n\n\n\nTime\nSession\n\n\n\n\n8:00 - 9:20\nObject-Oriented Programming\n\n\n9:20 - 9:35\nBreak\n\n\n9:35 - 10:35\nData Packages\n\n\n10:35 - 10:55\nReleasing Your R Package\n\n\n10:55 - 11:10\nBreak\n\n\n11:10 - 12:30\nBYOP + Open Topics"
+    "objectID": "slides/package-fundamentals-slides.html#package-structure-and-state",
+    "href": "slides/package-fundamentals-slides.html#package-structure-and-state",
+    "title": "Package Development Fundamentals",
+    "section": "Package structure and state",
+    "text": "Package structure and state\nFive forms\n\n\n\n\n\n\n\nSource\nDirectory of files with specific structureWhat you interact with as you build a package\n\n\nBundle\nCompressed into a single file (.tar.gz) via devtools::build() -&gt; R CMD buildVignettes built; files in .Rbuildignore left behind\n\n\nBinary\nPlatform-specific compressed file (.tgz, .zip)Made with devtools::build(binary = TRUE) → R CMD INSTALL –build\n\n\nInstalled\nBinary package decompressed into a user’s libraryinstall.packages()\n\n\nIn Memory\nLoaded and ready for use in an R sessionlibrary()\n\n\n\n\nAs a developer, you mostly live in the source form. Bundle and binary are intermediate forms you rarely touch directly — devtools handles them. Installed is what users have after install.packages(). In memory is what you get after library() — this is the only state where you can actually use the package. load_all() shortcuts straight from source to in-memory without going through the other forms."
   },
   {
-    "objectID": "slides/intro-slides.html#byop-open-topics",
-    "href": "slides/intro-slides.html#byop-open-topics",
-    "title": "Advanced R Package Development",
-    "section": "BYOP + Open Topics",
-    "text": "BYOP + Open Topics\nOpen Q&A\n\nSpecific challenges you’ve encountered during the workshop\nApplying workshop concepts to your own package\n\n\nBring Your Own Package\n\nDedicated time to work on your package\nInstructors available for individual consultation"
+    "objectID": "slides/package-fundamentals-slides.html#package-structure",
+    "href": "slides/package-fundamentals-slides.html#package-structure",
+    "title": "Package Development Fundamentals",
+    "section": "Package structure",
+    "text": "Package structure\nmypackage/\n  R/           &lt;- Your R functions\n  man/         &lt;- Documentation (auto-generated)\n  tests/       &lt;- Tests\n  DESCRIPTION  &lt;- Package metadata\n  NAMESPACE    &lt;- Exports (auto-generated)"
   },
   {
-    "objectID": "slides/intro-slides.html#lets-go",
-    "href": "slides/intro-slides.html#lets-go",
-    "title": "Advanced R Package Development",
-    "section": "Let’s go!",
-    "text": "Let’s go!"
+    "objectID": "slides/package-fundamentals-slides.html#lets-make-a-package",
+    "href": "slides/package-fundamentals-slides.html#lets-make-a-package",
+    "title": "Package Development Fundamentals",
+    "section": "Let’s make a package!",
+    "text": "Let’s make a package!\n\n\nWe will\n\nCreate a simple fishy package\nFocus on workflows\n\n\nWe won’t\n\nCover every aspect of R package development"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#fishr",
+    "href": "slides/package-fundamentals-slides.html#fishr",
+    "title": "Package Development Fundamentals",
+    "section": "fishr",
+    "text": "fishr\nSneak peak of our end state on GitHub\n\nhttps://github.com/ateucher/fishr.example"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#configure-rstudio",
+    "href": "slides/package-fundamentals-slides.html#configure-rstudio",
+    "title": "Package Development Fundamentals",
+    "section": "Configure RStudio",
+    "text": "Configure RStudio\nTools &gt; Global Options"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#configure-rstudio-1",
+    "href": "slides/package-fundamentals-slides.html#configure-rstudio-1",
+    "title": "Package Development Fundamentals",
+    "section": "Configure RStudio",
+    "text": "Configure RStudio\nTools &gt; Global Options"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#tools",
+    "href": "slides/package-fundamentals-slides.html#tools",
+    "title": "Package Development Fundamentals",
+    "section": "Tools",
+    "text": "Tools\n\nR version &gt;= 4.4.0 (4.5 strongly recommended)\nRStudio &gt;= 2025.09 (2026.01 recommended)\nR package development toolchain\nGit\nGitHub account\n\nCheck required packages\n\nall(\n  c(\"devtools\", \"roxygen2\", \"testthat\", \"knitr\", \"pkgdown\", \"usethis\") %in%\n    installed.packages()\n)"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#create-your-package",
+    "href": "slides/package-fundamentals-slides.html#create-your-package",
+    "title": "Package Development Fundamentals",
+    "section": "Create your package",
+    "text": "Create your package\n\nlibrary(devtools)\ncreate_package(\"~/Desktop/fishr\")\n\n\nOpens a new RStudio project with the basic package skeleton:\n\nR/ - directory for your functions\nDESCRIPTION - package metadata\nNAMESPACE - exports (managed automatically)"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#use-devtools-automatically",
+    "href": "slides/package-fundamentals-slides.html#use-devtools-automatically",
+    "title": "Package Development Fundamentals",
+    "section": "Use devtools automatically",
+    "text": "Use devtools automatically\n\nlibrary(devtools)\nuse_devtools()\n\n\nAdds library(devtools) to your .Rprofile so it is always loaded during development.\nNot a package dependency - only for your own workflow.\nNote: devtools makes all of usethis available too."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#confirm-git-is-configured",
+    "href": "slides/package-fundamentals-slides.html#confirm-git-is-configured",
+    "title": "Package Development Fundamentals",
+    "section": "Confirm git is configured",
+    "text": "Confirm git is configured\n\ngit_sitrep()\ndev_sitrep()\n\n\nIf git_sitrep warns of a missing username or email:\n\nuse_git_config(\n  user.name = \"Your Name\",\n  user.email = \"your.email@example.com\"\n)\n\nIf dev_sitrep suggests package updates, hold off updating them now (but do it later!)."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#initialize-git-and-connect-to-github",
+    "href": "slides/package-fundamentals-slides.html#initialize-git-and-connect-to-github",
+    "title": "Package Development Fundamentals",
+    "section": "Initialize git and connect to GitHub",
+    "text": "Initialize git and connect to GitHub\n\nuse_git()\n\n\nThen connect to GitHub:\n\nuse_github()\n\nCreates a GitHub repo and pushes your initial commit."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#create-a-function-file",
+    "href": "slides/package-fundamentals-slides.html#create-a-function-file",
+    "title": "Package Development Fundamentals",
+    "section": "Create a function file",
+    "text": "Create a function file\n\nuse_r(\"cpue\")\n\n\nCreates R/cpue.R and opens it for editing."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#write-the-function",
+    "href": "slides/package-fundamentals-slides.html#write-the-function",
+    "title": "Package Development Fundamentals",
+    "section": "Write the function",
+    "text": "Write the function\ncpue calculates catch per unit effort.\n\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#load-and-test-interactively",
+    "href": "slides/package-fundamentals-slides.html#load-and-test-interactively",
+    "title": "Package Development Fundamentals",
+    "section": "Load and test interactively",
+    "text": "Load and test interactively\nTry your function in the new package\n\nload_all()\n\n\nSimulates installing and loading the package - much faster than install().\n\ncpue(10, 5)\n\nCtrl/Cmd+Shift+L - use this constantly during development."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#run-a-full-package-check",
+    "href": "slides/package-fundamentals-slides.html#run-a-full-package-check",
+    "title": "Package Development Fundamentals",
+    "section": "Run a full package check",
+    "text": "Run a full package check\n\ncheck()\n\n\nRuns R CMD check - the same check CRAN runs.\nAim for 0 errors, 0 warnings, 0 notes."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#package-development-loop",
+    "href": "slides/package-fundamentals-slides.html#package-development-loop",
+    "title": "Package Development Fundamentals",
+    "section": "Package development loop",
+    "text": "Package development loop"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#make-a-commit",
+    "href": "slides/package-fundamentals-slides.html#make-a-commit",
+    "title": "Package Development Fundamentals",
+    "section": "Make a commit",
+    "text": "Make a commit\nNow that we have a basic working function, commit your changes."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#set-a-license",
+    "href": "slides/package-fundamentals-slides.html#set-a-license",
+    "title": "Package Development Fundamentals",
+    "section": "Set a license",
+    "text": "Set a license\n\nuse_mit_license()\n\n\nAdds LICENSE and LICENSE.md files and updates DESCRIPTION.\nOther options: use_gpl3_license(), use_ccby_license(), use_apache_license()"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#description-file",
+    "href": "slides/package-fundamentals-slides.html#description-file",
+    "title": "Package Development Fundamentals",
+    "section": "DESCRIPTION file",
+    "text": "DESCRIPTION file\nPackage: fishr\nTitle: Calculate standard catch metrics for fisheries\nVersion: 0.0.0.9000\nAuthors@R:\n    person(\"Jane\", \"Doe\",\n           email = \"jane.doe@something.com\",\n           role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"XXXX-XXXX-XXXX-XXXX\"))\nDescription: Provides functions for calculating and analyzing fisheries\n    catch data, such as Catch Per Unit Effort (CPUE), a fundamental metric in\n    fisheries science.\nLicense: MIT + file LICENSE\nEncoding: UTF-8\nRoxygen: list(markdown = TRUE)\nRoxygenNote: 7.3.2"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#add-a-roxygen-block",
+    "href": "slides/package-fundamentals-slides.html#add-a-roxygen-block",
+    "title": "Package Development Fundamentals",
+    "section": "Add a roxygen block",
+    "text": "Add a roxygen block\nInsert a template with Ctrl+Alt+Shift+R or Cmd+Option+Shift+R\n#' Title\n#'\n#' @param catch\n#' @param effort\n#' @param gear_factor\n#'\n#' @returns\n#' @export\n#'\n#' @examples\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  ...\n}"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#generate-documentation",
+    "href": "slides/package-fundamentals-slides.html#generate-documentation",
+    "title": "Package Development Fundamentals",
+    "section": "Generate documentation",
+    "text": "Generate documentation\n\ndocument()\n\n\n\nReads #' roxygen2 comments\nCreates man/cpue.Rd\nUpdates NAMESPACE\n\nPreview with:\n\nload_all()\n?cpue"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#exercise",
+    "href": "slides/package-fundamentals-slides.html#exercise",
+    "title": "Package Development Fundamentals",
+    "section": "Exercise",
+    "text": "Exercise\n\nFill in the Title and Description fields in DESCRIPTION\nPopulate roxygen tags @param, @return, and @examples\nRun document() and verify ?cpue works\nRun check() and resolve any warnings"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#solution",
+    "href": "slides/package-fundamentals-slides.html#solution",
+    "title": "Package Development Fundamentals",
+    "section": "Solution",
+    "text": "Solution\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear standardization.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric adjustment for gear standardization (default is 1)\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(100, 10, gear_factor = 0.5)\ncpue &lt;- function(catch, effort, gear_factor = 1) {\n  ...\n}"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#package-development-workflow-again",
+    "href": "slides/package-fundamentals-slides.html#package-development-workflow-again",
+    "title": "Package Development Fundamentals",
+    "section": "Package development workflow (Again)",
+    "text": "Package development workflow (Again)"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#namespace",
+    "href": "slides/package-fundamentals-slides.html#namespace",
+    "title": "Package Development Fundamentals",
+    "section": "NAMESPACE",
+    "text": "NAMESPACE\nControls what your package exports and what it imports from other packages.\n# Generated by roxygen2: do not edit by hand\n\nexport(cpue)\n\n\nManaged automatically by roxygen2 - never edit by hand\nUse @export to export a function\nUse @importFrom pkg fun to import from another package"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#package-level-documentation",
+    "href": "slides/package-fundamentals-slides.html#package-level-documentation",
+    "title": "Package Development Fundamentals",
+    "section": "Package-level documentation",
+    "text": "Package-level documentation\n\nuse_package_doc()\ndocument()\n\n\nCreates R/fishr-package.R with package-level roxygen.\n\nload_all()\n?fishr"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#readme",
+    "href": "slides/package-fundamentals-slides.html#readme",
+    "title": "Package Development Fundamentals",
+    "section": "README",
+    "text": "README\n\nuse_readme_rmd()\n\n\nCreates README.Rmd. Edit it, then render to README.md:\n\nbuild_readme()\n\nREADME.md is what GitHub displays on your repository page.\n\n\n\ncheck()"
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#make-a-commit-1",
+    "href": "slides/package-fundamentals-slides.html#make-a-commit-1",
+    "title": "Package Development Fundamentals",
+    "section": "Make a commit",
+    "text": "Make a commit\nCommit all new changes to the DESCRIPTION file, documentation and the license."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#load_all-vs-install",
+    "href": "slides/package-fundamentals-slides.html#load_all-vs-install",
+    "title": "Package Development Fundamentals",
+    "section": "load_all() vs install()",
+    "text": "load_all() vs install()\n\nload_all(): during active development - fast, doesn’t install. Use this when working inside your package project.\ninstall(): when you want to test as a “real” package, outside your package project."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#managing-dependencies",
+    "href": "slides/package-fundamentals-slides.html#managing-dependencies",
+    "title": "Package Development Fundamentals",
+    "section": "Managing dependencies",
+    "text": "Managing dependencies\n\nWhich functions need @importFrom?\nWhen to use package::function() vs importing?\nDependencies in NAMESPACE vs DESCRIPTION\n\n\nRule of thumb: use package::function() in your code, declare the package under Imports in DESCRIPTION with use_package(\"pkg\")."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#documentation-drift",
+    "href": "slides/package-fundamentals-slides.html#documentation-drift",
+    "title": "Package Development Fundamentals",
+    "section": "Documentation drift",
+    "text": "Documentation drift\n\nKeeping roxygen comments in sync with code\nUpdating examples when function signatures change\n\n\nRun document() regularly - it is fast and keeps man/ files current. check() will catch documentation that does not match the code."
+  },
+  {
+    "objectID": "slides/package-fundamentals-slides.html#understanding-check-output",
+    "href": "slides/package-fundamentals-slides.html#understanding-check-output",
+    "title": "Package Development Fundamentals",
+    "section": "Understanding check() output",
+    "text": "Understanding check() output\n\nErrors: must fix before releasing\nWarnings: should fix before releasing\nNotes: review carefully - some are informational\n\n\nRun check() early and often. It is much easier to fix one new problem than ten accumulated ones."
   },
   {
     "objectID": "slides/testing-part1-slides.html#outline",

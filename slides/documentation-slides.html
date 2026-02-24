@@ -12,7 +12,7 @@
 <link href="../site_libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.8.27">
 
-  <title>📦 Advanced R Package Development – Advanced R Package Development</title>
+  <title>📦 Advanced R Package Development – Advanced Documentation</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -197,296 +197,317 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Advanced R Package Development</h1>
-  <p class="subtitle">DFO - February 2026</p>
+  <h1 class="title">Advanced Documentation</h1>
+  <p class="subtitle">Day 2, Session 3 - Advanced R Package Development</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
-<section id="welcome" class="slide level2">
-<h2>Welcome!</h2>
-<p><strong>Instructors:</strong></p>
-<ul>
-<li>Andy Teucher
-<ul>
-<li><a href="https://andyteucher.ca">andyteucher.ca</a></li>
-<li>GitHub: <a href="https://github.com/ateucher">ateucher</a></li>
-</ul></li>
-<li>Sam Albers
-<ul>
-<li><a href="https://samalbers.science">samalbers.science</a></li>
-<li>GitHub: <a href="https://github.com/boshek">boshek</a></li>
-</ul></li>
-</ul>
+<section id="outline" class="slide level2">
+<h2>Outline</h2>
+<ol type="1">
+<li>The duplication problem</li>
+<li><code>@inheritParams</code></li>
+<li><code>@inheritDotParams</code></li>
+<li>Markdown formatting</li>
+<li>Cross-references</li>
+</ol>
 </section>
-<section id="welcome-1" class="slide level2">
-<h2>Welcome!</h2>
-<p>This is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.</p>
-<p><strong>Code of Conduct:</strong></p>
-<ul>
-<li>Treat everyone with respect</li>
-<li>Everyone should feel welcome</li>
-<li>Full text: <a href="https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html" class="uri">https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html</a></li>
-</ul>
-<aside class="notes">
-<p>Cameras. Remind everyone about the code of conduct briefly - it’s about creating a safe learning environment.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+<section>
+<section id="the-duplication-problem" class="title-slide slide level1 center">
+<h1>The Duplication Problem</h1>
+
 </section>
-<section id="sticky-notes-online" class="slide level2">
-<h2>Sticky Notes (online)</h2>
+<section id="two-functions-overlapping-parameters" class="slide level2">
+<h2>Two functions, overlapping parameters</h2>
+<p><code>cpue()</code> and <code>biomass_index()</code> share <code>catch</code>, <code>effort</code>, and <code>verbose</code>.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><strong>I’m stuck</strong> <span style="font-size:2em;">✋</span></p>
-<p>Use the Zoom Raise Hand reaction</p>
+<p><strong><code>cpue()</code></strong></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" data-code-line-numbers="|1-4,9-10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="co">#' @param catch Numeric vector of</span></span>
+<span id="cb1-2"><a></a><span class="co">#'   catch (e.g., kg).</span></span>
+<span id="cb1-3"><a></a><span class="co">#' @param effort Numeric vector of</span></span>
+<span id="cb1-4"><a></a><span class="co">#'   effort (e.g., hours).</span></span>
+<span id="cb1-5"><a></a><span class="co">#' @param gear_factor Numeric scalar for gear </span></span>
+<span id="cb1-6"><a></a><span class="co">#'   standardization (default 1)</span></span>
+<span id="cb1-7"><a></a><span class="co">#' @param method Character; </span></span>
+<span id="cb1-8"><a></a><span class="co">#'   one of `"ratio"` (default) or `"log"`.</span></span>
+<span id="cb1-9"><a></a><span class="co">#' @param verbose Logical; Default from</span></span>
+<span id="cb1-10"><a></a><span class="co">#'   `getOption("fishr.verbose", FALSE)`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div><div class="column" style="width:50%;">
-<p><strong>I’m good</strong> <span style="font-size:2em;">👍</span></p>
-<p>Use the Thumbs Up reaction</p>
+<p><strong><code>biomass_index()</code></strong></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" data-code-line-numbers="|4-9|10-11|4-11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="co">#' @param cpue Numeric vector of CPUE values. </span></span>
+<span id="cb2-2"><a></a><span class="co">#' @param area_swept Numeric vector of area </span></span>
+<span id="cb2-3"><a></a><span class="co">#'   swept (e.g., km^2^)</span></span>
+<span id="cb2-4"><a></a><span class="co">#' @param catch Numeric vector of</span></span>
+<span id="cb2-5"><a></a><span class="co">#'   catch (e.g., kg).</span></span>
+<span id="cb2-6"><a></a><span class="co">#' @param effort Numeric vector of</span></span>
+<span id="cb2-7"><a></a><span class="co">#'   effort (e.g., hours).</span></span>
+<span id="cb2-8"><a></a><span class="co">#' @param verbose Logical; Default from</span></span>
+<span id="cb2-9"><a></a><span class="co">#'   `getOption("fishr.verbose", FALSE)`.</span></span>
+<span id="cb2-10"><a></a><span class="co">#' @param ... Additional arguments </span></span>
+<span id="cb2-11"><a></a><span class="co">#'   passed to `cpue()`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div></div>
-<aside class="notes">
-<p>We’ll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="discussions-q-a" class="slide level2">
-<h2>Discussions / Q &amp; A</h2>
-<ul>
-<li>GitHub Discussions: <a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions" class="uri">https://github.com/ateucher/dfo-advanced-r-pkgs-2026/discussions</a></li>
-</ul>
-<p>Open the welcome discussion and introduce yourself:</p>
-<ul>
-<li>Office/department, city/town</li>
-<li>Why you’re here</li>
-<li>Something you’ve built or are trying to build</li>
-</ul>
-<aside class="notes">
-<p>Paste link in chat. Open GitHub discussions, ask people to introduce themselves. Share screen doing it.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="resources" class="slide level2">
-<h2>Resources</h2>
-<ul>
-<li><strong>Workshop website:</strong> <a href="https://andyteucher.ca/dfo-advanced-r-pkgs-2026/" class="uri">https://andyteucher.ca/dfo-advanced-r-pkgs-2026/</a></li>
-<li><strong>Setup instructions:</strong> <a href="https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html" class="uri">https://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html</a></li>
-<li><strong>Cheatsheet:</strong> <a href="https://rstudio.github.io/cheatsheets/html/package-development.html" class="uri">https://rstudio.github.io/cheatsheets/html/package-development.html</a></li>
-</ul>
-<aside class="notes">
-<p>Remind people about setup - which they should have done before today.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="check-your-setup" class="slide level2">
-<h2>Check your setup</h2>
-<p>Run these two commands and make sure they succeed before we begin:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>devtools<span class="sc">::</span><span class="fu">has_devel</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Look for <code>Your system is ready to build packages!</code></p>
 <div class="fragment">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>usethis<span class="sc">::</span><span class="fu">git_sitrep</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Two problems:</strong></p>
+<ol type="1">
+<li>If the descriptions ever change, you have two places to update</li>
+<li><code>@param ...</code> is vague - users cannot tell which arguments are accepted and passed to <code>cpue()</code></li>
+</ol>
 </div>
-<p>Look for <code>Personal access token for 'https://github.com': '&lt;discovered&gt;'</code></p>
-</div>
-<aside class="notes">
-<p>Give people 2-3 minutes to run these. has_devel() should print “Your system is ready to build packages!”. For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section>
-<section id="day-1" class="title-slide slide level1 center">
-<h1>Day 1</h1>
-
-</section>
-<section id="schedule" class="slide level2">
-<h2>Schedule</h2>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Time</th>
-<th>Session</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>8:00 - 8:20</td>
-<td>Introduction</td>
-</tr>
-<tr class="even">
-<td>8:20 - 9:20</td>
-<td>Package Development Fundamentals</td>
-</tr>
-<tr class="odd">
-<td>9:20 - 9:35</td>
-<td>Break</td>
-</tr>
-<tr class="even">
-<td>9:35 - 10:55</td>
-<td>Git/GitHub for Collaborative Development</td>
-</tr>
-<tr class="odd">
-<td>10:55 - 11:10</td>
-<td>Break</td>
-</tr>
-<tr class="even">
-<td>11:10 - 12:30</td>
-<td>Testing with testthat - Part 1</td>
-</tr>
-</tbody>
-</table>
 </section></section>
 <section>
-<section id="day-2" class="title-slide slide level1 center">
-<h1>Day 2</h1>
+<section id="inheritparams" class="title-slide slide level1 center">
+<h1><code>@inheritParams</code></h1>
 
 </section>
-<section id="schedule-1" class="slide level2">
-<h2>Schedule</h2>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Time</th>
-<th>Session</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>8:00 - 9:20</td>
-<td>Function Design Best Practices</td>
-</tr>
-<tr class="even">
-<td>9:20 - 9:35</td>
-<td>Break</td>
-</tr>
-<tr class="odd">
-<td>9:35 - 10:55</td>
-<td>Testing with testthat - Part 2</td>
-</tr>
-<tr class="even">
-<td>10:55 - 11:10</td>
-<td>Break</td>
-</tr>
-<tr class="odd">
-<td>11:10 - 11:30</td>
-<td>Advanced Documentation</td>
-</tr>
-<tr class="even">
-<td>11:30 - 12:30</td>
-<td>Debugging Techniques</td>
-</tr>
-</tbody>
-</table>
-</section></section>
-<section>
-<section id="day-3" class="title-slide slide level1 center">
-<h1>Day 3</h1>
-
+<section id="copy-parameter-docs-from-another-function" class="slide level2">
+<h2>Copy parameter docs from another function</h2>
+<p><code>@inheritParams</code> pulls <code>@param</code> entries from a source function into the current one.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" data-code-line-numbers="|6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="co">#' Calculate Biomass Index</span></span>
+<span id="cb3-2"><a></a><span class="co">#'</span></span>
+<span id="cb3-3"><a></a><span class="co">#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`</span></span>
+<span id="cb3-4"><a></a><span class="co">#'   and `effort`.</span></span>
+<span id="cb3-5"><a></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km^2^).</span></span>
+<span id="cb3-6"><a></a><span class="co">#' @inheritParams cpue</span></span>
+<span id="cb3-7"><a></a><span class="co">#' @param ... Additional arguments passed to `cpue()`.</span></span>
+<span id="cb3-8"><a></a><span class="co">#' @export</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Render documentation and open the help page:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">document</span>()</span>
+<span id="cb4-2"><a></a>?biomass_index</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
 </section>
-<section id="schedule-2" class="slide level2">
-<h2>Schedule</h2>
-<table class="caption-top">
-<thead>
-<tr class="header">
-<th>Time</th>
-<th>Session</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>8:00 - 9:20</td>
-<td>Object-Oriented Programming</td>
-</tr>
-<tr class="even">
-<td>9:20 - 9:35</td>
-<td>Break</td>
-</tr>
-<tr class="odd">
-<td>9:35 - 10:35</td>
-<td>Data Packages</td>
-</tr>
-<tr class="even">
-<td>10:35 - 10:55</td>
-<td>Releasing Your R Package</td>
-</tr>
-<tr class="odd">
-<td>10:55 - 11:10</td>
-<td>Break</td>
-</tr>
-<tr class="even">
-<td>11:10 - 12:30</td>
-<td>BYOP + Open Topics</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="byop-open-topics" class="slide level2">
-<h2>BYOP + Open Topics</h2>
-<p><strong>Open Q&amp;A</strong></p>
+<section id="what-gets-inherited" class="slide level2">
+<h2>What gets inherited?</h2>
+<p>roxygen2 copies <code>@param</code> entries from <code>cpue()</code> where the parameter:</p>
 <ul>
-<li>Specific challenges you’ve encountered during the workshop</li>
-<li>Applying workshop concepts to your own package</li>
+<li class="fragment">appears in <code>biomass_index()</code>’s signature, <strong>and</strong></li>
+<li class="fragment">is not already documented in <code>biomass_index()</code></li>
 </ul>
 <div class="fragment">
-<p><strong>Bring Your Own Package</strong></p>
 <ul>
-<li>Dedicated time to work on your package</li>
-<li>Instructors available for individual consultation</li>
+<li><code>catch</code>, <code>effort</code>, and <code>verbose</code> are inherited.</li>
+<li><code>gear_factor</code> and <code>method</code> are skipped - they are not explicit parameters of <code>biomass_index()</code>.</li>
+</ul>
+</div>
+<div class="fragment">
+<p><code>@inheritParams</code> also works across packages: <code>@inheritParams pkg::function</code></p>
+</div>
+<aside class="notes">
+<p>Point out that <code>@inheritParams</code> can chain: if C inherits from B which inherits from A, roxygen2 resolves the full chain. The descriptions stay in sync automatically - change the docs in cpue() and biomass_index() picks them up on the next document() call.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="inheritdotparams" class="title-slide slide level1 center">
+<h1><code>@inheritDotParams</code></h1>
+
+</section>
+<section id="make-...-informative" class="slide level2">
+<h2>Make <code>...</code> informative</h2>
+<p><code>@param ...</code> tells users nothing.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="co">#' @param ... Additional arguments passed to `cpue()`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>What are the additional arguments? What do they do?<br>
+The user has to go to the <code>?cpue()</code> help and figure it out for themselves.</p>
+</div>
+</section>
+<section id="inheritdotparams-1" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title"><code>@inheritDotParams</code></h2>
+<p>generates a formatted description that names the forwarded arguments and links their documentation.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" data-code-line-numbers="7"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb6-1" class="hljs-ln-code"><a></a><span class="co">#' Calculate Biomass Index</span></span>
+<span id="cb6-2" class="hljs-ln-code"><a></a><span class="co">#'</span></span>
+<span id="cb6-3" class="hljs-ln-code"><a></a><span class="co">#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`</span></span>
+<span id="cb6-4" class="hljs-ln-code"><a></a><span class="co">#'   and `effort`.</span></span>
+<span id="cb6-5" class="hljs-ln-code"><a></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km^2^).</span></span>
+<span id="cb6-6" class="hljs-ln-code"><a></a><span class="co">#' @inheritParams cpue</span></span>
+<span id="cb6-7" class="hljs-ln-code"><a></a><span class="co">#' ... Additional arguments passed to `cpue()`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="inheritdotparams-2" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title"><code>@inheritDotParams</code></h2>
+<p>generates a formatted description that names the forwarded arguments and links their documentation.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" data-code-line-numbers="7"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb7-1" class="hljs-ln-code"><a></a><span class="co">#' Calculate Biomass Index</span></span>
+<span id="cb7-2" class="hljs-ln-code"><a></a><span class="co">#'</span></span>
+<span id="cb7-3" class="hljs-ln-code"><a></a><span class="co">#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`</span></span>
+<span id="cb7-4" class="hljs-ln-code"><a></a><span class="co">#'   and `effort`.</span></span>
+<span id="cb7-5" class="hljs-ln-code"><a></a><span class="co">#' @param area_swept Numeric vector of area swept (e.g., km^2^).</span></span>
+<span id="cb7-6" class="hljs-ln-code"><a></a><span class="co">#' @inheritParams cpue</span></span>
+<span id="cb7-7" class="hljs-ln-code"><a></a><span class="co">#' @inheritDotParams cpue -catch -effort</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>The <code>-catch -effort</code> syntax <strong>excludes</strong> those parameters - they are already documented explicitly above.</p>
+<p>What remains (<code>gear_factor</code>, <code>method</code>) is rendered as a formatted list linking back to <code>?cpue</code>.</p>
+</div>
+</section>
+<section id="inheritdotparams-3" class="slide level2">
+<h2><code>@inheritDotParams</code></h2>
+<p>The <code>...</code> entry in the help page now reads something like:</p>
+<p><br>
+</p>
+<p><strong><code>...</code></strong> Arguments passed to <code>cpue()</code>:<br>
+ <code>gear_factor</code> Numeric adjustment for gear standardisation…<br>
+ <code>method</code> One of “ratio” or “log”…</p>
+<aside class="notes">
+<p>Before <code>@inherit</code>DotParams`, a user had to navigate to ?cpue, figure out which arguments apply to biomass_index(), and mentally filter. Now they get the answer on the same help page.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
+<section>
+<section id="markdown-formatting" class="title-slide slide level1 center">
+<h1>Markdown Formatting</h1>
+
+</section>
+<section id="inline-formatting" class="slide level2">
+<h2>Inline formatting</h2>
+<p>Standard Markdown works in all roxygen2 text fields: <code>@param</code>, <code>@return</code>, <code>@description</code>, <code>@details</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co">#' @param area_swept Numeric vector of area swept in **km^2^**.</span></span>
+<span id="cb8-2"><a></a><span class="co">#' @return A numeric vector the same length as `cpue`. Returns `NA` for any</span></span>
+<span id="cb8-3"><a></a><span class="co">#'   row where either input is `NA`.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<ul>
+<li>Backticks (``) render as inline code: <code>cpue</code>, <code>NA</code>, <code>TRUE</code></li>
+<li><code>**text**</code> renders as <strong>bold</strong></li>
+<li><code>*text*</code> renders as <em>italic</em></li>
+<li><code>^text^</code> renders as superscript: km<sup>2</sup></li>
 </ul>
 </div>
 </section>
-<section id="lets-go" class="slide level2">
-<h2>Let’s go!</h2>
+<section id="lists" class="slide level2">
+<h2>Lists</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="co">#' @details</span></span>
+<span id="cb9-2"><a></a><span class="co">#' Two modes of use:</span></span>
+<span id="cb9-3"><a></a><span class="co">#'</span></span>
+<span id="cb9-4"><a></a><span class="co">#' - Provide `cpue` directly for a simple calculation.</span></span>
+<span id="cb9-5"><a></a><span class="co">#' - Provide `catch` and `effort` to compute CPUE first, then scale by area.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<div class="notebox">
+<p>The blank line between the tag and the list is required. Without it, roxygen2 treats the hyphens as literal text.</p>
+</div>
+</div>
+</section></section>
+<section>
+<section id="cross-references" class="title-slide slide level1 center">
+<h1>Cross-References</h1>
+
+</section>
+<section id="linking-to-functions" class="slide level2">
+<h2>Linking to functions</h2>
+<p>The most common form: function name followed by <code>()</code> in square brackets <code>[]</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co">#' Calculates biomass index from CPUE and area swept.</span></span>
+<span id="cb10-2"><a></a><span class="co">#' See [cpue()] for computing CPUE values from raw catch and effort.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>The <code>()</code> suffix tells roxygen2 this is a function link. It generates a code-formatted hyperlink to <code>?cpue</code>.</p>
+</div>
+</section>
+<section id="linking-across-packages" class="slide level2">
+<h2>Linking across packages</h2>
+<p>Use the <code>::</code> operator inside the brackets:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="co">#' @param data A data frame. See [dplyr::filter()] for subsetting rows.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>This creates a link that opens <code>?dplyr::filter</code>.</p>
+<p>R CMD check may produce a NOTE: “Undeclared package ‘dplyr’ in Rd xrefs”. Adding the package to <code>Suggests</code> in your DESCRIPTION silences it - you do not need <code>Imports</code>.</p>
+</div>
+</section>
+<section id="custom-link-text-and-seealso" class="slide level2">
+<h2>Custom link text and <code>@seealso</code></h2>
+<p>To display different text than the function name:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co">#' Returns the same structure as [the CPUE function][cpue()].</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<p>Use this sparingly - the function name itself is usually the most informative link text.</p>
+</div>
+<div class="fragment">
+<p><code>@seealso</code> renders in its own section at the bottom of the help page:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="co">#' @seealso [cpue()] to compute CPUE values from raw catch and effort.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Use it for functions that are related but not directly referenced in the body of the docs.</p>
+</div>
+</section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Syntax</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[cpue()]</code></td>
+<td>Link to <code>?cpue</code> in this package</td>
+</tr>
+<tr class="even">
+<td><code>[pkg::cpue()]</code></td>
+<td>Link to <code>?pkg::cpue</code> in another package</td>
+</tr>
+<tr class="odd">
+<td><code>[some text][cpue()]</code></td>
+<td>“some text” linking to <code>?cpue</code></td>
+</tr>
+<tr class="even">
+<td><code>@inheritParams cpue</code></td>
+<td>Copy matching <code>@param</code> entries from <code>cpue()</code></td>
+</tr>
+<tr class="odd">
+<td><code>@inheritDotParams cpue -x</code></td>
+<td>Document <code>...</code> as forwarded args, excluding <code>x</code></td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p>Use links freely in <code>@description</code>, <code>@details</code>, <code>@param</code>, <code>@return</code>, and <code>@seealso</code>. A well-linked help page lets users navigate the package without leaving the help system.</p>
+</div>
 
 
-
-<img data-src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzcyZW11M3h2NDkxczh4a3pwbjhpOW1lMjQ0dnE2NTg5Z2toY2FodyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BpGWitbFZflfSUYuZ9/giphy.gif" class="quarto-figure quarto-figure-center r-stretch"></section></section>
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

@@ -65,6 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -377,6 +378,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Day 2, Session 2: Testing Part 2</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./slides/documentation-slides.html">
+ <span class="dropdown-text">Day 2, Session 3: Advanced Documentation</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./slides/releasing-slides.html">
  <span class="dropdown-text">Day 3, Session 2: Releasing Your R Package</span></a>
   </li>  
@@ -385,7 +390,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/boshek/2026-feb-course-planning"> <i class="bi bi-github" role="img" aria-label="GitHub">
+    <a class="nav-link" href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026"> <i class="bi bi-github" role="img" aria-label="GitHub">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -570,7 +575,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#when-to-use-oop-in-packages" id="toc-when-to-use-oop-in-packages" class="nav-link" data-scroll-target="#when-to-use-oop-in-packages">When to Use OOP in Packages</a></li>
   <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/boshek/2026-feb-course-planning/edit/main/object-oriented-programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/boshek/2026-feb-course-planning/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/object-oriented-programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -761,11 +766,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="print-method">print method</h3>
 <p>The <code>print</code> method controls what users see when they type an object name at the console. When you type <code>result</code> and hit Enter, R calls <code>print(result)</code> behind the scenes - this is called <strong>autoprinting</strong>. R looks at the class of the object, finds <code>print.cpue_result</code>, and calls that. Without a custom print method, R falls back to <code>print.default</code>, which is why our tagged vector currently displays as raw numbers.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>print.cpue_result <span class="ot">&lt;-</span> <span class="cf">function</span>(x, ...) {</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"CPUE Results for"</span>, <span class="fu">length</span>(x), <span class="st">"records</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Values:"</span>, <span class="fu">round</span>(x, <span class="dv">2</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>(x)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' @export</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>print.cpue_result <span class="ot">&lt;-</span> <span class="cf">function</span>(x, ...) {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"CPUE Results for"</span>, <span class="fu">length</span>(x), <span class="st">"records</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Values:"</span>, <span class="fu">round</span>(x, <span class="dv">2</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>(x)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Important details:</p>
 <ul>
@@ -773,6 +779,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Always include <code>...</code> in the signature (required by the <code>print</code> generic)</li>
 <li>Return <code>invisible(x)</code> so assignment still works: <code>y &lt;- print(x)</code></li>
 <li>Use <code>cat()</code> rather than <code>print()</code> inside print methods to avoid recursion</li>
+<li>Use <code>@export</code> to register the method in the NAMESPACE file</li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">document</span>()</span>
@@ -1180,7 +1187,7 @@ S3method(plot,cpue_result)</code></pre>
 <section id="update-biomass_index-documentation" class="level3">
 <h3 class="anchored" data-anchor-id="update-biomass_index-documentation">Update biomass_index documentation</h3>
 <p>Converting <code>cpue</code> into a generic changed its signature from <code>cpue(catch, effort, ...)</code> to <code>cpue(x, ...)</code>. The <code>@inheritParams cpue</code> tag on <code>biomass_index</code> was inheriting <code>catch</code> and <code>effort</code> docs from the old function - those params no longer exist on the generic.</p>
-<p>Update <code>biomass_index</code> to inherit from <code>cpue.numeric</code> instead, since that is the method it actually calls. Because <code>cpue.numeric</code> names its first argument <code>x</code> rather than <code>catch</code>, add <code>@param catch</code> back explicitly:</p>
+<p>Update <code>biomass_index</code> to inherit parameters from <code>cpue.numeric</code> instead, since that is the method it actually calls. Because <code>cpue.numeric</code> names its first argument <code>x</code> rather than <code>catch</code>, add <code>@param catch</code> back explicitly:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' Calculate Biomass Index</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
@@ -1522,6 +1529,11 @@ biomass_index(survey_data)
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1840,4 +1852,4 @@ biomass_index(survey_data)
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/boshek/2026-feb-course-planning/edit/main/object-oriented-programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/boshek/2026-feb-course-planning/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/edit/main/object-oriented-programming.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/ateucher/dfo-advanced-r-pkgs-2026/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
