@@ -286,7 +286,6 @@ test_that("biomass_index verbosity falls back to FALSE when not set", {
 | `local_tempfile()` / `with_tempfile()` | Temp file (deleted after) |
 | `local_tempdir()` / `with_tempdir()` | Temp directory (deleted after) |
 | `local_seed()` / `with_seed()` | Random seed |
-| `defer()` | Custom cleanup code |
 
 ## Example: testing file output
 
