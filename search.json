@@ -1880,7 +1880,7 @@
     "href": "slides/debugging-techniques-slides.html#outline",
     "title": "Debugging Techniques",
     "section": "Outline",
-    "text": "Outline\n\nReading error messages and traceback()\nPrint debugging\nbrowser(): interactive debugging\nBreakpoints, debug(), and debugonce()\nDebugging failing tests\nrlang::last_trace()\nStrategy summary"
+    "text": "Outline\n\nReading error messages and traceback()\nPrint debugging\nbrowser(): interactive debugging\nBreakpoints, debug(), and debugonce()\nrlang::last_trace()\nStrategy summary"
   },
   {
     "objectID": "slides/debugging-techniques-slides.html#read-the-message-first",
@@ -1922,7 +1922,7 @@
     "href": "slides/debugging-techniques-slides.html#browser-commands",
     "title": "Debugging Techniques",
     "section": "Browser commands",
-    "text": "Browser commands\nOnce inside the browser you have a mini command language:\n\n\n\nCommand\nAction\n\n\n\n\nn\nNext: execute the current line and step to the next\n\n\ns\nStep into: if the current line calls a function, enter it\n\n\nc\nContinue: resume until the next browser() or end\n\n\nQ\nQuit: stop execution immediately\n\n\nwhere\nShow the call stack (like traceback() while paused)\n\n\n\n\nYou can also run any R expression: ls(), str(raw_cpue), etc."
+    "text": "Browser commands\nOnce inside the browser you have a mini command language:\n\n\n\nCommand\nAction\n\n\n\n\nn\nNext: execute the current line and step to the next\n\n\ns\nStep into: if the current line calls a function, enter it\n\n\nc\nContinue: resume until the next browser() or end\n\n\nQ\nQuit: stop execution immediately\n\n\nwhere\nShow the call stack (like traceback() while paused)\n\n\n\n\nYou can also run any R expression: ls(), str(catch), etc."
   },
   {
     "objectID": "slides/debugging-techniques-slides.html#rstudio-debug-toolbar",
@@ -1965,34 +1965,6 @@
     "title": "Debugging Techniques",
     "section": "options(error = recover)",
     "text": "options(error = recover)\nPost-mortem debugging — inspect state after an error:\n\noptions(error = recover)\n\nbiomass_index(cpue = \"ten\", area_swept = 5)\n\n\nR prints the call stack as a numbered list and prompts you to pick a frame:\nEnter a frame number, or 0 to exit\n\n1: biomass_index(cpue = \"ten\", area_swept = 5)\n2: validate_numeric_inputs(cpue = cpue, area_swept = area_swept)\n\nSelection:\n\n\nType a frame number to browse into it, inspect variables, then 0 to exit.\n\noptions(error = NULL)  # reset to default when done"
-  },
-  {
-    "objectID": "slides/debugging-techniques-slides.html#browser-inside-test_that",
-    "href": "slides/debugging-techniques-slides.html#browser-inside-test_that",
-    "title": "Debugging Techniques",
-    "section": "browser() inside test_that()",
-    "text": "browser() inside test_that()\n\ntest_that(\"cpue calculates correctly\", {\n  browser()\n  result &lt;- cpue(catch = 100, effort = 10)\n  expect_equal(result, 10)\n})\n\n\nRun this interactively with Ctrl+Enter — not with test().\nThe test runner captures output differently; interactive execution gives the full browser experience."
-  },
-  {
-    "objectID": "slides/debugging-techniques-slides.html#narrow-down-with-test_active_file",
-    "href": "slides/debugging-techniques-slides.html#narrow-down-with-test_active_file",
-    "title": "Debugging Techniques",
-    "section": "Narrow down with test_active_file()",
-    "text": "Narrow down with test_active_file()\nWhen a test fails, don’t run the full suite repeatedly. Focus on the failing file:\n\ndevtools::test_active_file()"
-  },
-  {
-    "objectID": "slides/debugging-techniques-slides.html#passes-alone-fails-with-test",
-    "href": "slides/debugging-techniques-slides.html#passes-alone-fails-with-test",
-    "title": "Debugging Techniques",
-    "section": "“Passes alone, fails with test()”",
-    "text": "“Passes alone, fails with test()”\nA test passes when you run it by itself but fails when running the full suite.\n\nThis is almost always leftover state: a previous test changed something and didn’t clean up.\n(Options, global variables, files, random seed — exactly what withr guards against.)\n\n\nDebugging strategy:\n\nBinary search: run half the suite to find which prior test causes the problem\nLook for side effects: options(), Sys.setenv(), file creation, set.seed()\nFix with withr::local_* in the offending test"
-  },
-  {
-    "objectID": "slides/debugging-techniques-slides.html#snapshot-mismatches",
-    "href": "slides/debugging-techniques-slides.html#snapshot-mismatches",
-    "title": "Debugging Techniques",
-    "section": "Snapshot mismatches",
-    "text": "Snapshot mismatches\nWhen a snapshot test fails, don’t guess what changed:\n\nsnapshot_review()\n\n\nOpens a side-by-side diff of the old snapshot and the new output.\nAccept if the change is intentional, fix the code if it is not."
   },
   {
     "objectID": "slides/debugging-techniques-slides.html#cleaner-backtraces-with-rlang",

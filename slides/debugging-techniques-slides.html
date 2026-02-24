@@ -211,7 +211,6 @@
 <li>Print debugging</li>
 <li><code>browser()</code>: interactive debugging</li>
 <li>Breakpoints, <code>debug()</code>, and <code>debugonce()</code></li>
-<li>Debugging failing tests</li>
 <li><code>rlang::last_trace()</code></li>
 <li>Strategy summary</li>
 </ol>
@@ -371,7 +370,7 @@
 </tbody>
 </table>
 <div class="fragment">
-<p>You can also run any R expression: <code>ls()</code>, <code>str(raw_cpue)</code>, etc.</p>
+<p>You can also run any R expression: <code>ls()</code>, <code>str(catch)</code>, etc.</p>
 </div>
 </section>
 <section id="rstudio-debug-toolbar" class="slide level2">
@@ -471,59 +470,6 @@ Selection:</code></pre>
 </div>
 </section></section>
 <section>
-<section id="debugging-failing-tests" class="title-slide slide level1 center">
-<h1>Debugging Failing Tests</h1>
-
-</section>
-<section id="browser-inside-test_that" class="slide level2">
-<h2>browser() inside test_that()</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue calculates correctly"</span>, {</span>
-<span id="cb16-2"><a></a>  <span class="fu">browser</span>()</span>
-<span id="cb16-3"><a></a>  result <span class="ot">&lt;-</span> <span class="fu">cpue</span>(<span class="at">catch =</span> <span class="dv">100</span>, <span class="at">effort =</span> <span class="dv">10</span>)</span>
-<span id="cb16-4"><a></a>  <span class="fu">expect_equal</span>(result, <span class="dv">10</span>)</span>
-<span id="cb16-5"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Run this interactively with <code>Ctrl+Enter</code> — <strong>not</strong> with <code>test()</code>.</p>
-<p>The test runner captures output differently; interactive execution gives the full browser experience.</p>
-</div>
-</section>
-<section id="narrow-down-with-test_active_file" class="slide level2">
-<h2>Narrow down with test_active_file()</h2>
-<p>When a test fails, don’t run the full suite repeatedly. Focus on the failing file:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>devtools<span class="sc">::</span><span class="fu">test_active_file</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="passes-alone-fails-with-test" class="slide level2">
-<h2>“Passes alone, fails with test()”</h2>
-<p>A test passes when you run it by itself but fails when running the full suite.</p>
-<div class="fragment">
-<p>This is almost always <strong>leftover state</strong>: a previous test changed something and didn’t clean up.</p>
-<p>(Options, global variables, files, random seed — exactly what <code>withr</code> guards against.)</p>
-</div>
-<div class="fragment">
-<p><strong>Debugging strategy:</strong></p>
-<ol type="1">
-<li>Binary search: run half the suite to find which prior test causes the problem</li>
-<li>Look for side effects: <code>options()</code>, <code>Sys.setenv()</code>, file creation, <code>set.seed()</code></li>
-<li>Fix with <code>withr::local_*</code> in the offending test</li>
-</ol>
-</div>
-</section>
-<section id="snapshot-mismatches" class="slide level2">
-<h2>Snapshot mismatches</h2>
-<p>When a snapshot test fails, don’t guess what changed:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">snapshot_review</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Opens a side-by-side diff of the old snapshot and the new output.</p>
-<p>Accept if the change is intentional, fix the code if it is not.</p>
-</div>
-</section></section>
-<section>
 <section id="rlanglast_trace" class="title-slide slide level1 center">
 <h1>rlang::last_trace()</h1>
 
@@ -532,11 +478,11 @@ Selection:</code></pre>
 <h2>Cleaner backtraces with rlang</h2>
 <p>When working with tidyverse or rlang-based packages, <code>rlang::last_trace()</code> gives a cleaner backtrace than <code>traceback()</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="co"># Standard R: flat list, can be noisy</span></span>
-<span id="cb19-2"><a></a><span class="fu">traceback</span>()</span>
-<span id="cb19-3"><a></a></span>
-<span id="cb19-4"><a></a><span class="co"># rlang: tree-structured, hides internal frames</span></span>
-<span id="cb19-5"><a></a>rlang<span class="sc">::</span><span class="fu">last_trace</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="co"># Standard R: flat list, can be noisy</span></span>
+<span id="cb16-2"><a></a><span class="fu">traceback</span>()</span>
+<span id="cb16-3"><a></a></span>
+<span id="cb16-4"><a></a><span class="co"># rlang: tree-structured, hides internal frames</span></span>
+<span id="cb16-5"><a></a>rlang<span class="sc">::</span><span class="fu">last_trace</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p><code>rlang::last_trace()</code> organises the call stack as a tree and collapses internal package machinery, making it easier to see the path through <em>your</em> code.</p>
@@ -545,7 +491,7 @@ Selection:</code></pre>
 <section id="inspecting-the-error-object" class="slide level2">
 <h2>Inspecting the error object</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>rlang<span class="sc">::</span><span class="fu">last_error</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>rlang<span class="sc">::</span><span class="fu">last_error</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Returns the error object itself — message, call, and (for rlang errors) the backtrace attached to the error.</p>
@@ -578,19 +524,19 @@ Selection:</code></pre>
 <p>There is a bug in this <code>standardize_effort()</code> function. It is supposed to convert effort from hours to days (dividing by 24), then calculate CPUE.</p>
 <p>Add this to <code>R/utils.R</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>standardize_effort <span class="ot">&lt;-</span> <span class="cf">function</span>(catch, effort_hours) {</span>
-<span id="cb21-2"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">catch =</span> catch, <span class="at">effort_hours =</span> effort_hours)</span>
-<span id="cb21-3"><a></a></span>
-<span id="cb21-4"><a></a>  effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">*</span> <span class="dv">24</span></span>
-<span id="cb21-5"><a></a></span>
-<span id="cb21-6"><a></a>  <span class="fu">cpue</span>(<span class="at">catch =</span> catch, <span class="at">effort =</span> effort_days)</span>
-<span id="cb21-7"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>standardize_effort <span class="ot">&lt;-</span> <span class="cf">function</span>(catch, effort_hours) {</span>
+<span id="cb18-2"><a></a>  <span class="fu">validate_numeric_inputs</span>(<span class="at">catch =</span> catch, <span class="at">effort_hours =</span> effort_hours)</span>
+<span id="cb18-3"><a></a></span>
+<span id="cb18-4"><a></a>  effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">*</span> <span class="dv">24</span></span>
+<span id="cb18-5"><a></a></span>
+<span id="cb18-6"><a></a>  <span class="fu">cpue</span>(<span class="at">catch =</span> catch, <span class="at">effort =</span> effort_days)</span>
+<span id="cb18-7"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">load_all</span>()</span>
-<span id="cb22-2"><a></a></span>
-<span id="cb22-3"><a></a><span class="co"># Effort is 48 hours = 2 days, so CPUE should be 100/2 = 50</span></span>
-<span id="cb22-4"><a></a><span class="fu">standardize_effort</span>(<span class="at">catch =</span> <span class="dv">100</span>, <span class="at">effort_hours =</span> <span class="dv">48</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">load_all</span>()</span>
+<span id="cb19-2"><a></a></span>
+<span id="cb19-3"><a></a><span class="co"># Effort is 48 hours = 2 days, so CPUE should be 100/2 = 50</span></span>
+<span id="cb19-4"><a></a><span class="fu">standardize_effort</span>(<span class="at">catch =</span> <span class="dv">100</span>, <span class="at">effort_hours =</span> <span class="dv">48</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>The result should be 50 but returns something much smaller. Use the debugging tools you just learned to find and fix it.</p>
@@ -600,11 +546,11 @@ Selection:</code></pre>
 <h2>Solution</h2>
 <p>The bug is on the conversion line — it multiplies by 24 instead of dividing:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># Bug</span></span>
-<span id="cb23-2"><a></a>effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">*</span> <span class="dv">24</span></span>
-<span id="cb23-3"><a></a></span>
-<span id="cb23-4"><a></a><span class="co"># Fix</span></span>
-<span id="cb23-5"><a></a>effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">/</span> <span class="dv">24</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="co"># Bug</span></span>
+<span id="cb20-2"><a></a>effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">*</span> <span class="dv">24</span></span>
+<span id="cb20-3"><a></a></span>
+<span id="cb20-4"><a></a><span class="co"># Fix</span></span>
+<span id="cb20-5"><a></a>effort_days <span class="ot">&lt;-</span> effort_hours <span class="sc">/</span> <span class="dv">24</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>You could find this by:</p>
