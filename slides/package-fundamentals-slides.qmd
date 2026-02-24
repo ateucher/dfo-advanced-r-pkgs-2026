@@ -30,7 +30,35 @@ execute:
 - Reuse your code across projects and share it with others
 - Enforce a consistent interface around your work
 - Bundle code with documentation and tests
-- Distribute software in a reproducible way
+- Distribute software in a reproducible way to:
+  - your team
+  - the world
+
+## Script vs Package
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Script**
+
+- Copy-paste to reuse across projects
+- Documentation in `#comments`
+- Tested less frequently
+- Functions mixed with analysis code
+- Run with  source() or select+run
+:::
+
+::: {.column width="50%"}
+**Package**
+
+- install once, `library()` anywhere
+- Document in Roxygen comments to enable `?function`
+- testthat test suite
+- Functions only - clean separation
+- Versioned releases
+:::
+
+::::
 
 ::: {.notes}
 A package is the fundamental unit of shareable R code. Even if you never share it publicly, packaging your own work enforces good habits.
