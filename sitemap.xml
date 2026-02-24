@@ -2,94 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/testing-part2.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/testing-part2-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/releasing-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/intro-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.320Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/function-design-best-practices-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.295Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/debugging-techniques-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.295Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html</loc>
-    <lastmod>2026-02-24T06:22:28.294Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/package-fundamentals.html</loc>
-    <lastmod>2026-02-24T06:22:28.294Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/index.html</loc>
-    <lastmod>2026-02-24T06:22:28.294Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/function-design-best-practices.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/debugging-techniques.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/course-schedule.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/data-packages.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/documentation.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/git-github.html</loc>
-    <lastmod>2026-02-24T06:22:28.292Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/object-oriented-programming.html</loc>
-    <lastmod>2026-02-24T06:22:28.294Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/releasing-your-r-package.html</loc>
-    <lastmod>2026-02-24T06:22:28.294Z</lastmod>
-  </url>
-  <url>
-    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/data-packages-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.295Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/documentation-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.295Z</lastmod>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/releasing-your-r-package.html</loc>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/object-oriented-programming.html</loc>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/git-github.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/documentation.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/data-packages.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/course-schedule.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/debugging-techniques.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/function-design-best-practices.html</loc>
+    <lastmod>2026-02-24T05:56:41.991Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/index.html</loc>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/package-fundamentals.html</loc>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
+  </url>
+  <url>
+    <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/setup.html</loc>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/git-github-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.295Z</lastmod>
+    <lastmod>2026-02-24T05:56:41.993Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/package-fundamentals-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/slides/testing-part1-slides.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
   <url>
     <loc>http://andyteucher.ca/dfo-advanced-r-pkgs-2026/testing-part1.html</loc>
-    <lastmod>2026-02-24T06:22:28.321Z</lastmod>
+    <lastmod>2026-02-24T05:56:42.017Z</lastmod>
   </url>
 </urlset>
