@@ -1424,18 +1424,11 @@
     "text": "Welcome!\nThis is a three-day course for people who want to build R packages that are robust, maintainable, and easy for others to use.\nCode of Conduct:\n\nTreat everyone with respect\nEveryone should feel welcome\nFull text: https://andyteucher.ca/dfo-advanced-r-pkgs-2026/CODE_OF_CONDUCT.html\n\n\nCameras. Remind everyone about the code of conduct briefly - it’s about creating a safe learning environment."
   },
   {
-    "objectID": "slides/intro-slides.html#sticky-notes",
-    "href": "slides/intro-slides.html#sticky-notes",
-    "title": "Advanced R Package Development",
-    "section": "Sticky Notes",
-    "text": "Sticky Notes\n\n\n\n\n\nPINK\nI’m stuck, please send help\n\n\n\n\nGREEN\nI’m good, let’s move on"
-  },
-  {
     "objectID": "slides/intro-slides.html#sticky-notes-online",
     "href": "slides/intro-slides.html#sticky-notes-online",
     "title": "Advanced R Package Development",
     "section": "Sticky Notes (online)",
-    "text": "Sticky Notes (online)\n\n\n\n\n\nPINK = I’m stuck ✋\nUse the Zoom Raise Hand reaction\n\n\n\n\nGREEN = I’m good 👍\nUse the Thumbs Up reaction\n\n\nWe’ll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room."
+    "text": "Sticky Notes (online)\n\n\nI’m stuck ✋\nUse the Zoom Raise Hand reaction\n\nI’m good 👍\nUse the Thumbs Up reaction\n\n\nWe’ll try to help everyone keep up. Questions in the chat or raise hand. Big issues can use a breakout room with the other instructor. Try to keep discussions in the main room."
   },
   {
     "objectID": "slides/intro-slides.html#discussions-q-a",
@@ -1456,7 +1449,7 @@
     "href": "slides/intro-slides.html#check-your-setup",
     "title": "Advanced R Package Development",
     "section": "Check your setup",
-    "text": "Check your setup\nRun these two commands and make sure they succeed before we begin:\n\ndevtools::has_devel()\n\nLook for “Your system is ready to build packages!”\n\n\nusethis::git_sitrep()\n\nLook for Personal access token for 'https://github.com': '&lt;discovered&gt;'\n\n\nGive people 2-3 minutes to run these. has_devel() should print “Your system is ready to build packages!”. For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content."
+    "text": "Check your setup\nRun these two commands and make sure they succeed before we begin:\n\ndevtools::has_devel()\n\nLook for Your system is ready to build packages!\n\n\nusethis::git_sitrep()\n\nLook for Personal access token for 'https://github.com': '&lt;discovered&gt;'\n\n\nGive people 2-3 minutes to run these. has_devel() should print “Your system is ready to build packages!”. For git_sitrep(), the key thing to check is that the PAT shows as discovered and their name/email are correct. If anyone is stuck, now is the time to sort it out before we get into content."
   },
   {
     "objectID": "slides/intro-slides.html#schedule",
