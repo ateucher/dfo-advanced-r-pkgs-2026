@@ -1,6 +1,6 @@
 ---
 title: "Testing with testthat"
-subtitle: "Part 2 - Advanced R Package Development"
+subtitle: "Part 2"
 format:
   revealjs:
     height: 900
