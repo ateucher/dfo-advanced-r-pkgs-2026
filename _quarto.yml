@@ -29,6 +29,8 @@ website:
             href: slides/testing-part1-slides.html
           - text: "Day 2, Session 2: Testing Part 2"
             href: slides/testing-part2-slides.html
+          - text: "Day 2, Session 3: Advanced Documentation"
+            href: slides/documentation-slides.html
           - text: "Day 3, Session 2: Releasing Your R Package"
             href: slides/releasing-slides.html
   repo-url: https://github.com/boshek/2026-feb-course-planning
