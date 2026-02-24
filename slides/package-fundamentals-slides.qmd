@@ -111,6 +111,14 @@ mypackage/
 
 ::::
 
+## fishr
+
+### Sneak peak of our end state on GitHub
+
+- [https://github.com/ateucher/fishr.example](https://github.com/ateucher/fishr.example)
+
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExemQ1eGIzeG0yM3RjeHFuN3Rld3c0Mzk3aGI5cWVhY2ZjMGdncDRraSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/b7PrQ32OqlMUZVlxar/giphy.gif)
+
 # Lay the Foundations
 
 ## Configure RStudio
@@ -284,6 +292,10 @@ Aim for 0 errors, 0 warnings, 0 notes.
 ## Package development loop
 ![](img/pkg-workflow.png)
 
+## Make a commit
+
+Now that we have a basic working function, commit your changes.
+
 ## Set a license
 
 ```{r}
@@ -398,6 +410,7 @@ load_all()
 
 :::
 
+
 ## README
 
 ```{r}
@@ -413,6 +426,10 @@ build_readme()
 
 `README.md` is what GitHub displays on your repository page.
 :::
+
+## Make a commit
+
+Commit all new changes to the DESCRIPTION file, documentation and the license.
 
 # Common Pain Points
 
@@ -458,12 +475,3 @@ Run `check()` early and often. It is much easier to fix one new problem than ten
 2. Add a roxygen block above `cpue()` with `@param`, `@return`, `@export`, and `@examples`
 3. Run `document()` and verify `?cpue` works
 4. Run `check()` and resolve any warnings
-
-::: {.fragment}
-**Bonus:** set a default DESCRIPTION via `.Rprofile` so you never have to fill in your name and email again:
-
-```{r}
-edit_r_profile()
-```
-
-:::
