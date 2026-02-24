@@ -30,6 +30,8 @@ website:
             href: slides/git-github-slides.html
           - text: "Day 1, Session 3: Testing Part 1"
             href: slides/testing-part1-slides.html
+          - text: "Day 2, Session 1: Function Design Best Practices"
+            href: slides/function-design-best-practices-slides.html
           - text: "Day 2, Session 2: Testing Part 2"
             href: slides/testing-part2-slides.html
           - text: "Day 2, Session 3: Advanced Documentation"

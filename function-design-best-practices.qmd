@@ -361,37 +361,10 @@ Imports:
     rlang
 ```
 
-Now call functions from the package using `::` notation:
-
-```{r}
-format_catch <- function(catch) {
-  if (!is.numeric(catch)) {
-    rlang::abort("`catch` must be a numeric vector.")
-  }
-  round(catch, 2)
-}
-```
+Now call functions from the package using `::` notation.
 
 The `::` operator is the preferred approach for package development: it is explicit, avoids
 namespace conflicts, and makes clear which package each function comes from.
-
-### Importing frequently-used functions
-
-For functions you call throughout a package, repeating `rlang::` on every call is verbose.
-`usethis::use_import_from()` adds the function to your `NAMESPACE` and lets you call it directly:
-
-```{r}
-use_import_from("rlang", "abort")
-```
-
-This inserts a `@importFrom` tag into a roxygen block (usually `R/<package>-package.R`):
-
-```r
-#' @importFrom rlang abort
-```
-
-After running `document()`, `abort()` is available across your package without the `rlang::`
-prefix. The `NAMESPACE` file is updated automatically - never edit it by hand.
 
 ### Catching unused dots
 
