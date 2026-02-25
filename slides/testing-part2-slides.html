@@ -421,7 +421,7 @@ new[3] == "  catch must be numeric, not character"</code></pre>
 <span id="cb8-7"><a></a>) { ... }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
-<p>Tests that set <code>fishr.verbose = TRUE</code> must restore the original value afterward - or they will leak into other tests.</p>
+<p>Tests that set <code>options(fishr.verbose = TRUE)</code> must restore the original value afterward - or they will leak into other tests.</p>
 </div>
 </section>
 <section id="testing-options-with-local_options" class="slide level2">
@@ -455,6 +455,7 @@ new[3] == "  catch must be numeric, not character"</code></pre>
 </section>
 <section id="with_options-for-a-single-assertion" class="slide level2">
 <h2><code>with_options</code> for a single assertion</h2>
+<p>Provide options in a list</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue verbosity falls back to FALSE when not set"</span>, {</span>
 <span id="cb10-2"><a></a>  withr<span class="sc">::</span><span class="fu">with_options</span>(</span>
@@ -545,10 +546,6 @@ new[3] == "  catch must be numeric, not character"</code></pre>
 <td><code>local_seed()</code> / <code>with_seed()</code></td>
 <td>Random seed</td>
 </tr>
-<tr class="odd">
-<td><code>defer()</code></td>
-<td>Custom cleanup code</td>
-</tr>
 </tbody>
 </table>
 </section>
@@ -580,6 +577,8 @@ new[3] == "  catch must be numeric, not character"</code></pre>
 <span id="cb13-4"><a></a>  <span class="fu">data.frame</span>(...)</span>
 <span id="cb13-5"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</div>
+<div class="fragment">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="co"># After</span></span>
 <span id="cb14-2"><a></a>generate_fishing_data <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n =</span> <span class="dv">10</span>) {</span>

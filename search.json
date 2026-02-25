@@ -89,7 +89,7 @@
     "href": "testing-part1.html#writing-tests",
     "title": "Testing with testthat - Part 1",
     "section": "Writing Tests",
-    "text": "Writing Tests\n\nBasic test structure\n\ntest_that(\"cpue calculates simple ratio correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10), 10)\n  expect_equal(cpue(catch = 50, effort = 2), 25)\n})\n\n\ntest_that(\"cpue handles vectors of data\", {\n  catches &lt;- c(100, 200, 300)\n  efforts &lt;- c(10, 10, 10)\n  expected_results &lt;- c(10, 20, 30)\n\n  expect_equal(cpue(catches, efforts), expected_results)\n})\n\nWhen possible, use a specific expectation which will give an informative failure message, instead of expect_true() or expect_false(). For example, instead of:\n\nexpect_true(is.numeric(cpue(100, 10)))\n\nUse:\n\nexpect_type(cpue(100, 10), \"double\")\n\n\n\nTesting optional arguments\n\ntest_that(\"gear_factor standardization scales correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)\n  expect_equal(\n    cpue(catch = 100, effort = 10),\n    cpue(catch = 100, effort = 10, gear_factor = 1)\n  )\n})\n\n\n\nTesting edge cases\n\ntest_that(\"cpue handles zero catch and missing data\", {\n  expect_equal(cpue(catch = 0, effort = 10), 0)\n\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\n\nRun your tests\n\ntest()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\npr_push()",
+    "text": "Writing Tests\n\nBasic test structure\n\ntest_that(\"cpue calculates simple ratio correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10), 10)\n  expect_equal(cpue(catch = 50, effort = 2), 25)\n})\n\n\ntest_that(\"cpue handles vectors of data\", {\n  catches &lt;- c(100, 200, 300)\n  efforts &lt;- c(10, 10, 10)\n  expected_results &lt;- c(10, 20, 30)\n\n  expect_equal(cpue(catches, efforts), expected_results)\n})\n\nWhen possible, use a specific expectation which will give an informative failure message, instead of expect_true() or expect_false(). For example, instead of:\n\nexpect_true(is.numeric(cpue(100, 10)))\n\nUse:\n\nexpect_type(cpue(100, 10), \"double\")\n\n\n\nTesting optional arguments\n\ntest_that(\"gear_factor standardization scales correctly\", {\n  expect_equal(cpue(catch = 100, effort = 10, gear_factor = 0.5), 5)\n  expect_equal(\n    cpue(catch = 100, effort = 10),\n    cpue(catch = 100, effort = 10, gear_factor = 1)\n  )\n})\n\n\n\nTesting edge cases\n\ntest_that(\"cpue handles missing data\", {\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\n\nRun your tests\n\ntest()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\npr_push()",
     "crumbs": [
       "Day 1: Foundations",
       "Testing with testthat - Part 1"
@@ -100,18 +100,7 @@
     "href": "testing-part1.html#test-helpers-and-fixtures",
     "title": "Testing with testthat - Part 1",
     "section": "Test Helpers and Fixtures",
-    "text": "Test Helpers and Fixtures\n\nCreate a test helper file\n\nuse_test_helper()\n\nTest helpers are loaded before tests run. Create tests/testthat/helper.R:\n\n# tests/testthat/helper.R\n\n# Helper function to generate sample fishing data\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(\n    catch = runif(n, 10, 500),\n    effort = runif(n, 1, 20),\n    gear_factor = runif(n, 1, 5)\n  )\n}\n\n\n\nUsing helpers in tests\n\ntest_that(\"cpue works with generated data\", {\n  data &lt;- generate_fishing_data(n = 5)\n\n  result &lt;- cpue(data$catch, data$effort)\n\n  expect_equal(\n    result,\n    c(34.053, 9.065, 19.239, 135.640, 6.372),\n    tolerance = 1e-3\n  )\n})\n\n\n\nCreate a setup file\nSetup runs once before all tests. Create tests/testthat/setup.R:\n\n# tests/testthat/setup.R\n\n# Set up test fixtures that are expensive to create\n# (only created once, shared across all tests)\n\n# Reference dataset for testing\nreference_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 10, 10),\n  expected_cpue = c(10, 20, 30)\n)\n\n\n\nUsing setup objects in tests\nObjects created in setup.R are available to all tests:\n\ntest_that(\"cpue matches reference data\", {\n  result &lt;- cpue(reference_data$catch, reference_data$effort)\n\n  expect_equal(result, reference_data$expected_cpue)\n})\n\n\ntest()\n\n\n\n\n\n\n\nTipMake a commit",
-    "crumbs": [
-      "Day 1: Foundations",
-      "Testing with testthat - Part 1"
-    ]
-  },
-  {
-    "objectID": "testing-part1.html#testing-different-function-types",
-    "href": "testing-part1.html#testing-different-function-types",
-    "title": "Testing with testthat - Part 1",
-    "section": "Testing Different Function Types",
-    "text": "Testing Different Function Types\n\nTesting return types and structure\n\ntest_that(\"cpue returns numeric vector\", {\n  result &lt;- cpue(c(100, 200), c(10, 20))\n\n  expect_type(result, \"double\")\n  expect_length(result, 2)\n})\n\n\n\nTesting with expect_message\nLet’s add a verbose parameter to cpue so we can test messages. Don’t forget to update the function documentation with the new verbose argument.\nUpdate R/cpue.R – add the parameter and update the roxygen documentation:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear standardization.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric adjustment for gear standardization (default is 1)\n#' @param verbose Logical indicating whether to print processing messages (default is FALSE)\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(100, 10, gear_factor = 0.5)\ncpue &lt;- function(catch, effort, gear_factor = 1, verbose = FALSE) {\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\nNow test the message:\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_message(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE),\n    \"Processing 2 records\"\n  )\n})\n\ntest_that(\"cpue is silent by default\", {\n  expect_no_message(cpue(100, 10))\n})\n\n\n\nTesting with expect_warning\n\ntest_that(\"cpue warns when vector lengths don't match\", {\n  expect_warning(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20)),\n    \"longer object length is not a multiple of shorter object length\"\n  )\n\n  expect_no_warning(cpue(100, 10))\n})",
+    "text": "Test Helpers and Fixtures\n\nCreate a test helper file\n\nuse_test_helper()\n\nTest helpers are loaded before tests run. Create tests/testthat/helper.R:\n\n# tests/testthat/helper.R\n\n# Helper function to generate sample fishing data\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(\n    catch = runif(n, 10, 500),\n    effort = runif(n, 1, 20),\n    gear_factor = runif(n, 1, 5)\n  )\n}\n\n\n\nUsing helpers in tests\n\ntest_that(\"cpue works with generated data\", {\n  data &lt;- generate_fishing_data(n = 5)\n\n  result &lt;- cpue(data$catch, data$effort)\n\n  expect_equal(\n    result,\n    c(34.053, 9.065, 19.239, 135.640, 6.372),\n    tolerance = 1e-3\n  )\n})\n\n\n\nCreate a setup file\nSetup runs once before all tests. Create tests/testthat/setup.R:\n\n# tests/testthat/setup.R\n\n# Set up test fixtures that are expensive to create\n# (only created once, shared across all tests)\n\n# Reference dataset for testing\nreference_data &lt;- data.frame(\n  catch = c(100, 200, 300),\n  effort = c(10, 10, 10),\n  expected_cpue = c(10, 20, 30)\n)\n\n\n\nUsing setup objects in tests\nObjects created in setup.R are available to all tests:\n\ntest_that(\"cpue matches reference data\", {\n  result &lt;- cpue(reference_data$catch, reference_data$effort)\n\n  expect_equal(result, reference_data$expected_cpue)\n})\n\n\ntest()\n\n\n\n\n\n\n\nTipMake a commit\n\n\n\n\n\n\n\n\nTesting messages with expect_message\nLet’s add a verbose parameter to cpue so we can test messages. Don’t forget to update the function documentation with the new verbose argument.\nUpdate R/cpue.R – add the parameter and update the roxygen documentation:\n\n#' Calculate Catch Per Unit Effort (CPUE)\n#'\n#' Calculates CPUE from catch and effort data, with optional gear standardization.\n#'\n#' @param catch Numeric vector of catch (e.g., kg)\n#' @param effort Numeric vector of effort (e.g., hours)\n#' @param gear_factor Numeric adjustment for gear standardization (default is 1)\n#' @param verbose Logical indicating whether to print processing messages (default is FALSE)\n#'\n#' @return A numeric vector of CPUE values\n#' @export\n#'\n#' @examples\n#' cpue(100, 10)\n#' cpue(100, 10, gear_factor = 0.5)\ncpue &lt;- function(catch, effort, gear_factor = 1, verbose = FALSE) {\n  if (verbose) {\n    message(\"Processing \", length(catch), \" records\")\n  }\n\n  raw_cpue &lt;- catch / effort\n\n  raw_cpue * gear_factor\n}\n\nNow test the message:\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_message(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE),\n    \"Processing 2 records\"\n  )\n})\n\ntest_that(\"cpue is silent by default\", {\n  expect_no_message(cpue(100, 10))\n})",
     "crumbs": [
       "Day 1: Foundations",
       "Testing with testthat - Part 1"
@@ -122,7 +111,7 @@
     "href": "testing-part1.html#snapshot-testing-introduction",
     "title": "Testing with testthat - Part 1",
     "section": "Snapshot Testing Introduction",
-    "text": "Snapshot Testing Introduction\nSnapshot testing captures output and compares against a saved reference.\n\nWhen to use snapshots\n\nComplex text output (print methods, messages)\nErrors and warnings\n\nWhen testing errors and warnings, don’t us expect_error() or expect_warning(). Instead, use expect_snapshot(error = TRUE) for errors and expect_snapshot() for warnings because these allow the user to review the full text of the output.\n\nPlots (with vdiffr package)\n\n\n\nBasic snapshot test\n\ntest_that(\"cpue error message is informative\", {\n  expect_snapshot(\n    cpue(\"not a number\", 10),\n    error = TRUE\n  )\n})\n\n\n\nFirst run creates the snapshot\nWhen you first run this test, testthat creates a snapshot file in tests/testthat/_snaps/, and you will get a warning that a new snapshot was added.\n\ntest()\n\n\n\nSnapshot testing for warnings\nLet’s update our warning test to use snapshots so we can review the full warning and save ourselves from having to copy and paste the warning text into our test code.\n\ntest_that(\"cpue produces no warnings with valid input\", {\n  expect_snapshot(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20))\n  )\n\n  expect_no_warning(cpue(100, 10))\n})\n\n\n\nYour turn\nUpdate your message test to use snapshots instead of expect_message()\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_snapshot(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE)\n  )\n  expect_no_message(cpue(100, 10))\n})\n\nWe’ll dive deeper into snapshot testing in Part 2\n\n\n\n\n\n\nTipMake a commit",
+    "text": "Snapshot Testing Introduction\nSnapshot testing captures output and compares against a saved reference.\n\nWhen to use snapshots\n\nComplex text output (print methods, messages)\nErrors and warnings\n\nWhen testing errors and warnings, don’t us expect_error() or expect_warning(). Instead, use expect_snapshot(error = TRUE) for errors and expect_snapshot() for warnings because these allow the user to review the full text of the output.\n\nPlots (with vdiffr package)\n\n\n\nBasic snapshot test for errors\n\ntest_that(\"cpue errors when input is not numeric\", {\n  expect_snapshot(\n    cpue(\"five\", 10),\n    error = TRUE\n  )\n})\n\n\n\nFirst run creates the snapshot\nWhen you first run this test, testthat creates a snapshot file in tests/testthat/_snaps/, and you will get a warning that a new snapshot was added.\n\ntest()\n\n\n\nSnapshot testing for warnings\nLet’s use snapshots so we can review the full warning and save ourselves from having to copy and paste the warning text into our test code.\n\ntest_that(\"cpue warns when catch and effort lengths differ\", {\n  expect_snapshot(\n    cpue(c(100, 200, 300), c(10, 20))\n  )\n\n  expect_no_warning(cpue(100, 10))\n})\n\nWe’ll dive deeper into snapshot testing in Part 2\n\n\n\n\n\n\nTipMake a commit",
     "crumbs": [
       "Day 1: Foundations",
       "Testing with testthat - Part 1"
@@ -140,8 +129,8 @@
     ]
   },
   {
-    "objectID": "testing-part1.html#your-turn-1",
-    "href": "testing-part1.html#your-turn-1",
+    "objectID": "testing-part1.html#your-turn",
+    "href": "testing-part1.html#your-turn",
     "title": "Testing with testthat - Part 1",
     "section": "Your Turn",
     "text": "Your Turn\nAdd some tests for biomass_index(). Try to make at least one snapshot test.\nWith R/biomass.R open, run:\n\nuse_test()\n\nOr\n\nuse_test(\"biomass\")\n\n\nOur solutions\nYours may look different. Let’s discuss!\n\ntest_that(\"biomass_index calculates correctly\", {\n  expect_equal(biomass_index(cpue = 10, area_swept = 5), 50)\n  expect_equal(biomass_index(cpue = 20, area_swept = 2.5), 50)\n})\n\ntest_that(\"biomass_index handles vectors\", {\n  cpue_vals &lt;- c(10, 20, 30)\n  area_vals &lt;- c(5, 5, 5)\n\n  expect_equal(biomass_index(cpue_vals, area_vals), c(50, 100, 150))\n})\n\ntest_that(\"biomass_index throws error on invalid input\", {\n  expect_snapshot(biomass_index(\"ten\", 5), error = TRUE)\n  expect_snapshot(biomass_index(10, \"five\"), error = TRUE)\n})\n\n\n\n\n\n\n\nTipMake a commit",
@@ -233,7 +222,7 @@
     "href": "slides/testing-part1-slides.html#testing-edge-cases",
     "title": "Testing with testthat",
     "section": "Testing edge cases",
-    "text": "Testing edge cases\n\ntest_that(\"cpue handles zero catch and missing data\", {\n  expect_equal(cpue(catch = 0, effort = 10), 0)\n\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\nEdge cases often reveal assumptions baked into your code."
+    "text": "Testing edge cases\n\ntest_that(\"cpue handles missing data\", {\n  expect_true(is.na(cpue(NA_real_, 10)))\n  expect_true(is.na(cpue(100, NA_real_)))\n})\n\n\nEdge cases often reveal assumptions baked into your code."
   },
   {
     "objectID": "slides/testing-part1-slides.html#run-your-tests",
@@ -285,13 +274,6 @@
     "text": "Testing with expect_message\n\ntest_that(\"cpue provides informative message when verbose\", {\n  expect_message(\n    cpue(c(100, 200), c(10, 20), verbose = TRUE),\n    \"Processing 2 records\"\n  )\n})\n\ntest_that(\"cpue is silent by default\", {\n  expect_no_message(cpue(100, 10))\n})\n\n\nAlways test both the positive and negative case - that the message appears when expected, and that it’s absent when not."
   },
   {
-    "objectID": "slides/testing-part1-slides.html#testing-with-expect_warning",
-    "href": "slides/testing-part1-slides.html#testing-with-expect_warning",
-    "title": "Testing with testthat",
-    "section": "Testing with expect_warning",
-    "text": "Testing with expect_warning\n\ntest_that(\"cpue warns when vector lengths don't match\", {\n  expect_warning(\n    cpue(catch = c(100, 200, 300), effort = c(10, 20)),\n    \"longer object length is not a multiple of shorter object length\"\n  )\n\n  expect_no_warning(cpue(100, 10))\n})"
-  },
-  {
     "objectID": "slides/testing-part1-slides.html#overview",
     "href": "slides/testing-part1-slides.html#overview",
     "title": "Testing with testthat",
@@ -303,21 +285,28 @@
     "href": "slides/testing-part1-slides.html#basic-snapshot-test",
     "title": "Testing with testthat",
     "section": "Basic snapshot test",
-    "text": "Basic snapshot test\n\nexpect_snapshot(\n  my_function(\"input that produces complex output\"),\n)\n\n\n\n\n\ntest_that(\"cpue error message is informative\", {\n  expect_snapshot(\n    cpue(\"not a number\", 10),\n    error = TRUE\n  )\n})\n\n\nFirst run throws a warning and creates tests/testthat/_snaps/cpue.md - review it!"
+    "text": "Basic snapshot test\n\nexpect_snapshot(\n  my_function(\"input that produces complex output\"),\n)\n\n\n\n\n\ntest_that(\"cpue errors when input is not numeric\", {\n  expect_snapshot(\n    cpue(\"five\", 10),\n    error = TRUE\n  )\n})\n\n\nFirst run throws a warning and creates tests/testthat/_snaps/cpue.md - review it!"
   },
   {
     "objectID": "slides/testing-part1-slides.html#first-run",
     "href": "slides/testing-part1-slides.html#first-run",
     "title": "Testing with testthat",
     "section": "First run",
-    "text": "First run\n\ntest()\n\ntestthat writes the snapshot to tests/testthat/_snaps/:\n# cpue error message is informative\n\n    Code\n      cpue(\"not a number\", 10)\n    Error\n      non-numeric argument to binary operator\n\nCommit the snapshot file - it becomes your reference."
+    "text": "First run\n\ntest()\n\ntestthat writes the snapshot to tests/testthat/_snaps/:\n# cpue errors when input is not numeric\n\n    Code\n      cpue(\"five\", 10)\n    Error\n      non-numeric argument to binary operator\n\nCommit the snapshot file - it becomes your reference."
+  },
+  {
+    "objectID": "slides/testing-part1-slides.html#snapshot-testing-for-warnings",
+    "href": "slides/testing-part1-slides.html#snapshot-testing-for-warnings",
+    "title": "Testing with testthat",
+    "section": "Snapshot testing for warnings",
+    "text": "Snapshot testing for warnings\n\nSave yourself from having to copy and paste the warning text into our test code.\nEasy to review and update when warning text changes.\n\n\ntest_that(\"cpue warns when catch and effort lengths differ\", {\n  expect_snapshot(\n    cpue(c(100, 200, 300), c(10, 20))\n  )\n\n  expect_no_warning(cpue(100, 10))\n})"
   },
   {
     "objectID": "slides/testing-part1-slides.html#when-snapshots-change",
     "href": "slides/testing-part1-slides.html#when-snapshots-change",
     "title": "Testing with testthat",
     "section": "When snapshots change",
-    "text": "When snapshots change\nAfter modifying output, tests fail. Review and accept:\n\nsnapshot_review() # interactive diff viewer\nsnapshot_accept() # accept all changes\n\n\nWe’ll dive deeper into snapshot workflows in Part 2."
+    "text": "When snapshots change\nAfter modifying output, tests fail. Review and accept:\n\nsnapshot_review() # interactive diff viewer\nsnapshot_accept() # accept all changes\n\nWe’ll dive deeper into snapshot workflows in Part 2."
   },
   {
     "objectID": "slides/testing-part1-slides.html#make-a-commit",
@@ -334,18 +323,11 @@
     "text": "Three levels\n\n\n\nWhat\nHow\nShortcut\n\n\n\n\nSingle test\nCtrl+Enter on test_that() block\n-\n\n\nActive file\ndevtools::test_active_file()\nCtrl/Cmd+T\n\n\nWhole package\ndevtools::test()\nShift+Ctrl/Cmd+T"
   },
   {
-    "objectID": "slides/testing-part1-slides.html#interactive-testing-matters",
-    "href": "slides/testing-part1-slides.html#interactive-testing-matters",
-    "title": "Testing with testthat",
-    "section": "Interactive testing matters",
-    "text": "Interactive testing matters\nRunning individual test_that() blocks interactively only works if tests are self-contained.\n\nKeep setup inside test_that() blocks (or in helpers), not floating in the test file."
-  },
-  {
     "objectID": "slides/testing-part1-slides.html#full-check",
     "href": "slides/testing-part1-slides.html#full-check",
     "title": "Testing with testthat",
     "section": "Full check",
-    "text": "Full check\n\ntest() # run tests only\n\ncheck() # full package check (includes tests)\n\n\ncheck() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission."
+    "text": "Full check\n\ntest() # run tests only\n\ncheck() # full package check (includes tests)"
   },
   {
     "objectID": "slides/testing-part1-slides.html#exercise",
@@ -2545,7 +2527,7 @@
     "href": "slides/testing-part2-slides.html#recall-verbose-via-a-package-option",
     "title": "Testing with testthat",
     "section": "Recall: verbose via a package option",
-    "text": "Recall: verbose via a package option\ncpue() reads verbosity from an option:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) { ... }\n\n\nTests that set fishr.verbose = TRUE must restore the original value afterward - or they will leak into other tests."
+    "text": "Recall: verbose via a package option\ncpue() reads verbosity from an option:\n\ncpue &lt;- function(\n  catch,\n  effort,\n  gear_factor = 1,\n  method = c(\"ratio\", \"log\"),\n  verbose = getOption(\"fishr.verbose\", FALSE)\n) { ... }\n\n\nTests that set options(fishr.verbose = TRUE) must restore the original value afterward - or they will leak into other tests."
   },
   {
     "objectID": "slides/testing-part2-slides.html#testing-options-with-local_options",
@@ -2559,7 +2541,7 @@
     "href": "slides/testing-part2-slides.html#with_options-for-a-single-assertion",
     "title": "Testing with testthat",
     "section": "with_options for a single assertion",
-    "text": "with_options for a single assertion\n\ntest_that(\"cpue verbosity falls back to FALSE when not set\", {\n  withr::with_options(\n    list(fishr.verbose = NULL), # reset as soon as this expression finishes\n    expect_no_message(cpue(100, 10))\n  )\n})"
+    "text": "with_options for a single assertion\nProvide options in a list\n\ntest_that(\"cpue verbosity falls back to FALSE when not set\", {\n  withr::with_options(\n    list(fishr.verbose = NULL), # reset as soon as this expression finishes\n    expect_no_message(cpue(100, 10))\n  )\n})"
   },
   {
     "objectID": "slides/testing-part2-slides.html#exercise",
@@ -2580,7 +2562,7 @@
     "href": "slides/testing-part2-slides.html#common-helpers",
     "title": "Testing with testthat",
     "section": "Common helpers",
-    "text": "Common helpers\n\n\n\n\n\n\n\nHelper\nResets\n\n\n\n\nlocal_options() / with_options()\nR options\n\n\nlocal_envvar() / with_envvar()\nEnvironment variables\n\n\nlocal_dir() / with_dir()\nWorking directory\n\n\nlocal_tempfile() / with_tempfile()\nTemp file (deleted after)\n\n\nlocal_tempdir() / with_tempdir()\nTemp directory (deleted after)\n\n\nlocal_seed() / with_seed()\nRandom seed\n\n\ndefer()\nCustom cleanup code"
+    "text": "Common helpers\n\n\n\n\n\n\n\nHelper\nResets\n\n\n\n\nlocal_options() / with_options()\nR options\n\n\nlocal_envvar() / with_envvar()\nEnvironment variables\n\n\nlocal_dir() / with_dir()\nWorking directory\n\n\nlocal_tempfile() / with_tempfile()\nTemp file (deleted after)\n\n\nlocal_tempdir() / with_tempdir()\nTemp directory (deleted after)\n\n\nlocal_seed() / with_seed()\nRandom seed"
   },
   {
     "objectID": "slides/testing-part2-slides.html#example-testing-file-output",
@@ -2594,7 +2576,7 @@
     "href": "slides/testing-part2-slides.html#quiz",
     "title": "Testing with testthat",
     "section": "Quiz",
-    "text": "Quiz\n\nWhere have we already altered the global state in our test helpers?\n\n\ntests/testthat/helper.R calls set.seed() directly - this sets the seed for the entire session.\n\n# Before\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(...)\n}\n\n\n# After\ngenerate_fishing_data &lt;- function(n = 10) {\n  withr::local_seed(67)\n  data.frame(...)\n}\n\n\n\nlocal_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function."
+    "text": "Quiz\n\nWhere have we already altered the global state in our test helpers?\n\n\ntests/testthat/helper.R calls set.seed() directly - this sets the seed for the entire session.\n\n# Before\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(...)\n}\n\n\n\n\n# After\ngenerate_fishing_data &lt;- function(n = 10) {\n  withr::local_seed(67)\n  data.frame(...)\n}\n\n\n\nlocal_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function."
   },
   {
     "objectID": "slides/testing-part2-slides.html#why-measure-coverage",

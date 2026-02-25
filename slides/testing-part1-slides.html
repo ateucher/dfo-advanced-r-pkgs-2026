@@ -362,12 +362,10 @@
 <section id="testing-edge-cases" class="slide level2">
 <h2>Testing edge cases</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue handles zero catch and missing data"</span>, {</span>
-<span id="cb9-2"><a></a>  <span class="fu">expect_equal</span>(<span class="fu">cpue</span>(<span class="at">catch =</span> <span class="dv">0</span>, <span class="at">effort =</span> <span class="dv">10</span>), <span class="dv">0</span>)</span>
-<span id="cb9-3"><a></a></span>
-<span id="cb9-4"><a></a>  <span class="fu">expect_true</span>(<span class="fu">is.na</span>(<span class="fu">cpue</span>(<span class="cn">NA_real_</span>, <span class="dv">10</span>)))</span>
-<span id="cb9-5"><a></a>  <span class="fu">expect_true</span>(<span class="fu">is.na</span>(<span class="fu">cpue</span>(<span class="dv">100</span>, <span class="cn">NA_real_</span>)))</span>
-<span id="cb9-6"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue handles missing data"</span>, {</span>
+<span id="cb9-2"><a></a>  <span class="fu">expect_true</span>(<span class="fu">is.na</span>(<span class="fu">cpue</span>(<span class="cn">NA_real_</span>, <span class="dv">10</span>)))</span>
+<span id="cb9-3"><a></a>  <span class="fu">expect_true</span>(<span class="fu">is.na</span>(<span class="fu">cpue</span>(<span class="dv">100</span>, <span class="cn">NA_real_</span>)))</span>
+<span id="cb9-4"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>Edge cases often reveal assumptions baked into your code.</p>
@@ -405,7 +403,7 @@
 </div>
 <div class="fragment">
 <p>Creates <code>tests/testthat/helper.R</code> - loaded before every test run.</p>
-<p>Does not contain test code itself, but defines functions that can be used in tests.</p>
+<p>Does not contain test code itself, but defines <em>functions</em> that can be used in tests.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="co"># tests/testthat/helper.R</span></span>
 <span id="cb13-2"><a></a></span>
@@ -518,19 +516,6 @@
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
-</section>
-<section id="testing-with-expect_warning" class="slide level2">
-<h2>Testing with <code>expect_warning</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue warns when vector lengths don't match"</span>, {</span>
-<span id="cb19-2"><a></a>  <span class="fu">expect_warning</span>(</span>
-<span id="cb19-3"><a></a>    <span class="fu">cpue</span>(<span class="at">catch =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">effort =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>)),</span>
-<span id="cb19-4"><a></a>    <span class="st">"longer object length is not a multiple of shorter object length"</span></span>
-<span id="cb19-5"><a></a>  )</span>
-<span id="cb19-6"><a></a></span>
-<span id="cb19-7"><a></a>  <span class="fu">expect_no_warning</span>(<span class="fu">cpue</span>(<span class="dv">100</span>, <span class="dv">10</span>))</span>
-<span id="cb19-8"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 </section></section>
 <section>
 <section id="snapshot-testing" class="title-slide slide level1 center">
@@ -557,20 +542,20 @@
 <section id="basic-snapshot-test" class="slide level2">
 <h2>Basic snapshot test</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">expect_snapshot</span>(</span>
-<span id="cb20-2"><a></a>  <span class="fu">my_function</span>(<span class="st">"input that produces complex output"</span>),</span>
-<span id="cb20-3"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">expect_snapshot</span>(</span>
+<span id="cb19-2"><a></a>  <span class="fu">my_function</span>(<span class="st">"input that produces complex output"</span>),</span>
+<span id="cb19-3"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p><br>
 </p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue error message is informative"</span>, {</span>
-<span id="cb21-2"><a></a>  <span class="fu">expect_snapshot</span>(</span>
-<span id="cb21-3"><a></a>    <span class="fu">cpue</span>(<span class="st">"not a number"</span>, <span class="dv">10</span>),</span>
-<span id="cb21-4"><a></a>    <span class="at">error =</span> <span class="cn">TRUE</span></span>
-<span id="cb21-5"><a></a>  )</span>
-<span id="cb21-6"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue errors when input is not numeric"</span>, {</span>
+<span id="cb20-2"><a></a>  <span class="fu">expect_snapshot</span>(</span>
+<span id="cb20-3"><a></a>    <span class="fu">cpue</span>(<span class="st">"five"</span>, <span class="dv">10</span>),</span>
+<span id="cb20-4"><a></a>    <span class="at">error =</span> <span class="cn">TRUE</span></span>
+<span id="cb20-5"><a></a>  )</span>
+<span id="cb20-6"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="fragment">
 <p>First run throws a warning and creates <code>tests/testthat/_snaps/cpue.md</code> - review it!</p>
@@ -580,17 +565,33 @@
 <section id="first-run" class="slide level2">
 <h2>First run</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">test</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">test</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>testthat writes the snapshot to <code>tests/testthat/_snaps/</code>:</p>
-<pre><code># cpue error message is informative
+<pre><code># cpue errors when input is not numeric
 
     Code
-      cpue("not a number", 10)
+      cpue("five", 10)
     Error
       non-numeric argument to binary operator</code></pre>
 <div class="fragment">
 <p>Commit the snapshot file - it becomes your reference.</p>
+</div>
+</section>
+<section id="snapshot-testing-for-warnings" class="slide level2">
+<h2>Snapshot testing for warnings</h2>
+<ul>
+<li>Save yourself from having to copy and paste the warning text into our test code.</li>
+<li>Easy to review and update when warning text changes.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">test_that</span>(<span class="st">"cpue warns when catch and effort lengths differ"</span>, {</span>
+<span id="cb23-2"><a></a>  <span class="fu">expect_snapshot</span>(</span>
+<span id="cb23-3"><a></a>    <span class="fu">cpue</span>(<span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>))</span>
+<span id="cb23-4"><a></a>  )</span>
+<span id="cb23-5"><a></a></span>
+<span id="cb23-6"><a></a>  <span class="fu">expect_no_warning</span>(<span class="fu">cpue</span>(<span class="dv">100</span>, <span class="dv">10</span>))</span>
+<span id="cb23-7"><a></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="when-snapshots-change" class="slide level2">
@@ -600,9 +601,7 @@
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">snapshot_review</span>() <span class="co"># interactive diff viewer</span></span>
 <span id="cb24-2"><a></a><span class="fu">snapshot_accept</span>() <span class="co"># accept all changes</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="fragment">
 <p>We’ll dive deeper into snapshot workflows in <strong>Part 2</strong>.</p>
-</div>
 </section>
 <section id="make-a-commit" class="slide level2">
 <h2>Make a commit</h2>
@@ -642,13 +641,6 @@
 </tbody>
 </table>
 </section>
-<section id="interactive-testing-matters" class="slide level2">
-<h2>Interactive testing matters</h2>
-<p>Running individual <code>test_that()</code> blocks interactively only works if tests are self-contained.</p>
-<div class="fragment">
-<p>Keep setup <em>inside</em> <code>test_that()</code> blocks (or in helpers), not floating in the test file.</p>
-</div>
-</section>
 <section id="full-check" class="slide level2">
 <h2>Full check</h2>
 <div class="cell">
@@ -656,19 +648,6 @@
 <span id="cb25-2"><a></a></span>
 <span id="cb25-3"><a></a><span class="fu">check</span>() <span class="co"># full package check (includes tests)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<aside class="notes">
-<p>check() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </section></section>
 <section>
 <section id="your-turn" class="title-slide slide level1 center">
