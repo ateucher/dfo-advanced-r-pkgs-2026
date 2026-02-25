@@ -600,160 +600,194 @@ new[3] == "  catch must be numeric, not character"</code></pre>
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
-</section></section>
-<section>
-<section id="test-coverage-with-covr" class="title-slide slide level1 center">
-<h1>Test Coverage with covr</h1>
+<!-- # Test Coverage with covr
 
-</section>
-<section id="why-measure-coverage" class="slide level2">
-<h2>Why measure coverage?</h2>
-<p>Coverage tracks which lines of your code are <em>executed</em> when your tests run.</p>
-<ul>
-<li class="fragment">Reveals untested code paths - the gaps you didn’t notice</li>
-<li class="fragment">Gives you an objective starting point when inheriting a package</li>
-<li class="fragment">CI can report coverage changes on every PR</li>
-</ul>
-<div class="fragment">
-<p>Coverage tells you where tests are <em>absent</em>. It does not tell you whether the tests you have are any good.</p>
-</div>
-</section>
-<section id="set-up-covr" class="slide level2">
-<h2>Set up covr</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">use_package</span>(<span class="st">"covr"</span>, <span class="at">type =</span> <span class="st">"Suggests"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="run-package-coverage" class="slide level2">
-<h2>Run package coverage</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">library</span>(covr)</span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a>cov <span class="ot">&lt;-</span> <span class="fu">package_coverage</span>()</span>
-<span id="cb16-4"><a></a>cov</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Prints a per-file coverage percentage:</p>
-<pre><code>fishr Coverage: 87.50%
+## Why measure coverage?
+
+Coverage tracks which lines of your code are *executed* when your tests run.
+
+::: {.incremental}
+- Reveals untested code paths - the gaps you didn't notice
+- Gives you an objective starting point when inheriting a package
+- CI can report coverage changes on every PR
+:::
+
+::: {.fragment}
+Coverage tells you where tests are *absent*. It does not tell you whether the tests you have are any good.
+:::
+
+## Set up covr
+
+
+::: {.cell}
+
+```{.r .cell-code}
+use_package("covr", type = "Suggests")
+```
+:::
+
+
+## Run package coverage
+
+
+::: {.cell}
+
+```{.r .cell-code}
+library(covr)
+
+cov <- package_coverage()
+cov
+```
+:::
+
+
+::: {.fragment}
+Prints a per-file coverage percentage:
+
+```
+fishr Coverage: 87.50%
 R/biomass.R: 75.00%
-R/cpue.R:    93.75%</code></pre>
-</div>
-<div class="fragment">
-<p>For a single overall number:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">percent_coverage</span>(cov)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-<aside class="notes">
-<p>package_coverage() loads the package, runs all your tests, and records which lines were hit. It takes the same time as running test(). The output already tells a useful story - which files have the most gaps.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="finding-untested-code" class="slide level2">
-<h2>Finding untested code</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">zero_coverage</span>(cov)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Returns a data frame of every line with zero hits. In RStudio, these appear as clickable markers - you can jump straight to the uncovered line.</p>
-</div>
-</section>
-<section id="visual-report" class="slide level2">
-<h2>Visual report</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">report</span>(cov)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Opens an HTML page showing each file with lines colour-coded:</p>
-<ul>
-<li>Green: covered</li>
-<li>Red: not covered</li>
-</ul>
-</div>
-<aside class="notes">
-<p>Show this live. The visual report makes it immediately obvious which branches are untested - for example, an error-handling path that is never triggered by tests.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="active-file-coverage" class="slide level2">
-<h2>Active file coverage</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>devtools<span class="sc">::</span><span class="fu">test_coverage_active_file</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Runs coverage only for the file you are editing - much faster than the full package.</p>
-<p>Consider binding this to a keyboard shortcut: <code>Ctrl/Cmd + R</code></p>
-</div>
-</section>
-<section id="excluding-lines" class="slide level2">
-<h2>Excluding lines</h2>
-<p>Some lines are not worth testing - interactive-only code paths, print methods, and so on.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="cf">if</span> (<span class="fu">interactive</span>()) {</span>
-<span id="cb22-2"><a></a>  <span class="co"># nocov start</span></span>
-<span id="cb22-3"><a></a>  <span class="fu">browse_results</span>(x)</span>
-<span id="cb22-4"><a></a>} <span class="co"># nocov end</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>Or exclude a single line:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">stop</span>(<span class="st">"Column must be numeric"</span>) <span class="co"># nocov</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</section>
-<section id="coverage-in-ci" class="slide level2">
-<h2>Coverage in CI</h2>
-<p>Add a GitHub Actions workflow that reports coverage on every push:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>usethis<span class="sc">::</span><span class="fu">use_github_action</span>(<span class="st">"test-coverage"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="fragment">
-<p>By default this uploads results to <a href="https://about.codecov.io/">Codecov</a>, which tracks coverage over time and comments on pull requests with coverage diffs.</p>
-<p>You will need to add a <code>CODECOV_TOKEN</code> repository secret - see the session notes for setup details.</p>
-</div>
-<aside class="notes">
-<p>If participants do not want a Codecov account, they can edit the generated workflow to remove the codecov/codecov-action upload step. Coverage will still be printed to the Actions log on every run.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="a-word-on-coverage-targets" class="slide level2">
-<h2>A word on coverage targets</h2>
-<ul>
-<li class="fragment">High coverage is useful as a guide for finding gaps</li>
-<li class="fragment">Chasing 100% is rarely worthwhile</li>
-<li class="fragment">Coverage tells you which lines were <em>executed</em>, not whether the tests verify correct behaviour</li>
-<li class="fragment">A test that runs code without assertions inflates the number without adding value</li>
-</ul>
-<div class="fragment">
-<p>Focus on covering the important logic paths and edge cases - not the number.</p>
-</div>
+R/cpue.R:    93.75%
+```
+:::
+
+::: {.fragment}
+For a single overall number:
+
+
+::: {.cell}
+
+```{.r .cell-code}
+percent_coverage(cov)
+```
+:::
+
+:::
+
+::: {.notes}
+package_coverage() loads the package, runs all your tests, and records which lines were hit. It takes the same time as running test(). The output already tells a useful story - which files have the most gaps.
+:::
+
+## Finding untested code
+
+
+::: {.cell}
+
+```{.r .cell-code}
+zero_coverage(cov)
+```
+:::
+
+
+::: {.fragment}
+Returns a data frame of every line with zero hits. In RStudio, these appear as clickable markers - you can jump straight to the uncovered line.
+:::
+
+
+## Visual report
+
+
+::: {.cell}
+
+```{.r .cell-code}
+report(cov)
+```
+:::
+
+
+::: {.fragment}
+Opens an HTML page showing each file with lines colour-coded:
+
+- Green: covered
+- Red: not covered
+:::
+
+::: {.notes}
+Show this live. The visual report makes it immediately obvious which branches are untested - for example, an error-handling path that is never triggered by tests.
+:::
+
+## Active file coverage
+
+
+::: {.cell}
+
+```{.r .cell-code}
+devtools::test_coverage_active_file()
+```
+:::
+
+
+::: {.fragment}
+Runs coverage only for the file you are editing - much faster than the full package.
+
+Consider binding this to a keyboard shortcut: `Ctrl/Cmd + R`
+:::
+
+## Excluding lines
+
+Some lines are not worth testing - interactive-only code paths, print methods, and so on.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+if (interactive()) {
+  # nocov start
+  browse_results(x)
+} # nocov end
+```
+:::
+
+
+::: {.fragment}
+Or exclude a single line:
+
+
+::: {.cell}
+
+```{.r .cell-code}
+stop("Column must be numeric") # nocov
+```
+:::
+
+
+:::
+
+## Coverage in CI
+
+Add a GitHub Actions workflow that reports coverage on every push:
+
+
+::: {.cell}
+
+```{.r .cell-code}
+usethis::use_github_action("test-coverage")
+```
+:::
+
+
+::: {.fragment}
+By default this uploads results to [Codecov](https://about.codecov.io/), which tracks coverage over time and comments on pull requests with coverage diffs.
+
+You will need to add a `CODECOV_TOKEN` repository secret - see the session notes for setup details.
+:::
+
+::: {.notes}
+If participants do not want a Codecov account, they can edit the generated workflow to remove the codecov/codecov-action upload step. Coverage will still be printed to the Actions log on every run.
+:::
+
+## A word on coverage targets
+
+::: {.incremental}
+- High coverage is useful as a guide for finding gaps
+- Chasing 100% is rarely worthwhile
+- Coverage tells you which lines were *executed*, not whether the tests verify correct behaviour
+- A test that runs code without assertions inflates the number without adding value
+:::
+
+::: {.fragment}
+Focus on covering the important logic paths and edge cases - not the number.
+::: -->
 
 
 </section></section>

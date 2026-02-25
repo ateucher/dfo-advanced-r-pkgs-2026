@@ -2579,69 +2579,6 @@
     "text": "Quiz\n\nWhere have we already altered the global state in our test helpers?\n\n\ntests/testthat/helper.R calls set.seed() directly - this sets the seed for the entire session.\n\n# Before\ngenerate_fishing_data &lt;- function(n = 10) {\n  set.seed(67)\n  data.frame(...)\n}\n\n\n\n\n# After\ngenerate_fishing_data &lt;- function(n = 10) {\n  withr::local_seed(67)\n  data.frame(...)\n}\n\n\n\nlocal_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function."
   },
   {
-    "objectID": "slides/testing-part2-slides.html#why-measure-coverage",
-    "href": "slides/testing-part2-slides.html#why-measure-coverage",
-    "title": "Testing with testthat",
-    "section": "Why measure coverage?",
-    "text": "Why measure coverage?\nCoverage tracks which lines of your code are executed when your tests run.\n\nReveals untested code paths - the gaps you didn’t notice\nGives you an objective starting point when inheriting a package\nCI can report coverage changes on every PR\n\n\nCoverage tells you where tests are absent. It does not tell you whether the tests you have are any good."
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#set-up-covr",
-    "href": "slides/testing-part2-slides.html#set-up-covr",
-    "title": "Testing with testthat",
-    "section": "Set up covr",
-    "text": "Set up covr\n\nuse_package(\"covr\", type = \"Suggests\")"
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#run-package-coverage",
-    "href": "slides/testing-part2-slides.html#run-package-coverage",
-    "title": "Testing with testthat",
-    "section": "Run package coverage",
-    "text": "Run package coverage\n\nlibrary(covr)\n\ncov &lt;- package_coverage()\ncov\n\n\nPrints a per-file coverage percentage:\nfishr Coverage: 87.50%\nR/biomass.R: 75.00%\nR/cpue.R:    93.75%\n\n\nFor a single overall number:\n\npercent_coverage(cov)\n\n\n\npackage_coverage() loads the package, runs all your tests, and records which lines were hit. It takes the same time as running test(). The output already tells a useful story - which files have the most gaps."
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#finding-untested-code",
-    "href": "slides/testing-part2-slides.html#finding-untested-code",
-    "title": "Testing with testthat",
-    "section": "Finding untested code",
-    "text": "Finding untested code\n\nzero_coverage(cov)\n\n\nReturns a data frame of every line with zero hits. In RStudio, these appear as clickable markers - you can jump straight to the uncovered line."
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#visual-report",
-    "href": "slides/testing-part2-slides.html#visual-report",
-    "title": "Testing with testthat",
-    "section": "Visual report",
-    "text": "Visual report\n\nreport(cov)\n\n\nOpens an HTML page showing each file with lines colour-coded:\n\nGreen: covered\nRed: not covered\n\n\n\nShow this live. The visual report makes it immediately obvious which branches are untested - for example, an error-handling path that is never triggered by tests."
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#active-file-coverage",
-    "href": "slides/testing-part2-slides.html#active-file-coverage",
-    "title": "Testing with testthat",
-    "section": "Active file coverage",
-    "text": "Active file coverage\n\ndevtools::test_coverage_active_file()\n\n\nRuns coverage only for the file you are editing - much faster than the full package.\nConsider binding this to a keyboard shortcut: Ctrl/Cmd + R"
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#excluding-lines",
-    "href": "slides/testing-part2-slides.html#excluding-lines",
-    "title": "Testing with testthat",
-    "section": "Excluding lines",
-    "text": "Excluding lines\nSome lines are not worth testing - interactive-only code paths, print methods, and so on.\n\nif (interactive()) {\n  # nocov start\n  browse_results(x)\n} # nocov end\n\n\nOr exclude a single line:\n\nstop(\"Column must be numeric\") # nocov"
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#coverage-in-ci",
-    "href": "slides/testing-part2-slides.html#coverage-in-ci",
-    "title": "Testing with testthat",
-    "section": "Coverage in CI",
-    "text": "Coverage in CI\nAdd a GitHub Actions workflow that reports coverage on every push:\n\nusethis::use_github_action(\"test-coverage\")\n\n\nBy default this uploads results to Codecov, which tracks coverage over time and comments on pull requests with coverage diffs.\nYou will need to add a CODECOV_TOKEN repository secret - see the session notes for setup details.\n\n\nIf participants do not want a Codecov account, they can edit the generated workflow to remove the codecov/codecov-action upload step. Coverage will still be printed to the Actions log on every run."
-  },
-  {
-    "objectID": "slides/testing-part2-slides.html#a-word-on-coverage-targets",
-    "href": "slides/testing-part2-slides.html#a-word-on-coverage-targets",
-    "title": "Testing with testthat",
-    "section": "A word on coverage targets",
-    "text": "A word on coverage targets\n\nHigh coverage is useful as a guide for finding gaps\nChasing 100% is rarely worthwhile\nCoverage tells you which lines were executed, not whether the tests verify correct behaviour\nA test that runs code without assertions inflates the number without adding value\n\n\nFocus on covering the important logic paths and edge cases - not the number."
-  },
-  {
     "objectID": "testing-part2.html",
     "href": "testing-part2.html",
     "title": "Testing with testthat - Part 2",
