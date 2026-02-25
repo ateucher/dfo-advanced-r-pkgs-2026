@@ -336,7 +336,7 @@ generate_fishing_data <- function(n = 10) {
 local_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function.
 :::
 
-# Test Coverage with covr
+<!-- # Test Coverage with covr
 
 ## Why measure coverage?
 
@@ -478,4 +478,4 @@ If participants do not want a Codecov account, they can edit the generated workf
 
 ::: {.fragment}
 Focus on covering the important logic paths and edge cases - not the number.
-:::
+::: -->
