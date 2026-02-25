@@ -280,8 +280,8 @@ a fundamental metric in fisheries science.
 You can install the development version of fishr from [GitHub](https://github.com/) with:
 
 ```r
-# install.packages("devtools")
-devtools::install_github("yourname/fishr")
+# install.packages("pak")
+pak::pak("yourname/fishr")
 ```
 
 ## Example usage

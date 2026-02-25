@@ -84,9 +84,7 @@ test_that("gear_factor standardization scales correctly", {
 ### Testing edge cases
 
 ```{r}
-test_that("cpue handles zero catch and missing data", {
-  expect_equal(cpue(catch = 0, effort = 10), 0)
-
+test_that("cpue handles missing data", {
   expect_true(is.na(cpue(NA_real_, 10)))
   expect_true(is.na(cpue(100, NA_real_)))
 })
@@ -185,20 +183,7 @@ test()
 ## Make a commit
 :::
 
-## Testing Different Function Types
-
-### Testing return types and structure
-
-```{r}
-test_that("cpue returns numeric vector", {
-  result <- cpue(c(100, 200), c(10, 20))
-
-  expect_type(result, "double")
-  expect_length(result, 2)
-})
-```
-
-### Testing with expect_message
+### Testing messages with `expect_message`
 
 Let's add a `verbose` parameter to cpue so we can test messages.
 Don't forget to update the function documentation with the new `verbose` argument.
@@ -247,19 +232,6 @@ test_that("cpue is silent by default", {
 })
 ```
 
-### Testing with expect_warning
-
-```{r}
-test_that("cpue warns when vector lengths don't match", {
-  expect_warning(
-    cpue(catch = c(100, 200, 300), effort = c(10, 20)),
-    "longer object length is not a multiple of shorter object length"
-  )
-
-  expect_no_warning(cpue(100, 10))
-})
-```
-
 ## Snapshot Testing Introduction
 
 Snapshot testing captures output and compares against a saved reference.
@@ -273,12 +245,12 @@ Snapshot testing captures output and compares against a saved reference.
     for warnings because these allow the user to review the full text of the output.
 - Plots (with vdiffr package)
 
-### Basic snapshot test
+### Basic snapshot test for errors
 
 ```{r}
-test_that("cpue error message is informative", {
+test_that("cpue errors when input is not numeric", {
   expect_snapshot(
-    cpue("not a number", 10),
+    cpue("five", 10),
     error = TRUE
   )
 })
@@ -295,31 +267,19 @@ test()
 
 ### Snapshot testing for warnings
 
-Let's update our warning test to use snapshots so we can review the full warning
+Let's use snapshots so we can review the full warning
 and save ourselves from having to copy and paste the warning text into our test code.
 
 ```{r}
-test_that("cpue produces no warnings with valid input", {
+test_that("cpue warns when catch and effort lengths differ", {
   expect_snapshot(
-    cpue(catch = c(100, 200, 300), effort = c(10, 20))
+    cpue(c(100, 200, 300), c(10, 20))
   )
 
   expect_no_warning(cpue(100, 10))
 })
 ```
 
-### Your turn
-
-Update your message test to use snapshots instead of `expect_message()`
-
-```{r}
-test_that("cpue provides informative message when verbose", {
-  expect_snapshot(
-    cpue(c(100, 200), c(10, 20), verbose = TRUE)
-  )
-  expect_no_message(cpue(100, 10))
-})
-```
 
 ***We'll dive deeper into snapshot testing in Part 2***
 

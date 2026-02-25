@@ -203,7 +203,7 @@ cpue <- function(
 ```
 
 ::: {.fragment}
-Tests that set `fishr.verbose = TRUE` must restore the original value afterward - or they will leak into other tests.
+Tests that set `options(fishr.verbose = TRUE)` must restore the original value afterward - or they will leak into other tests.
 :::
 
 ## Testing options with `local_options`
@@ -227,6 +227,8 @@ Emphasise that without local_options, the first test would leave fishr.verbose =
 :::
 
 ## `with_options` for a single assertion
+
+Provide options in a list
 
 ```{r}
 test_that("cpue verbosity falls back to FALSE when not set", {
@@ -284,7 +286,6 @@ test_that("biomass_index verbosity falls back to FALSE when not set", {
 | `local_tempfile()` / `with_tempfile()` | Temp file (deleted after) |
 | `local_tempdir()` / `with_tempdir()` | Temp directory (deleted after) |
 | `local_seed()` / `with_seed()` | Random seed |
-| `defer()` | Custom cleanup code |
 
 ## Example: testing file output
 
@@ -317,6 +318,10 @@ generate_fishing_data <- function(n = 10) {
 }
 ```
 
+:::
+
+::: {.fragment}
+
 ```{r}
 # After
 generate_fishing_data <- function(n = 10) {
@@ -331,7 +336,7 @@ generate_fishing_data <- function(n = 10) {
 local_seed() sets the seed, runs the body of the function, then restores the previous seed state. This means calling generate_fishing_data() no longer has any effect on the random number stream outside of the function.
 :::
 
-# Test Coverage with covr
+<!-- # Test Coverage with covr
 
 ## Why measure coverage?
 
@@ -473,4 +478,4 @@ If participants do not want a Codecov account, they can edit the generated workf
 
 ::: {.fragment}
 Focus on covering the important logic paths and edge cases - not the number.
-:::
+::: -->

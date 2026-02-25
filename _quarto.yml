@@ -2,6 +2,7 @@ project:
   type: website
   render:
     - "*.qmd"
+    - "*md"
     - "slides/*.qmd"
     - "!claude.md"
     - "!CLAUDE.md"
@@ -36,11 +37,13 @@ website:
             href: slides/testing-part2-slides.html
           - text: "Day 2, Session 3: Advanced Documentation"
             href: slides/documentation-slides.html
-          - text: "Day 2, Session 3: Debugging Techniques"
+          - text: "Day 2, Session 4: Debugging Techniques"
             href: slides/debugging-techniques-slides.html
           - text: "Day 3, Session 1: Object-Oriented Programming"
             href: slides/oop-slides.html
-          - text: "Day 3, Session 2: Releasing Your R Package"
+          - text: "Day 3, Session 2: Data in Packages"
+            href: slides/data-packages-slides.html
+          - text: "Day 3, Session 3: Releasing Your R Package"
             href: slides/releasing-slides.html
   repo-url: https://github.com/ateucher/dfo-advanced-r-pkgs-2026
   repo-actions: [edit, issue]
