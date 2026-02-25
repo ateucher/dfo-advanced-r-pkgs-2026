@@ -203,7 +203,7 @@ cpue <- function(
 ```
 
 ::: {.fragment}
-Tests that set `fishr.verbose = TRUE` must restore the original value afterward - or they will leak into other tests.
+Tests that set `options(fishr.verbose = TRUE)` must restore the original value afterward - or they will leak into other tests.
 :::
 
 ## Testing options with `local_options`
@@ -227,6 +227,8 @@ Emphasise that without local_options, the first test would leave fishr.verbose =
 :::
 
 ## `with_options` for a single assertion
+
+Provide options in a list
 
 ```{r}
 test_that("cpue verbosity falls back to FALSE when not set", {
@@ -284,7 +286,6 @@ test_that("biomass_index verbosity falls back to FALSE when not set", {
 | `local_tempfile()` / `with_tempfile()` | Temp file (deleted after) |
 | `local_tempdir()` / `with_tempdir()` | Temp directory (deleted after) |
 | `local_seed()` / `with_seed()` | Random seed |
-| `defer()` | Custom cleanup code |
 
 ## Example: testing file output
 
@@ -316,6 +317,10 @@ generate_fishing_data <- function(n = 10) {
   data.frame(...)
 }
 ```
+
+:::
+
+::: {.fragment}
 
 ```{r}
 # After

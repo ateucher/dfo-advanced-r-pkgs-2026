@@ -27,9 +27,9 @@ snapshot_accept()
 ::: {.callout-tip}
 ## Snapshots need updating throughout development
 
-This will not be the last time you update snapshots. Each time you change
-output that a snapshot captures - a message format, an error message, a print
-method - the affected tests will fail until you accept the new output.
+Each time you change output that a snapshot captures - a message format, an 
+error message, a print method - the affected tests will fail until you accept 
+the new output.
 
 This is the intended workflow: the failure is a prompt to *review* the change,
 not a sign something is wrong. By Day 3 of this workshop you will have gone

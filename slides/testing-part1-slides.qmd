@@ -158,9 +158,7 @@ test_that("gear_factor standardization scales correctly", {
 ## Testing edge cases
 
 ```{r}
-test_that("cpue handles zero catch and missing data", {
-  expect_equal(cpue(catch = 0, effort = 10), 0)
-
+test_that("cpue handles missing data", {
   expect_true(is.na(cpue(NA_real_, 10)))
   expect_true(is.na(cpue(100, NA_real_)))
 })
@@ -206,7 +204,7 @@ use_testthat_helper()
 ::: {.fragment}
 Creates `tests/testthat/helper.R` - loaded before every test run.
 
-Does not contain test code itself, but defines functions that can be used in tests.
+Does not contain test code itself, but defines *functions* that can be used in tests.
 
 ```{r}
 # tests/testthat/helper.R
@@ -306,19 +304,6 @@ test_that("cpue is silent by default", {
 Always test both the positive and negative case - that the message appears when expected, and that it's absent when not.
 :::
 
-## Testing with `expect_warning`
-
-```{r}
-test_that("cpue warns when vector lengths don't match", {
-  expect_warning(
-    cpue(catch = c(100, 200, 300), effort = c(10, 20)),
-    "longer object length is not a multiple of shorter object length"
-  )
-
-  expect_no_warning(cpue(100, 10))
-})
-```
-
 # Snapshot Testing
 
 ## Overview
@@ -349,9 +334,9 @@ expect_snapshot(
 
 \
 ```{r}
-test_that("cpue error message is informative", {
+test_that("cpue errors when input is not numeric", {
   expect_snapshot(
-    cpue("not a number", 10),
+    cpue("five", 10),
     error = TRUE
   )
 })
@@ -371,10 +356,10 @@ test()
 testthat writes the snapshot to `tests/testthat/_snaps/`:
 
 ```
-# cpue error message is informative
+# cpue errors when input is not numeric
 
     Code
-      cpue("not a number", 10)
+      cpue("five", 10)
     Error
       non-numeric argument to binary operator
 ```
@@ -382,6 +367,21 @@ testthat writes the snapshot to `tests/testthat/_snaps/`:
 ::: {.fragment}
 Commit the snapshot file - it becomes your reference.
 :::
+
+## Snapshot testing for warnings
+
+- Save yourself from having to copy and paste the warning text into our test code.
+- Easy to review and update when warning text changes.
+
+```{r}
+test_that("cpue warns when catch and effort lengths differ", {
+  expect_snapshot(
+    cpue(c(100, 200, 300), c(10, 20))
+  )
+
+  expect_no_warning(cpue(100, 10))
+})
+```
 
 ## When snapshots change
 
@@ -392,9 +392,7 @@ snapshot_review() # interactive diff viewer
 snapshot_accept() # accept all changes
 ```
 
-::: {.fragment}
 We'll dive deeper into snapshot workflows in **Part 2**.
-:::
 
 ## Make a commit
 
@@ -410,14 +408,6 @@ Commit your snapshot tests - including the `_snaps/` files testthat created.
 | Active file | `devtools::test_active_file()` | `Ctrl/Cmd+T` |
 | Whole package | `devtools::test()` | `Shift+Ctrl/Cmd+T` |
 
-## Interactive testing matters
-
-Running individual `test_that()` blocks interactively only works if tests are self-contained.
-
-::: {.fragment}
-Keep setup *inside* `test_that()` blocks (or in helpers), not floating in the test file.
-:::
-
 ## Full check
 
 ```{r}
@@ -425,10 +415,6 @@ test() # run tests only
 
 check() # full package check (includes tests)
 ```
-
-::: {.notes}
-check() runs R CMD check which is what CRAN runs. Get in the habit of running it regularly, not just before submission.
-:::
 
 # Your Turn
 
