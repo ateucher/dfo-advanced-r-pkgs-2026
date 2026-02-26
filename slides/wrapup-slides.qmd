@@ -1,0 +1,88 @@
+---
+title: "Wrapping Up"
+subtitle: "Advanced R Package Development"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## We've covered a lot!
+
+::: {.incremental}
+
+- Package fundamentals and workflows
+- Git and GitHub
+- Testing with testthat
+- Function design best practices
+- Efficient documentation with roxygen2
+- Debugging
+- Object-oriented programming with S3
+- Data in packages
+
+:::
+
+::: {.fragment}
+
+### And you did awesome work!
+
+:::
+
+::: {.fragment}
+
+Exposure to concepts & tools, it's up to you to practice & apply
+
+:::
+
+## Big Picture
+
+. . .
+
+A growth mindset
+
+
+. . .
+
+\+
+
+Shared coding styles and conventions
+
+. . .
+
+\+
+
+Git and GitHub 
+<br>
+
+. . .
+
+[= better packages, and better and more reproducible science in less time]{style="font-weight: bold; font-size: 1.2em;"}
+
+## Wrap up
+
+Identify as a team & prioritize helping each other
+
+- Work on many different projects
+- Use same workflows, share feedback, think together across projects
+
+Shared practices are a daily opportunity for efficiency & inclusion
+
+- Increase participation and inclusion
+- Common ground, easier to talk about, easier to ask for help
+
+## Key resources
+
+- [R Packages book](https://r-pkgs.org/) (Hadley Wickham & Jennifer Bryan)
+- [Advanced R](https://adv-r.hadley.nz/) (Hadley Wickham)
+- [Happy Git and GitHub for the useR](https://happygitwithr.com/) (Jenny Bryan & Jim Hester)
+- [Package Development Cheat Sheet](https://rstudio.github.io/cheatsheets/html/package-development.html)
+- [Posit Community Forum - Package Development](https://community.rstudio.com/c/package-development)
+- [Tidyverse design guide](https://design.tidyverse.org)
