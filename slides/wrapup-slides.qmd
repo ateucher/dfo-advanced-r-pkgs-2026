@@ -30,9 +30,17 @@ execute:
 
 :::
 
-. . .
+::: {.fragment}
+
+### And you did awesome work!
+
+:::
+
+::: {.fragment}
 
 Exposure to concepts & tools, it's up to you to practice & apply
+
+:::
 
 ## Big Picture
 
