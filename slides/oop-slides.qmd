@@ -29,6 +29,7 @@ execute:
 ```{r}
 #| eval: true
 #| output-location: column-fragment
+#| code-line-numbers: "|2"
 x_norm <- rnorm(5000)
 summary(x_norm)
 ```
@@ -52,6 +53,7 @@ summary(mtcars)
 ```{r}
 #| eval: true
 #| output-location: column-fragment
+#| code-line-numbers: "|2"
 mtcars_model <- lm(mpg ~ wt, data = mtcars)
 summary(mtcars_model)
 ```
@@ -104,7 +106,7 @@ function (object, ...) UseMethod("summary")
 It does almost nothing itself - it just dispatches.
 :::
 
-::: {.column width="50%"}
+::: {.column width="50%" .fragment}
 **A method** is a class-specific implementation:
 
 ```{r}
@@ -175,6 +177,8 @@ S4 is worth knowing if you work in Bioconductor or need multiple dispatch. R6 is
 
 ...with a `class` attribute attached.
 
+. . .
+
 ```{r}
 x <- c(10, 20, 30)
 class(x)
@@ -225,7 +229,7 @@ class(r) # "cpue_result"
 
 :::
 
-# Writing Methods
+# Writing New Methods for Existing Generics
 
 ## The `print` method
 
@@ -233,6 +237,8 @@ When you type an object name at the console, R calls `print()` - this is **autop
 
 - A special generic that is called implicitly when an object is returned at the console.
 
+
+**Generic Signature**: `print(x, ...)`
 . . .
 
 ```{r}
@@ -246,6 +252,7 @@ print.cpue_result <- function(x, ...) {
 
 ::: {.incremental}
 - Name it `print.<classname>`
+- First argument is `x`
 - Always include `...` in the signature - the `print` generic requires it (See `?print`)
 - Don't modify `x`; return `invisible(x)` so assignment still works: `y <- print(x)`
 - Use `cat()` inside, not `print()` - calling `print()` inside `print.foo` causes infinite recursion
@@ -269,7 +276,7 @@ Without a custom print method, R falls back to `print.default`, which is why our
 tagged vector currently displays as raw numbers.
 :::
 
-## Carrying metadata with attributes
+## Add metadata to class with attributes
 
 A class tag alone gives us dispatch. **Attributes** let us attach context to the object.
 
@@ -388,6 +395,8 @@ print.cpue_result <- function(x, ...) {
 
 `summary` should print a useful statistical summary:
 
+**Generic Signature**: `summary(object, ...)`
+
 ```{r}
 summary.cpue_result <- function(object, ...) {
   cat("Survey Result Summary\n")
@@ -406,6 +415,8 @@ summary.cpue_result <- function(object, ...) {
 
 - Plot methods must be named `plot.<classname>`, take `x` as the first argument, and include `...` in the signature.
 - Note that you don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. 
+
+**Generic Signature**: `plot(x, ...)`
 
 ::: {.fragment}
 
@@ -453,6 +464,10 @@ S3method(plot,cpue_result)
 ::: {.fragment}
 `S3method()` entries - not regular `export()` entries - are how R finds your methods when the package is installed.
 :::
+
+## We are going to have some test failures...
+
+Let's go and fix them!
 
 ## Testing S3 classes
 
@@ -534,7 +549,7 @@ Replace the function body with `UseMethod()`:
 
 ```{r}
 #' @export
-cpue <- function(x, ...) {
+cpue <- function(catch, ...) {
   UseMethod("cpue")
 }
 ```
@@ -542,7 +557,7 @@ cpue <- function(x, ...) {
 ::: {.fragment}
 The first argument becomes `x` by convention - it could be a numeric vector or a data frame.
 
-`UseMethod("cpue")` tells R: look at `class(x)` and dispatch to `cpue.<class>`.
+`UseMethod("cpue")` tells R: look at `class(catch)` and dispatch to `cpue.<class>`.
 :::
 
 ## Step 2: The numeric method
@@ -554,7 +569,7 @@ Move the existing implementation into `cpue.numeric`:
 #' @rdname cpue
 #' @export
 cpue.numeric <- function(
-  x,
+  catch,
   effort,
   gear_factor = 1,
   method = c("ratio", "log"),
@@ -562,7 +577,7 @@ cpue.numeric <- function(
   ...
 ) {
   # ... same logic as before ...
-  new_cpue_result(raw_cpue * gear_factor, method, gear_factor, length(x))
+  new_cpue_result(raw_cpue * gear_factor, method, gear_factor, length(catch))
 }
 ```
 
@@ -577,17 +592,17 @@ All existing calls to `cpue()` with a numeric first argument still work - R disp
 #' @rdname cpue
 #' @export
 cpue.data.frame <- function(
-  x,
+  catch,
   ...
 ) {
-  if (!"catch" %in% names(x)) {
+  if (!"catch" %in% names(catch)) {
     stop("Column 'catch' not found.", call. = FALSE)
   }
-  if (!"effort" %in% names(x)) {
+  if (!"effort" %in% names(catch)) {
     stop("Column 'effort' not found.", call. = FALSE)
   }
 
-  cpue(x[["catch"]], effort = x[["effort"]], ...)
+  cpue(catch[["catch"]], effort = catch[["effort"]], ...)
 }
 ```
 
@@ -602,8 +617,8 @@ This **delegation pattern** - one method calling the generic with different inpu
 ```{r}
 #' @rdname cpue
 #' @export
-cpue.default <- function(x, ...) {
-  stop("Unsupported input type for cpue(): ", class(x), call. = FALSE)
+cpue.default <- function(catch, ...) {
+  stop("Unsupported input type for cpue(): ", class(catch), call. = FALSE)
 }
 ```
 
@@ -619,21 +634,21 @@ All three methods share one help page:
 
 ```{r}
 #' Calculate CPUE
-#' @param x A numeric vector of catch, or a data frame.
+#' @param catch A numeric vector of catch, or a data frame.
 #' @param ... Additional arguments passed to methods.
 #' @export
-cpue <- function(x, ...) UseMethod("cpue")
+cpue <- function(catch, ...) UseMethod("cpue")
 
 #' @rdname cpue
 #' ... same @param tags as before ...
 #' @export
-cpue.numeric <- function(x, effort, ...) {
+cpue.numeric <- function(catch, effort, ...) {
   ...
 }
 
 #' @rdname cpue
 #' @export
-cpue.data.frame <- function(x, ...) {
+cpue.data.frame <- function(catch, ...) {
   ...
 }
 ```
@@ -655,25 +670,11 @@ fishing_data <- data.frame(catch = c(100, 200), effort = c(10, 20))
 cpue(fishing_data)
 ```
 
-## One thing to watch for
-
-The first argument was renamed from `catch` to `x`.
-
-Any call using the named argument `catch = ` will break:
-
-```{r}
-cpue(catch = 100, effort = 10) # Error: unused argument (catch = 100)
-cpue(100, 10) # Fine - positional arguments still work
-```
-
-::: {.fragment}
-Existing tests that use `catch =` will need updating. This is a **breaking change** - something to note in your changelog.
-:::
-
 ## Update `biomass_index()` documentation
 
 - Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is now the method it actually calls. 
-- Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
+- `cpue.numeric` defines `catch` as a vector OR data.frame, but `biomass_index` expects a numeric vector
+  - add `@param catch` back explicitly:
 
 ```{r}
 #' Calculate Biomass Index

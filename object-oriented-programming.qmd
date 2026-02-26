@@ -237,20 +237,6 @@ attr(result, "n_records")
 attr(result, "method")
 ```
 
-Now our print method can be more informative:
-
-```{r}
-#' @export
-print.cpue_result <- function(x, ...) {
-  cat("CPUE Result\n")
-  cat("Records:     ", attr(x, "n_records"), "\n")
-  cat("Method:      ", attr(x, "method"), "\n")
-  cat("Gear factor: ", attr(x, "gear_factor"), "\n")
-  cat("Values:      ", round(x, 2), "\n")
-  invisible(x)
-}
-```
-
 As a class accumulates more fields, setting attributes one by one gets unwieldy. 
 
 ### Create a constructor function
@@ -308,6 +294,20 @@ cpue <- function(
     gear_factor = gear_factor,
     n_records = length(catch)
   )
+}
+```
+
+Now our print method can be more informative:
+
+```{r}
+#' @export
+print.cpue_result <- function(x, ...) {
+  cat("CPUE Result\n")
+  cat("Records:     ", attr(x, "n_records"), "\n")
+  cat("Method:      ", attr(x, "method"), "\n")
+  cat("Gear factor: ", attr(x, "gear_factor"), "\n")
+  cat("Values:      ", round(x, 2), "\n")
+  invisible(x)
 }
 ```
 
@@ -497,12 +497,12 @@ convention, since it could be either a numeric vector or a data frame:
 #' Calculates CPUE from catch and effort data, with optional gear
 #' standardization. Supports ratio and log-transformed methods.
 #'
-#' @param x Input data: a numeric vector of catch values, or a data frame
+#' @param catch Input data: a numeric vector of catch values, or a data frame
 #'   containing catch and effort columns.
 #' @param ... Additional arguments passed to methods.
 #'
 #' @export
-cpue <- function(x, ...) {
+cpue <- function(catch, ...) {
   UseMethod("cpue")
 }
 ```
@@ -528,7 +528,7 @@ to match the generic's signature, but the logic is identical:
 #' cpue(100, 10)
 #' cpue(c(100, 200), c(10, 20), method = "log")
 cpue.numeric <- function(
-  x,
+  catch,
   effort,
   gear_factor = 1,
   method = c("ratio", "log"),
@@ -537,23 +537,23 @@ cpue.numeric <- function(
 ) {
   method <- match.arg(method)
 
-  validate_numeric_inputs(x = x, effort = effort)
+  validate_numeric_inputs(catch = catch, effort = effort)
 
   if (verbose) {
-    message("Processing ", length(x), " records using ", method, " method")
+    message("Processing ", length(catch), " records using ", method, " method")
   }
 
   raw_cpue <- switch(
     method,
-    ratio = x / effort,
-    log = log(x / effort)
+    ratio = catch / effort,
+    log = log(catch / effort)
   )
 
   new_cpue_result(
     values = raw_cpue * gear_factor,
     method = method,
     gear_factor = gear_factor,
-    n_records = length(x)
+    n_records = length(catch)
   )
 }
 ```
@@ -561,36 +561,30 @@ cpue.numeric <- function(
 All existing code that calls `cpue()` with positional arguments continues to work - R
 dispatches to `cpue.numeric` because the first argument is numeric.
 
-::: {.callout-warning}
-## Named argument change
-
-The first argument was renamed from `catch` to `x` to match the generic's signature. Any call using named arguments - `cpue(catch = 100, effort = 10)` - will now fail because `catch` is no longer a parameter. Update these to use positional arguments: `cpue(100, 10)`.
-:::
-
 ### Step 3: Add a data frame method
 
 ```{r}
 #' @rdname cpue
 #' @export
 cpue.data.frame <- function(
-  x,
+  catch,
   gear_factor = 1,
   method = c("ratio", "log"),
   verbose = getOption("fishr.verbose", FALSE),
   ...
 ) {
-  if (!"catch" %in% names(x)) {
+  if (!"catch" %in% names(catch)) {
     stop("Column 'catch' not found in data frame.", call. = FALSE)
   }
-  if (!"effort" %in% names(x)) {
+  if (!"effort" %in% names(catch)) {
     stop("Column 'effort' not found in data frame.", call. = FALSE)
   }
 
   # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.
   # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.
   cpue(
-    x = x[["catch"]],
-    effort = x[["effort"]],
+    catch = catch[["catch"]],
+    effort = catch[["effort"]],
     gear_factor = gear_factor,
     method = method,
     verbose = verbose,
@@ -607,21 +601,21 @@ with different input - is a common and effective pattern.
 
 It's good practice to add a default method that throws an informative error if 
 the user passes in an unsupported type. If the generic can't find a method for 
-the class of `x`, it will fall back to `cpue.default`:
+the class of `catch`, it will fall back to `cpue.default`:
 
 ```{r}
 #' @rdname cpue
 #' @export
-cpue.default <- function(x, ...) {
-  stop("Unsupported input type for cpue(): ", class(x), call. = FALSE)
+cpue.default <- function(catch, ...) {
+  stop("Unsupported input type for cpue(): ", class(catch), call. = FALSE)
 }
 ```
 
 ### Update biomass_index documentation
 
-Converting `cpue` into a generic changed its signature from `cpue(catch, effort, ...)` to `cpue(x, ...)`. The `@inheritParams cpue` tag on `biomass_index` was inheriting `catch` and `effort` docs from the old function - those params no longer exist on the generic.
-
-Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is the method it actually calls. Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
+- Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is now the method it actually calls. 
+- `cpue.numeric` defines `catch` as a vector OR data.frame, but `biomass_index` expects a numeric vector
+  - add `@param catch` back explicitly:
 
 ```{r}
 #' Calculate Biomass Index
@@ -664,7 +658,6 @@ cpue(fishing_data)
 
 Two things have changed that may break existing tests:
 
-- **Named argument calls:** tests using `cpue(catch = ..., effort = ...)` will fail now that the argument is named `x`. Change these to positional calls.
 - **Return type:** `cpue()` now returns a `cpue_result` object, not a plain numeric. `expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in `as.numeric()` for numeric comparisons: `expect_equal(as.numeric(cpue(100, 10)), 10)`.
 
 Some existing snapshots will also be stale since the print format changed. Run `snapshot_accept()` after `check()` to accept the updated snapshots.
