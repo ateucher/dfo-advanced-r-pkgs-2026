@@ -1027,7 +1027,7 @@
     "href": "slides/data-packages-slides.html#connecting-to-cpue",
     "title": "Data in Packages",
     "section": "Connecting to cpue()",
-    "text": "Connecting to cpue()\n\nfish &lt;- kluane[kluane$species != \"no fish\", ]\n\nsurvey_df &lt;- data.frame(\n  catch  = as.integer(table(fish$set_number)),\n  effort = 1L\n)\n\nlt_cpue &lt;- cpue(survey_df)\nsummary(lt_cpue)\n\n\ncpue() is a generic with a data.frame method - passing a data frame with catch and effort columns dispatches automatically. Real-world data flows through the same function without any changes to it."
+    "text": "Connecting to cpue()\n\nfish &lt;- kluane[kluane$species != \"no fish\", ]\n\nsurvey_df &lt;- data.frame(\n  catch  = as.integer(table(fish$set_number)),\n  effort = 1L\n)\n\nlt_cpue &lt;- cpue(survey_df)\nsummary(lt_cpue)\n\n\ncpue() is a generic with a data.frame method - passing a data frame with catch and effort columns dispatches automatically. Real-world data flows through the same function without any changes to it.\n\n\n\nWhat might be a better way to go from fetch_kluane_data to cpue?"
   },
   {
     "objectID": "slides/data-packages-slides.html#testing-functions-that-call-http-apis",
