@@ -467,7 +467,27 @@ S3method(plot,cpue_result)
 
 ## We are going to have some test failures...
 
-Let's go and fix them!
+- `cpue()` now returns a `cpue_result` object, not a plain numeric. 
+- `expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. 
+
+We have a few options to fix this:
+
+::: {.incremental}
+- Wrap the result in `as.numeric()` for numeric comparisons: 
+  - `expect_equal(as.numeric(cpue(100, 10)), 10)`.
+- Use the `ignore_attr = TRUE` argument in `expect_equal()` to ignore attributes: 
+  - `expect_equal(cpue(100, 10), 10, ignore_attr = TRUE)`.
+- Write a helper function in `tests/testthat/helper.R` to use in our tests:
+
+  ```r
+  expect_equal_numbers <- function(object, expected, ...) {
+    expect_equal(object, expected, ignore_attr = TRUE, ...)
+  }
+  ```
+  
+  Then use `expect_equal_numbers(cpue(100, 10), 10)` in your tests.
+
+:::
 
 ## Testing S3 classes
 
@@ -520,7 +540,7 @@ Commit your class definition, constructor, methods, and tests.
 
 ## The motivation
 
-`cpue()` currently takes numeric vectors. But users often have a data frame
+`cpue()` currently takes two numeric vectors. But users often have a data frame
 
 ```{r}
 # What they have to write now:
@@ -540,7 +560,7 @@ cpue(fishing_data)
 \
 
 ::: {.fragment}
-We can make `cpue()` work on both. The same function call adapts its behaviour depending on what the user passes in - just like `summary()` does.
+We can make `cpue()` work on both by writing **S3 methods** for `numeric` and `data.frame` inputs. 
 :::
 
 ## Step 1: Make `cpue()` a generic
@@ -555,8 +575,6 @@ cpue <- function(catch, ...) {
 ```
 
 ::: {.fragment}
-The first argument becomes `x` by convention - it could be a numeric vector or a data frame.
-
 `UseMethod("cpue")` tells R: look at `class(catch)` and dispatch to `cpue.<class>`.
 :::
 
@@ -606,10 +624,9 @@ cpue.data.frame <- function(
 }
 ```
 
-::: {.fragment}
-The data frame method extracts columns and calls `cpue()` again with numeric vectors - which dispatches to `cpue.numeric`.
-
-This **delegation pattern** - one method calling the generic with different input - is common and effective. The calculation logic lives in exactly one place.
+::: {.incremental}
+- The data frame method extracts columns and calls `cpue()` again with numeric vectors - which dispatches to `cpue.numeric`.
+- The calculation logic lives in exactly one place.
 :::
 
 ## Step 4: The default method
@@ -623,9 +640,7 @@ cpue.default <- function(catch, ...) {
 ```
 
 ::: {.fragment}
-Without a default, passing an unsupported type gives a cryptic error: "no applicable method for 'cpue' applied to an object of class ...".
-
-With a default, users get a message that names the function and the problem.
+With a default method, users get a clear error message when they call `cpue()` on a class for which no method is defined.
 :::
 
 ## Using `@rdname` to group docs
@@ -670,7 +685,7 @@ fishing_data <- data.frame(catch = c(100, 200), effort = c(10, 20))
 cpue(fishing_data)
 ```
 
-## Update `biomass_index()` documentation
+## One more thing: update `biomass_index()` documentation
 
 - Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is now the method it actually calls. 
 - `cpue.numeric` defines `catch` as a vector OR data.frame, but `biomass_index` expects a numeric vector
@@ -687,6 +702,7 @@ cpue(fishing_data)
 #' @inheritDotParams cpue.numeric -effort
 #' @export
 biomass_index <- function(
+```
 
 ## Make a commit
 
@@ -708,18 +724,6 @@ Commit the generic, methods, updated documentation, and tests.
 - Your function returns complex results that benefit from custom `print`/`summary`/`plot`
 - You want the same function name to work on multiple input types (vectors, data frames, model objects)
 - You want other packages to be able to extend your work by writing new methods
-:::
-
-## S3 is overkill when...
-
-::: {.incremental}
-- A named list or data frame communicates the result clearly on its own
-- There is only one type of input and one way to display the output
-- The function returns a scalar or vector with obvious meaning
-:::
-
-::: {.fragment}
-Start simple. Reach for S3 when a plain return value creates friction for users.
 :::
 
 ## Recap

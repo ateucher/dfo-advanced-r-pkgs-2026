@@ -656,11 +656,24 @@ cpue(fishing_data)
 
 ### Updating and adding tests
 
-Two things have changed that may break existing tests:
+`cpue()` now returns a `cpue_result` object, not a plain numeric. 
+`expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. 
+We have a few options to fix this:
 
-- **Return type:** `cpue()` now returns a `cpue_result` object, not a plain numeric. `expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. Wrap the result in `as.numeric()` for numeric comparisons: `expect_equal(as.numeric(cpue(100, 10)), 10)`.
+- Wrap the result in `as.numeric()` for numeric comparisons: 
+  - `expect_equal(as.numeric(cpue(100, 10)), 10)`.
+- Use the `ignore_attr = TRUE` argument in `expect_equal()` to ignore attributes: 
+  - `expect_equal(cpue(100, 10), 10, ignore_attr = TRUE)`.
+- Write a helper function in `tests/testthat/helper.R` to use in our tests::
+  ```{r}
+  expect_equal_numeric <- function(object, expected, ...) {
+    expect_equal(as.numeric(object), expected, ...)
+  }
+  ```
+  Then use `expect_equal_numeric(cpue(100, 10), 10)` in your tests.
 
-Some existing snapshots will also be stale since the print format changed. Run `snapshot_accept()` after `check()` to accept the updated snapshots.
+
+Some existing snapshots may also be stale since the print format changed. Run `snapshot_accept()` after `check()` to accept the updated snapshots.
 
 Now add tests for the data frame method and the default error:
 
