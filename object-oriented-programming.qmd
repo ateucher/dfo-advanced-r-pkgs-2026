@@ -242,17 +242,16 @@ Now our print method can be more informative:
 ```{r}
 #' @export
 print.cpue_result <- function(x, ...) {
-  cat("Survey Result\n")
-  cat("Records:", attr(x, "n_records"), "\n")
-  cat("Gear factor:", attr(x, "gear_factor"), "\n")
-  cat("Method:", attr(x, "method"), "\n")
-  cat("CPUE values:", round(x, 2), "\n")
+  cat("CPUE Result\n")
+  cat("Records:     ", attr(x, "n_records"), "\n")
+  cat("Method:      ", attr(x, "method"), "\n")
+  cat("Gear factor: ", attr(x, "gear_factor"), "\n")
+  cat("Values:      ", round(x, 2), "\n")
   invisible(x)
 }
 ```
 
-As a class accumulates more fields, setting attributes one by one gets unwieldy. There
-is a better pattern.
+As a class accumulates more fields, setting attributes one by one gets unwieldy. 
 
 ### Create a constructor function
 
@@ -260,18 +259,10 @@ For anything beyond a very basic class, the standard practice is to create a **c
 A common naming convention, recommended in [Advanced R](https://adv-r.hadley.nz/s3.html#s3-constructor), is `new_<classname>`.
 
 ```{r}
-#' Create a cpue result object
-#'
-#' @param cpue_values Numeric vector of CPUE values.
-#' @param method Character string indicating the calculation method.
-#' @param gear_factor Numeric gear correction factor used.
-#' @param n_records Integer number of records processed.
-#'
-#' @return A `cpue_result` object.
 #' @noRd
-new_cpue_result <- function(cpue_values, method, gear_factor, n_records) {
+new_cpue_result <- function(values, method, gear_factor, n_records) {
   structure(
-    cpue_values, # The data
+    values, # The data
     method = method, # Attributes specifying metadata
     gear_factor = gear_factor,
     n_records = n_records,
@@ -312,7 +303,7 @@ cpue <- function(
   # ...cpue body here
 
   new_cpue_result(
-    cpue_values = result,
+    values = raw_cpue * gear_factor,
     method = method,
     gear_factor = gear_factor,
     n_records = length(catch)
@@ -338,42 +329,17 @@ result
 ```{r}
 #' @export
 summary.cpue_result <- function(object, ...) {
-  stats <- list(
-    method = attr(object, "method"),
-    n_records = attr(object, "n_records"),
-    gear_factor = attr(object, "gear_factor"),
-    mean_cpue = mean(object),
-    median_cpue = stats::median(object),
-    sd_cpue = stats::sd(object),
-    range_cpue = range(object)
-  )
-
-  structure(stats, class = "summary.cpue_result")
-}
-
-#' @export
-print.summary.cpue_result <- function(x, ...) {
   cat("Survey Result Summary\n")
   cat("---------------------\n")
-  cat("Method:      ", x$method, "\n")
-  cat("Records:     ", x$n_records, "\n")
-  cat("Gear factor: ", x$gear_factor, "\n")
-  cat("Mean CPUE:   ", round(x$mean_cpue, 2), "\n")
-  cat("Median CPUE: ", round(x$median_cpue, 2), "\n")
-  cat("SD CPUE:     ", round(x$sd_cpue, 2), "\n")
-  cat(
-    "CPUE Range:    ",
-    round(x$range_cpue[1], 2),
-    "-",
-    round(x$range_cpue[2], 2),
-    "\n"
-  )
-  invisible(x)
+  cat("Method:      ", attr(object, "method"), "\n")
+  cat("Records:     ", attr(object, "n_records"), "\n")
+  cat("Gear factor: ", attr(object, "gear_factor"), "\n")
+  cat("Mean CPUE:   ", round(mean(object), 2), "\n")
+  cat("Median CPUE: ", round(stats::median(object), 2), "\n")
+  cat("SD CPUE:     ", round(stats::sd(object), 2), "\n")
+  invisible(object)
 }
 ```
-
-Note that `summary` returns an object of class `summary.cpue_result`, which has its own print method.
-This is the standard pattern in base R (see `summary.lm`).
 
 ```{r}
 document()
@@ -386,7 +352,11 @@ summary(result)
 
 Plot methods must be named `plot.<classname>`, take `x` as the first argument, and include `...` in the signature.
 
-Note that you don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. 
+You don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. First, add ggplot2 to your package dependencies:
+
+::: {.panel-tabset}
+
+## base `plot()`
 
 ```{r}
 #' @export
@@ -403,16 +373,50 @@ plot.cpue_result <- function(x, ...) {
 }
 ```
 
-The `...` passes through to `plot.default`, allowing users to customize (colours, line types, etc.)
-without us having to anticipate every option.
+```{r}
+document()
+load_all()
+
+plot(result)
+```
+
+## ggplot2
+
+```{r}
+use_package("ggplot2")
+```
+
+```{r}
+#' @export
+plot.cpue_result <- function(x, ...) {
+  data <- data.frame(
+    record = seq_along(x),
+    cpue = as.numeric(x)
+  )
+
+  ggplot2::ggplot(data, ggplot2::aes(x = record, y = cpue)) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point() +
+    ggplot2::labs(
+      x = "Record",
+      y = "CPUE",
+      title = paste("CPUE -", attr(x, "method"), "method")
+    )
+}
+```
 
 ```{r}
 document()
 load_all()
 
 plot(result)
-plot(result, col = "steelblue", pch = 19)
+
+plot(result) +
+  ggplot2::theme_minimal() +
+  ggplot2::geom_hline(yintercept = mean(result), linetype = "dashed")
 ```
+
+:::
 
 ### Registering S3 methods
 
@@ -546,7 +550,7 @@ cpue.numeric <- function(
   )
 
   new_cpue_result(
-    cpue_values = raw_cpue * gear_factor,
+    values = raw_cpue * gear_factor,
     method = method,
     gear_factor = gear_factor,
     n_records = length(x)
@@ -567,30 +571,26 @@ The first argument was renamed from `catch` to `x` to match the generic's signat
 
 ```{r}
 #' @rdname cpue
-#' @param catch_col Name of the catch column (default `"catch"`).
-#' @param effort_col Name of the effort column (default `"effort"`).
 #' @export
 cpue.data.frame <- function(
   x,
-  catch_col = "catch",
-  effort_col = "effort",
   gear_factor = 1,
   method = c("ratio", "log"),
   verbose = getOption("fishr.verbose", FALSE),
   ...
 ) {
-  if (!catch_col %in% names(x)) {
-    stop("Column '", catch_col, "' not found in data frame.", call. = FALSE)
+  if (!"catch" %in% names(x)) {
+    stop("Column 'catch' not found in data frame.", call. = FALSE)
   }
-  if (!effort_col %in% names(x)) {
-    stop("Column '", effort_col, "' not found in data frame.", call. = FALSE)
+  if (!"effort" %in% names(x)) {
+    stop("Column 'effort' not found in data frame.", call. = FALSE)
   }
 
   # We can then call the numeric method by extracting the relevant columns and passing them to cpue() again.
   # This way we reuse the existing logic and maintain a single source of truth for the CPUE calculation.
   cpue(
-    x = x[[catch_col]],
-    effort = x[[effort_col]],
+    x = x[["catch"]],
+    effort = x[["effort"]],
     gear_factor = gear_factor,
     method = method,
     verbose = verbose,
@@ -608,7 +608,6 @@ with different input - is a common and effective pattern.
 It's good practice to add a default method that throws an informative error if 
 the user passes in an unsupported type. If the generic can't find a method for 
 the class of `x`, it will fall back to `cpue.default`:
-
 
 ```{r}
 #' @rdname cpue
@@ -659,14 +658,6 @@ fishing_data <- data.frame(
 )
 
 cpue(fishing_data)
-
-# Custom column names
-trawl_data <- data.frame(
-  kg = c(50, 100, 150),
-  hours = c(5, 10, 8)
-)
-
-cpue(trawl_data, catch_col = "kg", effort_col = "hours")
 ```
 
 ### Updating and adding tests
@@ -691,16 +682,6 @@ test_that("cpue.data.frame dispatches correctly", {
   expect_equal(as.numeric(result), c(10, 10, 20))
 })
 
-test_that("cpue.data.frame works with custom column names", {
-  trawl_data <- data.frame(
-    kg = c(50, 100),
-    hours = c(5, 10)
-  )
-  result <- cpue(trawl_data, catch_col = "kg", effort_col = "hours")
-  expect_s3_class(result, "cpue_result")
-  expect_equal(as.numeric(result), c(10, 10))
-})
-
 test_that("cpue.data.frame errors on missing columns", {
   df <- data.frame(x = 1, y = 2)
   expect_snapshot(cpue(df), error = TRUE)
@@ -714,109 +695,6 @@ test_that("cpue.default gives informative error", {
 ::: {.callout-tip}
 ## Make a commit
 :::
-
-<!--
-TODO: This is still very awkward with the way biomass_index() is structured
-where the first argument can be missing.
-
-## Your Turn: biomass_index.data.frame
-
-`biomass_index()` can accept either pre-computed CPUE values or raw catch/effort data (with `...` passing arguments through to `cpue()`). Convert it into a generic with a numeric method and a data frame method.
-
-Hint: follow the same three steps we used for `cpue()`:
-
-1. Replace the function body with `UseMethod("biomass_index")`
-2. Move the existing implementation into `biomass_index.numeric` - keep the optional `catch`/`effort`/`...` pass-through
-3. Write `biomass_index.data.frame` that extracts columns and delegates to the numeric method
-
-::: {.callout-tip collapse="true"}
-
-## Solution
-
-```{r}
-#' Calculate Biomass Index
-#'
-#' @param x Input data: a numeric vector of CPUE values, or a data frame
-#'   containing CPUE and area swept columns.
-#' @param ... Additional arguments passed to methods.
-#'
-#' @export
-biomass_index <- function(x, ...) {
-  UseMethod("biomass_index")
-}
-
-#' @rdname biomass_index
-#' @param area_swept Numeric vector of area swept (e.g., km squared).
-#' @param catch Optional numeric vector of catch. If provided with `effort`,
-#'   CPUE is computed via [cpue()].
-#' @param effort Optional numeric vector of effort. Required if `catch` is
-#'   provided.
-#' @export
-biomass_index.numeric <- function(
-  x,
-  area_swept,
-  catch = NULL,
-  effort = NULL,
-  ...
-) {
-  rlang::check_dots_used()
-
-  if (is.null(x) && (!is.null(catch) && !is.null(effort))) {
-    x <- cpue(catch, effort, ...)
-  }
-
-  if (is.null(x)) {
-    stop("Must provide either 'x' (cpue) or both 'catch' and 'effort'.")
-  }
-
-  validate_numeric_inputs(x = x, area_swept = area_swept)
-
-  x * area_swept
-}
-
-#' @rdname biomass_index
-#' @param cpue_col Name of the CPUE column (default `"cpue"`).
-#' @param area_col Name of the area swept column (default `"area_swept"`).
-#' @export
-biomass_index.data.frame <- function(
-  x,
-  cpue_col = "cpue",
-  area_col = "area_swept",
-  ...
-) {
-  rlang::check_dots_used()
-
-  if (!cpue_col %in% names(x)) {
-    stop("Column '", cpue_col, "' not found in data frame.", call. = FALSE)
-  }
-  if (!area_col %in% names(x)) {
-    stop("Column '", area_col, "' not found in data frame.", call. = FALSE)
-  }
-
-  biomass_index(x[[cpue_col]], x[[area_col]])
-}
-```
-
-Test it:
-
-```{r}
-document()
-load_all()
-
-# Vector method
-biomass_index(c(10, 20), c(5, 8))
-
-# Data frame method
-survey_data <- data.frame(
-  cpue = c(10, 20, 30),
-  area_swept = c(5, 8, 6)
-)
-
-biomass_index(survey_data)
-```
-
-::: 
--->
 
 ## When to Use OOP in Packages
 

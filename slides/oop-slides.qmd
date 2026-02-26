@@ -150,7 +150,7 @@ methods(class = "data.frame")
 
 # OOP Systems in R
 
-## Four systems, one concept
+## Four main OOP systems
 
 All four implement the same idea - dispatch based on class - but differ in formality and where methods live.
 
@@ -177,24 +177,28 @@ S4 is worth knowing if you work in Bioconductor or need multiple dispatch. R6 is
 
 ```{r}
 x <- c(10, 20, 30)
-class(x) # "numeric"
+class(x)
+#> "numeric"
 
 class(x) <- "my_class"
-class(x) # "my_class"
+class(x)
+#> "my_class"
 
 # The data is unchanged
 x + 1 # still works as a numeric vector
 ```
 
 ::: {.fragment}
-That's the whole mechanism. No class declaration. No schema. Just an attribute.
+- That's the whole mechanism with S3. 
+- Other class systems have a more formal way of declaring classes.
 :::
 
 ## Giving `cpue()` a class
 
-Currently `cpue()` returns a plain numeric vector. We can tag its output:
+Currently `cpue()` returns a plain numeric vector. We can give it a class:
 
 ```{r}
+#| code-line-numbers: "|11,12"
 cpue <- function(
   catch,
   effort,
@@ -206,9 +210,11 @@ cpue <- function(
 
   result <- raw_cpue * gear_factor
   class(result) <- "cpue_result" # tag the output
-  result
+  result # return the result
 }
 ```
+
+\
 
 ::: {.fragment}
 
@@ -219,8 +225,48 @@ class(r) # "cpue_result"
 
 :::
 
-::: {.fragment}
-Now we can write methods that fire whenever something is done with a `cpue_result`.
+# Writing Methods
+
+## The `print` method
+
+When you type an object name at the console, R calls `print()` - this is **autoprinting**.
+
+- A special generic that is called implicitly when an object is returned at the console.
+
+. . .
+
+```{r}
+#' @export
+print.cpue_result <- function(x, ...) {
+  cat("CPUE Results for", length(x), "records\n")
+  cat("Values:", round(x, 2), "\n")
+  invisible(x)
+}
+```
+
+::: {.incremental}
+- Name it `print.<classname>`
+- Always include `...` in the signature - the `print` generic requires it (See `?print`)
+- Don't modify `x`; return `invisible(x)` so assignment still works: `y <- print(x)`
+- Use `cat()` inside, not `print()` - calling `print()` inside `print.foo` causes infinite recursion
+- Use `@export` so roxygen2 registers it in NAMESPACE
+:::
+
+. . .
+
+```{r}
+document()
+load_all()
+
+result
+```
+
+::: {.notes}
+The `print` method controls what users see when they type an object name at the console. 
+When you type `result` and hit Enter, R calls `print(result)` behind the scenes - 
+this is called **autoprinting**. R looks at the class of the object, finds `print.cpue_result`, and calls that. 
+Without a custom print method, R falls back to `print.default`, which is why our 
+tagged vector currently displays as raw numbers.
 :::
 
 ## Carrying metadata with attributes
@@ -235,11 +281,46 @@ class(result) <- "cpue_result"
 ```
 
 ::: {.fragment}
-Attributes survive assignment and can be read back with `attr()`:
+Attributes can be read back with `attr()` or `attributes()`:
+:::
+
+::: {.fragment}
 
 ```{r}
-attr(r, "method") # "ratio"
-attr(r, "n_records") # 3
+attr(result, "method")
+#> "ratio"
+attr(result, "n_records")
+#> 3
+```
+
+:::
+
+::: {.fragment}
+
+```{r}
+attributes(result)
+#> $method
+#> [1] "ratio"
+#> $gear_factor
+#> [1] 1
+#> $n_records
+#> [1] 3
+#> $class
+#> [1] "cpue_result"
+```
+
+:::
+
+::: {.fragment}
+
+Under the hood it is still a numeric vector
+
+```{r}
+typeof(result)
+#> "double"
+
+result + 1
+#> [1] 11 21 31
 ```
 
 :::
@@ -248,15 +329,19 @@ attr(r, "n_records") # 3
 Contrast this with a named list approach - attributes keep the numeric vector as the primary data, with metadata attached to it, rather than burying the values inside a list. The object is still a numeric vector that supports arithmetic; it just also carries context.
 :::
 
-## The constructor pattern
+## Using a constructor function
 
-Setting attributes one by one gets messy. The standard practice is a **constructor function**:
+- Setting attributes one by one gets messy. 
+- The standard practice is a **constructor function**
+- Use `structure()` to set all attributes in one call
 
 ```{r}
-new_cpue_result <- function(cpue_values, method, gear_factor, n_records) {
+#| code-line-numbers: "|3|4-8"
+new_cpue_result <- function(values, method, gear_factor, n_records) {
   structure(
-    cpue_values, # the data
-    method = method, # metadata as named attributes
+    values, # the object
+    # metadata as named attributes
+    method = method,
     gear_factor = gear_factor,
     n_records = n_records,
     class = "cpue_result"
@@ -265,34 +350,27 @@ new_cpue_result <- function(cpue_values, method, gear_factor, n_records) {
 ```
 
 ::: {.fragment}
-`structure()` sets all attributes - including `class` - in one call.
-
 Convention: name constructors `new_<classname>`. They are usually internal (`@noRd`).
 :::
 
-::: {.fragment}
+## Use the constructor in your main function
+
 Then `cpue()` calls the constructor instead of setting attributes directly:
 
 ```{r}
-result <- new_cpue_result(
-  raw_cpue * gear_factor,
-  method,
-  gear_factor,
-  length(catch)
+new_cpue_result(
+  values = raw_cpue * gear_factor,
+  method = method,
+  gear_factor = gear_factor,
+  n_records = length(catch)
 )
 ```
-
-:::
 
 ::: {.notes}
 The constructor is the single source of truth for how a cpue_result is built. If you ever need to change what metadata the object carries, there is one place to change it. This matters as the package grows.
 :::
 
-# Writing Methods
-
-## The `print` method
-
-When you type an object name at the console, R calls `print()` - this is **autoprinting**.
+## Improving the `print` method
 
 ```{r}
 #' @export
@@ -306,43 +384,30 @@ print.cpue_result <- function(x, ...) {
 }
 ```
 
-## Rules for print methods
-
-::: {.incremental}
-- Name it `print.<classname>`
-- Always include `...` in the signature - the `print` generic requires it
-- Return `invisible(x)` so assignment still works: `y <- print(x)`
-- Use `cat()` inside, not `print()` - calling `print()` inside `print.foo` causes infinite recursion
-- Use `@export` so roxygen2 registers it in NAMESPACE
-:::
-
 ## The `summary` method
 
-`summary` should compute and return a useful statistical object:
+`summary` should print a useful statistical summary:
 
 ```{r}
-#' @export
 summary.cpue_result <- function(object, ...) {
-  stats <- list(
-    method = attr(object, "method"),
-    n_records = attr(object, "n_records"),
-    gear_factor = attr(object, "gear_factor"),
-    mean_cpue = mean(object),
-    median_cpue = stats::median(object),
-    sd_cpue = stats::sd(object),
-    range_cpue = range(object)
-  )
-  structure(stats, class = "summary.cpue_result")
+  cat("Survey Result Summary\n")
+  cat("---------------------\n")
+  cat("Method:      ", attr(object, "method"), "\n")
+  cat("Records:     ", attr(object, "n_records"), "\n")
+  cat("Gear factor: ", attr(object, "gear_factor"), "\n")
+  cat("Mean CPUE:   ", round(mean(object), 2), "\n")
+  cat("Median CPUE: ", round(stats::median(object), 2), "\n")
+  cat("SD CPUE:     ", round(stats::sd(object), 2), "\n")
+  invisible(object)
 }
 ```
 
+## Your turn: Make a `plot()` method
+
+- Plot methods must be named `plot.<classname>`, take `x` as the first argument, and include `...` in the signature.
+- Note that you don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. 
+
 ::: {.fragment}
-It returns an object with its own class - which has its own `print` method.
-
-This is the standard base R pattern: `summary.lm` returns a `summary.lm` object.
-:::
-
-## The `plot` method
 
 ```{r}
 #' @export
@@ -359,10 +424,10 @@ plot.cpue_result <- function(x, ...) {
 }
 ```
 
+:::
+
 ::: {.fragment}
 The `...` passes through to `plot.default` - users can customise colour, line type, etc. without us anticipating every option.
-
-You don't have to use base `plot()` - ggplot2 works too.
 :::
 
 ## Registering methods in NAMESPACE
@@ -373,6 +438,9 @@ You don't have to use base `plot()` - ggplot2 works too.
 document()
 ```
 
+. . .
+
+\
 ```
 # NAMESPACE entries
 S3method(print,cpue_result)
@@ -380,10 +448,10 @@ S3method(summary,cpue_result)
 S3method(plot,cpue_result)
 ```
 
-::: {.fragment}
-`S3method()` entries - not plain `export()` entries - are how R finds your methods when the package is installed.
+\
 
-`load_all()` registers them automatically during development, which is why things work in your session even before you call `document()`.
+::: {.fragment}
+`S3method()` entries - not regular `export()` entries - are how R finds your methods when the package is installed.
 :::
 
 ## Testing S3 classes
@@ -437,21 +505,30 @@ Commit your class definition, constructor, methods, and tests.
 
 ## The motivation
 
-`cpue()` currently takes numeric vectors. But users often have a data frame:
+`cpue()` currently takes numeric vectors. But users often have a data frame
 
 ```{r}
 # What they have to write now:
 cpue(fishing_data$catch, fishing_data$effort)
+```
 
-# What would be nicer:
+\
+
+. . .
+
+####  What would be nicer:
+
+```{r}
 cpue(fishing_data)
 ```
+
+\
 
 ::: {.fragment}
 We can make `cpue()` work on both. The same function call adapts its behaviour depending on what the user passes in - just like `summary()` does.
 :::
 
-## Step 1: Make cpue() a generic
+## Step 1: Make `cpue()` a generic
 
 Replace the function body with `UseMethod()`:
 
@@ -473,6 +550,7 @@ The first argument becomes `x` by convention - it could be a numeric vector or a
 Move the existing implementation into `cpue.numeric`:
 
 ```{r}
+#| code-line-numbers: "|3"
 #' @rdname cpue
 #' @export
 cpue.numeric <- function(
@@ -495,22 +573,21 @@ All existing calls to `cpue()` with a numeric first argument still work - R disp
 ## Step 3: The data frame method
 
 ```{r}
+#| code-line-numbers: "|3|14"
 #' @rdname cpue
 #' @export
 cpue.data.frame <- function(
   x,
-  catch_col = "catch",
-  effort_col = "effort",
   ...
 ) {
-  if (!catch_col %in% names(x)) {
-    stop("Column '", catch_col, "' not found.", call. = FALSE)
+  if (!"catch" %in% names(x)) {
+    stop("Column 'catch' not found.", call. = FALSE)
   }
-  if (!effort_col %in% names(x)) {
-    stop("Column '", effort_col, "' not found.", call. = FALSE)
+  if (!"effort" %in% names(x)) {
+    stop("Column 'effort' not found.", call. = FALSE)
   }
 
-  cpue(x[[catch_col]], effort = x[[effort_col]], ...)
+  cpue(x[["catch"]], effort = x[["effort"]], ...)
 }
 ```
 
@@ -548,6 +625,7 @@ All three methods share one help page:
 cpue <- function(x, ...) UseMethod("cpue")
 
 #' @rdname cpue
+#' ... same @param tags as before ...
 #' @export
 cpue.numeric <- function(x, effort, ...) {
   ...
@@ -555,7 +633,7 @@ cpue.numeric <- function(x, effort, ...) {
 
 #' @rdname cpue
 #' @export
-cpue.data.frame <- function(x, catch_col = "catch", ...) {
+cpue.data.frame <- function(x, ...) {
   ...
 }
 ```
@@ -575,10 +653,6 @@ cpue(c(100, 200, 300), c(10, 20, 15))
 # Data frame - dispatches to cpue.data.frame
 fishing_data <- data.frame(catch = c(100, 200), effort = c(10, 20))
 cpue(fishing_data)
-
-# Custom column names
-trawl_data <- data.frame(kg = c(50, 100), hours = c(5, 10))
-cpue(trawl_data, catch_col = "kg", effort_col = "hours")
 ```
 
 ## One thing to watch for
@@ -595,6 +669,23 @@ cpue(100, 10) # Fine - positional arguments still work
 ::: {.fragment}
 Existing tests that use `catch =` will need updating. This is a **breaking change** - something to note in your changelog.
 :::
+
+## Update `biomass_index()` documentation
+
+- Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is now the method it actually calls. 
+- Because `cpue.numeric` names its first argument `x` rather than `catch`, add `@param catch` back explicitly:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param catch Numeric vector of catch (e.g., kg).
+#' @inheritParams cpue.numeric
+#' @inheritDotParams cpue.numeric -effort
+#' @export
+biomass_index <- function(
 
 ## Make a commit
 
