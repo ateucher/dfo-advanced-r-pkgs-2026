@@ -223,6 +223,12 @@ summary(lt_cpue)
 `cpue()` is a generic with a `data.frame` method - passing a data frame with `catch` and `effort` columns dispatches automatically. Real-world data flows through the same function without any changes to it.
 :::
 
+::: {.fragment}
+::: {.question}
+What might be a better way to go from `fetch_kluane_data` to `cpue`?
+:::
+:::
+
 ## Testing functions that call HTTP APIs
 
 Testing functions that make real HTTP requests requires care - tests should not depend on an external server being available.
