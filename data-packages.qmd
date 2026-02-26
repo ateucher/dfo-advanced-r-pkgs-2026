@@ -323,7 +323,7 @@ Update `cpue.numeric()` and `cpue.data.frame()` in `R/cpue.R`, replacing `gear_f
 #'   the standard reference gear (factor = 1.0).
 #' @export
 cpue.numeric <- function(
-  x,
+  catch,
   effort,
   gear_type = "nordic_gillnet",
   method = c("ratio", "log"),
@@ -341,45 +341,41 @@ cpue.numeric <- function(
   gear_factor <- gear_types$gear_factor[gear_types$gear_type == gear_type]
 
   method <- match.arg(method)
-  validate_numeric_inputs(x = x, effort = effort)
+  validate_numeric_inputs(catch = catch, effort = effort)
 
   if (verbose) {
-    message("Processing ", length(x), " records using ", method, " method")
+    message("Processing ", length(catch), " records using ", method, " method")
   }
 
-  raw_cpue <- switch(method, ratio = x / effort, log = log(x / effort))
+  raw_cpue <- switch(method, ratio = catch / effort, log = log(catch / effort))
 
   new_cpue_result(
     cpue_values = raw_cpue * gear_factor,
     method = method,
     gear_factor = gear_factor,
-    n_records = length(x)
+    n_records = length(catch)
   )
 }
 
 #' @rdname cpue
-#' @param catch_col Character. Name of the catch column (default `"catch"`).
-#' @param effort_col Character. Name of the effort column (default `"effort"`).
 #' @export
 cpue.data.frame <- function(
-  x,
-  catch_col = "catch",
-  effort_col = "effort",
+  catch,
   gear_type = "nordic_gillnet",
   method = c("ratio", "log"),
   verbose = getOption("fishr.verbose", FALSE),
   ...
 ) {
-  if (!catch_col %in% names(x)) {
-    stop("Column '", catch_col, "' not found in data frame.", call. = FALSE)
+  if (!"catch" %in% names(catch)) {
+    stop("Column 'catch' not found in data frame.", call. = FALSE)
   }
-  if (!effort_col %in% names(x)) {
-    stop("Column '", effort_col, "' not found in data frame.", call. = FALSE)
+  if (!"effort" %in% names(catch)) {
+    stop("Column 'effort' not found in data frame.", call. = FALSE)
   }
 
   cpue(
-    x = x[[catch_col]],
-    effort = x[[effort_col]],
+    catch = catch[["catch"]],
+    effort = catch[["effort"]],
     gear_type = gear_type,
     method = method,
     verbose = verbose,

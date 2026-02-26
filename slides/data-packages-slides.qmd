@@ -286,7 +286,7 @@ Replace the numeric `gear_factor` argument with a named `gear_type`:
 
 ```{r}
 cpue.numeric <- function(
-  x,
+  catch,
   effort,
   gear_type = "nordic_gillnet",
   method = c("ratio", "log"),
