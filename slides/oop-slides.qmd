@@ -1,0 +1,739 @@
+---
+title: "Object-Oriented Programming in R"
+format:
+  revealjs:
+    height: 900
+    width: 1600
+    theme: [moon, slides.scss]
+    highlight-style: a11y
+    slide-number: true
+    chalkboard: true
+    footer: "[{{< fa house >}}](../index.html)"
+execute:
+  eval: false
+  echo: true
+---
+
+## Outline
+
+1. What is Object-Oriented Programming and why does R have it?
+2. OOP systems in R
+3. S3 in depth: classes, attributes, and methods
+4. Writing `print`, `summary`, and `plot` methods
+5. Creating your own generics
+
+# What is Object-Oriented Programming?
+
+## You already use it
+
+```{r}
+#| eval: true
+#| output-location: column-fragment
+#| code-line-numbers: "|2"
+x_norm <- rnorm(5000)
+summary(x_norm)
+```
+
+\
+
+::: {.fragment}
+
+```{r}
+#| eval: true
+#| output-location: column-fragment
+summary(mtcars)
+```
+
+:::
+
+\
+
+::: {.fragment}
+
+```{r}
+#| eval: true
+#| output-location: column-fragment
+#| code-line-numbers: "|2"
+mtcars_model <- lm(mpg ~ wt, data = mtcars)
+summary(mtcars_model)
+```
+
+:::
+
+::: {.notes}
+Give participants a moment to think about this. They have been calling summary() for years without thinking about what makes it work. The magic is that the *object* determines what happens, not the caller.
+:::
+
+## What makes that possible?
+
+The same function name. Completely different behaviour. No `if/else` in your code.
+
+. . .
+
+Every R object has a **class** attribute:
+
+```{r}
+class(x_norm)
+#> "numeric"
+
+class(mtcars)
+#> "data.frame"
+
+class(mtcars_model)
+#> "lm"
+```
+
+::: {.fragment}
+When you call `summary(x)`, R reads `class(x)` and looks for a function named `summary.<class>`.
+
+This is called **dispatch**: the object's class determines which function runs.
+:::
+
+## Generics and methods
+
+::: columns
+::: {.column width="50%"}
+**A generic** is the user-facing function:
+
+```{r}
+summary
+```
+
+```
+function (object, ...) UseMethod("summary")
+```
+
+It does almost nothing itself - it just dispatches.
+:::
+
+::: {.column width="50%" .fragment}
+**A method** is a class-specific implementation:
+
+```{r}
+summary.lm
+summary.data.frame
+summary.default # fallback
+```
+
+Named `<generic>.<class>`.
+:::
+:::
+
+::: {.fragment}
+The generic is the consistent interface. The methods are the specialised implementations.
+:::
+
+::: {.notes}
+Show methods(summary) live if time permits. The list is long - summary has dozens of methods across base R and packages. That's the power of the system: packages can add new methods for existing generics without touching the original code.
+:::
+
+## The dispatch chain
+
+When you call `summary(x)` and `class(x)` is `"foo"`:
+
+::: {.incremental}
+1. R looks for `summary.foo`
+2. If not found, looks for `summary.default`
+3. If neither exists - error
+:::
+
+::: {.fragment}
+This is **single dispatch**: the method is chosen based on the class of the *first argument only*.
+
+```{r}
+# What methods exist for a generic?
+methods(generic.function = "print")
+
+# What methods exist for a class?
+methods(class = "data.frame")
+```
+
+:::
+
+# OOP Systems in R
+
+## Four main OOP systems
+
+All four implement the same idea - dispatch based on class - but differ in formality and where methods live.
+
+| System | Dispatch | Formality | Common in |
+|--------|----------|-----------|-----------|
+| **S3** | Single (first arg) | Minimal | Base R, tidyverse, most packages |
+| **S4** | Multiple args | Formal classes, validity checks | Bioconductor |
+| **S7** | Multiple args | Formal, successor to S3 + S4 | Some newer packages |
+| **R6** | Single | Encapsulated, mutable | Shiny, databases, stateful objects |
+
+::: {.fragment}
+S3 covers the vast majority of package development use cases. We focus on S3 today.
+:::
+
+::: {.notes}
+S4 is worth knowing if you work in Bioconductor or need multiple dispatch. R6 is useful when you need objects that hold mutable state - think a database connection or an HTTP client. S7 is the planned long-term successor to both S3 and S4, combining S3's simplicity with S4's rigour. It is stable but not yet dominant in the ecosystem.
+:::
+
+# S3 in Depth
+
+## An S3 object is just a regular R object
+
+...with a `class` attribute attached.
+
+. . .
+
+```{r}
+x <- c(10, 20, 30)
+class(x)
+#> "numeric"
+
+class(x) <- "my_class"
+class(x)
+#> "my_class"
+
+# The data is unchanged
+x + 1 # still works as a numeric vector
+```
+
+::: {.fragment}
+- That's the whole mechanism with S3. 
+- Other class systems have a more formal way of declaring classes.
+:::
+
+## Giving `cpue()` a class
+
+Currently `cpue()` returns a plain numeric vector. We can give it a class:
+
+```{r}
+#| code-line-numbers: "|11,12"
+cpue <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  ...
+) {
+  # ... existing calculation ...
+
+  result <- raw_cpue * gear_factor
+  class(result) <- "cpue_result" # tag the output
+  result # return the result
+}
+```
+
+\
+
+::: {.fragment}
+
+```{r}
+r <- cpue(c(100, 200, 300), c(10, 20, 15))
+class(r) # "cpue_result"
+```
+
+:::
+
+# Writing New Methods for Existing Generics
+
+## The `print` method
+
+When you type an object name at the console, R calls `print()` - this is **autoprinting**.
+
+- A special generic that is called implicitly when an object is returned at the console.
+
+
+**Generic Signature**: `print(x, ...)`
+. . .
+
+```{r}
+#' @export
+print.cpue_result <- function(x, ...) {
+  cat("CPUE Results for", length(x), "records\n")
+  cat("Values:", round(x, 2), "\n")
+  invisible(x)
+}
+```
+
+::: {.incremental}
+- Name it `print.<classname>`
+- First argument is `x`
+- Always include `...` in the signature - the `print` generic requires it (See `?print`)
+- Don't modify `x`; return `invisible(x)` so assignment still works: `y <- print(x)`
+- Use `cat()` inside, not `print()` - calling `print()` inside `print.foo` causes infinite recursion
+- Use `@export` so roxygen2 registers it in NAMESPACE
+:::
+
+. . .
+
+```{r}
+document()
+load_all()
+
+result
+```
+
+::: {.notes}
+The `print` method controls what users see when they type an object name at the console. 
+When you type `result` and hit Enter, R calls `print(result)` behind the scenes - 
+this is called **autoprinting**. R looks at the class of the object, finds `print.cpue_result`, and calls that. 
+Without a custom print method, R falls back to `print.default`, which is why our 
+tagged vector currently displays as raw numbers.
+:::
+
+## Add metadata to class with attributes
+
+A class tag alone gives us dispatch. **Attributes** let us attach context to the object.
+
+```{r}
+attr(result, "method") <- method
+attr(result, "gear_factor") <- gear_factor
+attr(result, "n_records") <- length(catch)
+class(result) <- "cpue_result"
+```
+
+::: {.fragment}
+Attributes can be read back with `attr()` or `attributes()`:
+:::
+
+::: {.fragment}
+
+```{r}
+attr(result, "method")
+#> "ratio"
+attr(result, "n_records")
+#> 3
+```
+
+:::
+
+::: {.fragment}
+
+```{r}
+attributes(result)
+#> $method
+#> [1] "ratio"
+#> $gear_factor
+#> [1] 1
+#> $n_records
+#> [1] 3
+#> $class
+#> [1] "cpue_result"
+```
+
+:::
+
+::: {.fragment}
+
+Under the hood it is still a numeric vector
+
+```{r}
+typeof(result)
+#> "double"
+
+result + 1
+#> [1] 11 21 31
+```
+
+:::
+
+::: {.notes}
+Contrast this with a named list approach - attributes keep the numeric vector as the primary data, with metadata attached to it, rather than burying the values inside a list. The object is still a numeric vector that supports arithmetic; it just also carries context.
+:::
+
+## Using a constructor function
+
+- Setting attributes one by one gets messy. 
+- The standard practice is a **constructor function**
+- Use `structure()` to set all attributes in one call
+
+```{r}
+#| code-line-numbers: "|3|4-8"
+new_cpue_result <- function(values, method, gear_factor, n_records) {
+  structure(
+    values, # the object
+    # metadata as named attributes
+    method = method,
+    gear_factor = gear_factor,
+    n_records = n_records,
+    class = "cpue_result"
+  )
+}
+```
+
+::: {.fragment}
+Convention: name constructors `new_<classname>`. They are usually internal (`@noRd`).
+:::
+
+## Use the constructor in your main function
+
+Then `cpue()` calls the constructor instead of setting attributes directly:
+
+```{r}
+new_cpue_result(
+  values = raw_cpue * gear_factor,
+  method = method,
+  gear_factor = gear_factor,
+  n_records = length(catch)
+)
+```
+
+::: {.notes}
+The constructor is the single source of truth for how a cpue_result is built. If you ever need to change what metadata the object carries, there is one place to change it. This matters as the package grows.
+:::
+
+## Improving the `print` method
+
+```{r}
+#' @export
+print.cpue_result <- function(x, ...) {
+  cat("CPUE Result\n")
+  cat("Records:     ", attr(x, "n_records"), "\n")
+  cat("Method:      ", attr(x, "method"), "\n")
+  cat("Gear factor: ", attr(x, "gear_factor"), "\n")
+  cat("Values:      ", round(x, 2), "\n")
+  invisible(x)
+}
+```
+
+## The `summary` method
+
+`summary` should print a useful statistical summary:
+
+**Generic Signature**: `summary(object, ...)`
+
+```{r}
+summary.cpue_result <- function(object, ...) {
+  cat("Survey Result Summary\n")
+  cat("---------------------\n")
+  cat("Method:      ", attr(object, "method"), "\n")
+  cat("Records:     ", attr(object, "n_records"), "\n")
+  cat("Gear factor: ", attr(object, "gear_factor"), "\n")
+  cat("Mean CPUE:   ", round(mean(object), 2), "\n")
+  cat("Median CPUE: ", round(stats::median(object), 2), "\n")
+  cat("SD CPUE:     ", round(stats::sd(object), 2), "\n")
+  invisible(object)
+}
+```
+
+## Your turn: Make a `plot()` method
+
+- Plot methods must be named `plot.<classname>`, take `x` as the first argument, and include `...` in the signature.
+- Note that you don't need to use base `plot()` in a plot method - you can use ggplot2 or any other plotting system. 
+
+**Generic Signature**: `plot(x, ...)`
+
+::: {.fragment}
+
+```{r}
+#' @export
+plot.cpue_result <- function(x, ...) {
+  plot(
+    seq_along(x),
+    x,
+    type = "b",
+    xlab = "Record",
+    ylab = "CPUE",
+    main = paste("CPUE -", attr(x, "method"), "method"),
+    ...
+  )
+}
+```
+
+:::
+
+::: {.fragment}
+The `...` passes through to `plot.default` - users can customise colour, line type, etc. without us anticipating every option.
+:::
+
+## Registering methods in NAMESPACE
+
+`@export` on each method tells roxygen2 to write the correct entry:
+
+```{r}
+document()
+```
+
+. . .
+
+\
+```
+# NAMESPACE entries
+S3method(print,cpue_result)
+S3method(summary,cpue_result)
+S3method(plot,cpue_result)
+```
+
+\
+
+::: {.fragment}
+`S3method()` entries - not regular `export()` entries - are how R finds your methods when the package is installed.
+:::
+
+## We are going to have some test failures...
+
+- `cpue()` now returns a `cpue_result` object, not a plain numeric. 
+- `expect_equal()` compares attributes, so tests that compare the result to a bare number will fail. 
+
+We have a few options to fix this:
+
+::: {.incremental}
+- Wrap the result in `as.numeric()` for numeric comparisons: 
+  - `expect_equal(as.numeric(cpue(100, 10)), 10)`.
+- Use the `ignore_attr = TRUE` argument in `expect_equal()` to ignore attributes: 
+  - `expect_equal(cpue(100, 10), 10, ignore_attr = TRUE)`.
+- Write a helper function in `tests/testthat/helper.R` to use in our tests:
+
+  ```r
+  expect_equal_numbers <- function(object, expected, ...) {
+    expect_equal(object, expected, ignore_attr = TRUE, ...)
+  }
+  ```
+  
+  Then use `expect_equal_numbers(cpue(100, 10), 10)` in your tests.
+
+:::
+
+## Testing S3 classes
+
+`expect_s3_class()` checks the class:
+
+```{r}
+test_that("cpue() returns a cpue_result object", {
+  result <- cpue(c(100, 200), c(10, 20))
+  expect_s3_class(result, "cpue_result")
+})
+```
+
+::: {.fragment}
+Test that attributes are set correctly:
+
+```{r}
+test_that("cpue_result carries calculation metadata", {
+  result <- cpue(c(100, 200, 300), c(10, 20, 15), method = "log")
+  expect_equal(attr(result, "method"), "log")
+  expect_equal(attr(result, "n_records"), 3)
+})
+```
+
+:::
+
+::: {.fragment}
+Snapshot tests are a natural fit for print methods:
+
+```{r}
+test_that("print.cpue_result displays expected output", {
+  result <- cpue(c(100, 200, 300), c(10, 20, 15))
+  expect_snapshot(print(result))
+})
+```
+
+:::
+
+## Make a commit
+
+```{r}
+document()
+check()
+```
+
+::: {.fragment}
+Commit your class definition, constructor, methods, and tests.
+:::
+
+# Creating Your Own Generics
+
+## The motivation
+
+`cpue()` currently takes two numeric vectors. But users often have a data frame
+
+```{r}
+# What they have to write now:
+cpue(fishing_data$catch, fishing_data$effort)
+```
+
+\
+
+. . .
+
+####  What would be nicer:
+
+```{r}
+cpue(fishing_data)
+```
+
+\
+
+::: {.fragment}
+We can make `cpue()` work on both by writing **S3 methods** for `numeric` and `data.frame` inputs. 
+:::
+
+## Step 1: Make `cpue()` a generic
+
+Replace the function body with `UseMethod()`:
+
+```{r}
+#' @export
+cpue <- function(catch, ...) {
+  UseMethod("cpue")
+}
+```
+
+::: {.fragment}
+`UseMethod("cpue")` tells R: look at `class(catch)` and dispatch to `cpue.<class>`.
+:::
+
+## Step 2: The numeric method
+
+Move the existing implementation into `cpue.numeric`:
+
+```{r}
+#| code-line-numbers: "|3"
+#' @rdname cpue
+#' @export
+cpue.numeric <- function(
+  catch,
+  effort,
+  gear_factor = 1,
+  method = c("ratio", "log"),
+  verbose = getOption("fishr.verbose", FALSE),
+  ...
+) {
+  # ... same logic as before ...
+  new_cpue_result(raw_cpue * gear_factor, method, gear_factor, length(catch))
+}
+```
+
+::: {.fragment}
+All existing calls to `cpue()` with a numeric first argument still work - R dispatches to `cpue.numeric` automatically.
+:::
+
+## Step 3: The data frame method
+
+```{r}
+#| code-line-numbers: "|3|14"
+#' @rdname cpue
+#' @export
+cpue.data.frame <- function(
+  catch,
+  ...
+) {
+  if (!"catch" %in% names(catch)) {
+    stop("Column 'catch' not found.", call. = FALSE)
+  }
+  if (!"effort" %in% names(catch)) {
+    stop("Column 'effort' not found.", call. = FALSE)
+  }
+
+  cpue(catch[["catch"]], effort = catch[["effort"]], ...)
+}
+```
+
+::: {.incremental}
+- The data frame method extracts columns and calls `cpue()` again with numeric vectors - which dispatches to `cpue.numeric`.
+- The calculation logic lives in exactly one place.
+:::
+
+## Step 4: The default method
+
+```{r}
+#' @rdname cpue
+#' @export
+cpue.default <- function(catch, ...) {
+  stop("Unsupported input type for cpue(): ", class(catch), call. = FALSE)
+}
+```
+
+::: {.fragment}
+With a default method, users get a clear error message when they call `cpue()` on a class for which no method is defined.
+:::
+
+## Using `@rdname` to group docs
+
+All three methods share one help page:
+
+```{r}
+#' Calculate CPUE
+#' @param catch A numeric vector of catch, or a data frame.
+#' @param ... Additional arguments passed to methods.
+#' @export
+cpue <- function(catch, ...) UseMethod("cpue")
+
+#' @rdname cpue
+#' ... same @param tags as before ...
+#' @export
+cpue.numeric <- function(catch, effort, ...) {
+  ...
+}
+
+#' @rdname cpue
+#' @export
+cpue.data.frame <- function(catch, ...) {
+  ...
+}
+```
+
+::: {.fragment}
+`@rdname cpue` tells roxygen2 to add documentation to the `cpue` help page rather than create a new one.
+:::
+
+## It works
+
+```{r}
+load_all()
+
+# Vector - dispatches to cpue.numeric
+cpue(c(100, 200, 300), c(10, 20, 15))
+
+# Data frame - dispatches to cpue.data.frame
+fishing_data <- data.frame(catch = c(100, 200), effort = c(10, 20))
+cpue(fishing_data)
+```
+
+## One more thing: update `biomass_index()` documentation
+
+- Update `biomass_index` to inherit parameters from `cpue.numeric` instead, since that is now the method it actually calls. 
+- `cpue.numeric` defines `catch` as a vector OR data.frame, but `biomass_index` expects a numeric vector
+  - add `@param catch` back explicitly:
+
+```{r}
+#' Calculate Biomass Index
+#'
+#' @param cpue Numeric vector of CPUE values. If NULL, computed from `catch`
+#'   and `effort`.
+#' @param area_swept Numeric vector of area swept (e.g., km²).
+#' @param catch Numeric vector of catch (e.g., kg).
+#' @inheritParams cpue.numeric
+#' @inheritDotParams cpue.numeric -effort
+#' @export
+biomass_index <- function(
+```
+
+## Make a commit
+
+```{r}
+document()
+check()
+snapshot_accept() # print format changed - accept updated snapshots
+```
+
+::: {.fragment}
+Commit the generic, methods, updated documentation, and tests.
+:::
+
+# When to Use OOP
+
+## S3 is worth it when...
+
+::: {.incremental}
+- Your function returns complex results that benefit from custom `print`/`summary`/`plot`
+- You want the same function name to work on multiple input types (vectors, data frames, model objects)
+- You want other packages to be able to extend your work by writing new methods
+:::
+
+## Recap
+
+::: {.incremental}
+- S3 objects are regular R objects with a `class` attribute
+- Generics dispatch to `generic.class` based on the class of the first argument
+- Constructors (`new_<classname>`) centralise object creation with `structure()`
+- `print`, `summary`, and `plot` methods make your classes pleasant to work with
+- Create your own generics with `UseMethod()` for consistent interfaces across input types
+- `@export` on each method registers it in NAMESPACE via `S3method()`
+- Test classes with `expect_s3_class()` and snapshot tests for print output
+:::

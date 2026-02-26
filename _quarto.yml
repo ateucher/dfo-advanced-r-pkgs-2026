@@ -39,6 +39,8 @@ website:
             href: slides/documentation-slides.html
           - text: "Day 2, Session 4: Debugging Techniques"
             href: slides/debugging-techniques-slides.html
+          - text: "Day 3, Session 1: Object-Oriented Programming"
+            href: slides/oop-slides.html
           - text: "Day 3, Session 2: Data in Packages"
             href: slides/data-packages-slides.html
           - text: "Day 3, Session 3: Releasing Your R Package"
